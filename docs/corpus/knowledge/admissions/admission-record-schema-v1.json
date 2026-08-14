@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "schema_id": "immutable-admission-record-v1",
+  "required_fields": [
+    "admission_id",
+    "status",
+    "decision",
+    "family",
+    "source_hashes",
+    "oracle",
+    "development_discriminating_case",
+    "held_out_split_isolation",
+    "negative_controls",
+    "failure_taxonomy",
+    "evidence_source_fields",
+    "non_projection"
+  ],
+  "held_out_rule": "Held-out evidence must be a reviewed, hash-pinned documentary link. Raw held-out fixture paths, hashes, parameters, candidate sequences, and replay output are prohibited.",
+  "runtime_rule": "The record is evidence-only and must explicitly prohibit runtime, retrieval, provider, manifest, training, card, pack, SDK, and IR promotion."
+}

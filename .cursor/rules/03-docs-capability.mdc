@@ -1,0 +1,17 @@
+---
+description: Architecture and runbook maintenance when editing docs
+globs: docs/**
+alwaysApply: false
+---
+
+# Docs Capability (L1)
+
+When changing project behavior or conventions under `docs/`:
+
+- **Architecture decisions** → new ADR in `docs/architecture/adr/` (numbered sequentially)
+- **Repeatable procedures** → add or update `docs/runbooks/`
+- Link ADRs from Handoff Decisions section when relevant
+- Keep ADRs concise: Context, Decision, Consequences
+
+Do not duplicate long content between ADR and runbook; ADR = why, runbook = how.
+Do not copy paper vault Q&A answers into `docs/`; link via `docs/links/paper-vault.md`.

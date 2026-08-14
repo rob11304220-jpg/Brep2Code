@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "status": "experimental",
+  "cards": [
+    "cards/sandbox-input-path-fixed-script.json",
+    "cards/input-probe-fail-closed.json",
+    "cards/geometry-gates-remain-authoritative.json",
+    "cards/vertical-cylinder-construction.json"
+  ]
+}

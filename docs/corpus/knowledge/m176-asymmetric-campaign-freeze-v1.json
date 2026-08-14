@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "status": "review_pending",
+  "qualification": {"path": "docs/corpus/knowledge/m175-asymmetric-cohort-qualification-v1.json", "sha256": "f55bad942d530ab51e8730be23392a72f1fa683e9aa80b7883170445cc38a1de"},
+  "provider": {"name": "deepseek", "model": "deepseek-v4-pro", "max_output_tokens": 4096, "provider_timeout_seconds": 120, "serial_only": true, "retry": "forbidden"},
+  "executor": {"name": "wsl-bwrap", "input_mount": "no-input"},
+  "main_cohort": {"case_count": 30, "reference": "none", "completion_ceiling_per_case": 3, "completion_cap": 90, "input_fingerprint_sha256": "2478bdb3c0a858225b42188265810aa7915a6704d780553421b4615ddb3f0086", "outbound": "bounded Q01 facts only"},
+  "feasibility_annex": {"case_count": 3, "reference": "one explicit hash-bound card", "completion_ceiling_per_case": 4, "completion_cap": 12, "input_fingerprint_sha256": "4cfa6d1528f0ceeb9979ddaf6e170099664acf505a3562882592ede0a7692053", "outbound": "bounded Q01 facts plus the returned card"},
+  "completion_cap": 102,
+  "execution_order": ["feasibility_annex", "main_cohort"],
+  "report_identities": {"annex_report": "data/hosted/m176-annex.json", "annex_monitor": "data/hosted/m176-annex.monitor.json", "main_report": "data/hosted/m176-main.json", "main_monitor": "data/hosted/m176-main.monitor.json"},
+  "epoch_integrity_stop": ["qualification/input/card hash drift", "report or monitor identity collision", "executor/preflight failure", "provider/model mismatch", "egress-boundary violation"],
+  "per_case_terminal": ["provider timeout", "provider/protocol failure", "script/API failure", "sandbox/provenance failure", "gate failure", "unclassified or ineligible repair"]
+}

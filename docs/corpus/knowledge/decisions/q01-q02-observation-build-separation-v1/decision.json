@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "decision_id": "q01-q02-observation-build-separation-v1",
+  "status": "planned",
+  "stages": ["Q01", "Q02", "Q03", "Q04"],
+  "question": "Can bounded, traceable Q01 B-Rep facts inform a generated Q02 build script while the executed script has no capability to read the original STEP?",
+  "decision_owner": "execution",
+  "model_class": "tool-assisted B-Rep-to-CAD script construction under a capability-separated offline sandbox",
+  "observation": {
+    "required_facts": [
+      "an opaque observation_session_id bound to one record revision and selected local input",
+      "validated Q01 calls and bounded structured responses from probe_summary, probe_topology, probe_entity, and sample_entity",
+      "a local query log containing call order, arguments, result digest, byte count, timeout outcome, and unsupported disposition",
+      "a build-capability attestation showing no original STEP mount or observation-tool endpoint during build execution",
+      "ADR-0048 normal-run and absent-input provenance evidence plus unchanged geometry gates"
+    ],
+    "ambiguity_or_fail_closed_conditions": [
+      "a tool response contains raw STEP bytes, host paths, a local overflow trace path, a reference script, or a history label",
+      "a requested fact requires unbounded traversal or is not available from the four frozen tools",
+      "a query, result digest, capability attestation, tracer coverage, or absent-input control is missing",
+      "the build process can resolve /input/model.step, the selected record input, or an observation endpoint"
+    ]
+  },
+  "constrained_hypothesis": "A bounded observation transcript can provide auditable geometric facts for script construction without granting the build process raw-file access. This is a capability contract, not evidence of feature-history recovery, editability, or model quality.",
+  "execution_and_repair": {
+    "gate_or_diagnostic": [
+      "observation-session start/end trace and one JSONL entry per validated tool call",
+      "canonical-JSON SHA-256 digest and byte count for every response supplied to the runtime LLM",
+      "build-capability attestation listing mount absence and disabled observation-tool endpoint",
+      "ADR-0048 provenance classification and existing script/readability/bbox/volume/topology gates"
+    ],
+    "repair_disposition": "diagnose_only",
+    "stopping_rule": [
+      "no provider request, prompt implementation, raw STEP egress, case/manifest update, or runtime code change under this design package",
+      "return structured unsupported rather than traversing beyond the frozen tool and response limits",
+      "do not expose local trace paths or overflow payloads to the runtime LLM",
+      "if a build capability cannot prove that /input/model.step and observation tools are unavailable, classify provenance_unknown",
+      "do not treat an observation transcript, a geometry pass, or a self-authored reference script as feature-history evidence"
+    ]
+  },
+  "evidence": {
+    "existing": [
+      "The current BRepToolBridge already bounds calls, entity counts, samples, and result bytes for four structured probe tools.",
+      "ADR-0048 and M46 show that executed input access must be classified separately from geometry success and fails closed when coverage is unresolved."
+    ],
+    "required_roles": ["discriminating", "negative_control", "regression"],
+    "missing_counterexample": [
+      "a later G2 fixture proving that no raw input path or overflow trace is visible in the observation transcript supplied to the runtime LLM",
+      "a later G2 fixture proving that a build script cannot access the original STEP after successful Q01 calls",
+      "a later G2 fixture proving that a missing query/capability attestation remains unsupported or provenance_unknown"
+    ],
+    "next_minimal_experiment": "Select one offline G2 implementation workpack with no provider. Freeze a local box input and six fixtures: direct round-trip negative control; valid bounded Q01 observation followed by independently constructed build; invalid arguments; budget or response-bound exceedance; attempted build read of /input/model.step; and missing tracer/capability attestation. Reference scripts must not be supplied as runtime-LLM inputs."
+  },
+  "reference_and_adoption": {
+    "reference_maturity": "L0",
+    "adoption_disposition": "development_only",
+    "not_authorized": [
+      "provider request", "prompt or model change", "raw STEP text or host-path exposure", "runtime implementation", "CAD helper, IR, or SDK", "case or manifest change", "feature-history claim", "editability claim", "benchmark claim"
+    ]
+  },
+  "links": {
+    "observable_units": [],
+    "operation_units": [],
+    "execution_units": ["docs/corpus/knowledge/execution/sandbox-input-path-fixed-script-v1.json"],
+    "patterns": [],
+    "coverage_dimensions": ["q01_structured_observation", "q02_build_capability_separation", "reconstruction_provenance"],
+    "workpacks": ["docs/workpacks/done/WP-M47-001-q01-observation-build-capability-separation-design.md"],
+    "adrs": ["docs/architecture/adr/0048-reconstruction-provenance-gate-design.md", "docs/architecture/adr/0049-q01-observation-build-capability-separation.md"],
+    "paper_evidence": ["D:/paper/Projects/Brep2Code-research/outputs/literature-synthesis-and-validation-handoff.md"]
+  }
+}

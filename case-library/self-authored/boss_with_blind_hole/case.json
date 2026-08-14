@@ -1,0 +1,54 @@
+{
+  "case_id": "boss_with_blind_hole",
+  "status": "active",
+  "origin": "self_authored",
+  "tier": "P2",
+  "fixture_version": 1,
+  "input_step": "input.step",
+  "reference_script": "reference_build_sequence.py",
+  "reference_script_status": "available",
+  "sha256": "073cdf08d987638851029df964c2bbda93251bf5112b5505e39635d53bd4b3df",
+  "unit": "mm",
+  "coordinate_frame": "right_handed_xyz; plate origin at (0,0,0); feature axes +Z",
+  "summary": "Fused boss with an axial blind hole.",
+  "key_dimensions": {
+    "plate": [
+      30.0,
+      20.0,
+      4.0
+    ],
+    "boss_diameter": 10.0,
+    "boss_height": 8.0,
+    "hole_diameter": 4.0,
+    "hole_depth": 6.0
+  },
+  "expected": {
+    "bbox": {
+      "min": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max": [
+        30.0,
+        20.0,
+        12.0
+      ]
+    },
+    "volume": 2952.920307031823,
+    "counts": {
+      "solid": 1,
+      "shell": 1,
+      "face": 10,
+      "edge": 36
+    }
+  },
+  "feature_tags": [
+    "plate",
+    "boss",
+    "blind-hole",
+    "fuse-cut"
+  ],
+  "case_directory": "case-library/self-authored/boss_with_blind_hole",
+  "metadata_authority": "case.json"
+}

@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {"case_id":"abc_v00_00000023","tier":"P2","input_step":"data/datasets/abc/v00/step/00000023/00000023_ad34a3f60c4a4caa99646600_step_003.step","expected_bbox":{"min":[-49.769042,-6.10014,54.529461],"max":[182.508237,11.343692,73.09341]},"expected_counts":{"solid":1,"shell":1,"face":454,"edge":2678},"expected_volume":3786.784379106134,"difficulty_tags":["external","abc-v00","single-solid","454-face"],"notes":"Local-only ABC sample; split=development; source identity and SHA-256 are in abc-v00-m10-003-selection.json."},
+    {"case_id":"abc_v00_00000024","tier":"P2","input_step":"data/datasets/abc/v00/step/00000024/00000024_ad34a3f60c4a4caa99646600_step_004.step","expected_bbox":{"min":[-0.000004,-8.851567,-15.000004],"max":[270.649558,270.814531,14.900003]},"expected_counts":{"solid":1,"shell":1,"face":30,"edge":154},"expected_volume":174268.93866909997,"difficulty_tags":["external","abc-v00","single-solid","30-face"],"notes":"Local-only ABC sample; split=development; source identity and SHA-256 are in abc-v00-m10-003-selection.json."}
+  ]
+}

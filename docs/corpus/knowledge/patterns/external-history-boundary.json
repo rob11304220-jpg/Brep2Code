@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "unit_id": "external-history-boundary",
+  "unit_kind": "failure_boundary",
+  "status": "reviewed",
+  "question": "What can the current external Fusion and ABC records support without claiming generic native-history or B-Rep-to-sequence recovery?",
+  "scope": {
+    "kernel_operation": ["restricted Fusion Line3D replay mapping", "ABC STEP input probe and fixed-box sandbox control"],
+    "brep_observables": ["Fusion Line3D frame evidence in a frozen selector scope", "ABC readable single-solid STEP input"],
+    "preconditions": ["source-specific hash-linked records", "existing frozen mapping or sandbox policy", "separate source and license boundaries"],
+    "unsupported_conditions": ["generic Fusion parser support", "operation-diverse native-history compatibility", "B-Rep-to-sequence recovery", "external data admission to runtime or training"]
+  },
+  "sequence": {
+    "canonical_pattern": [],
+    "dependencies": ["Fusion selector conclusions depend on the frozen Line3D scope", "ABC control conclusions depend on the fixed-box scaffold and existing geometry gates"],
+    "admissible_alternatives": []
+  },
+  "evidence": {
+    "level": "case_local",
+    "source_kind": "external_source_specific_review",
+    "supporting_case_ids": ["141323_f85efdd4_0000", "136900_4fe212e6_0010", "143017_21d96cc2_0005"],
+    "held_out_case_ids": [],
+    "audit_links": ["docs/architecture/v1/fusion360-m17-independent-line3d-selector-validation-review.md", "docs/architecture/v1/m8-abc-external-admission-review.md"],
+    "authority_links": ["docs/architecture/adr/0017-restricted-fusion-line3d-default-mapping.md"]
+  },
+  "failure_and_repair": {
+    "observable_signals": ["Fusion strict replay volume/topology failure on a source-specific Line3D case", "ABC fixed-box geometry-gate failure despite readable input and successful script exit"],
+    "safe_action": "Keep the source-specific review boundary and record the result as validation or robustness evidence only; do not infer an operation sequence, helper, or repair rule.",
+    "stop_conditions": ["unreviewed operation or curve scope", "a claim beyond the recorded source representation", "any proposal to expose external raw assets or ignored traces to runtime"],
+    "counterexamples": ["The ABC scaffold controls do not identify feature semantics.", "The restricted Fusion Line3D result does not establish general native-history replay."]
+  },
+  "runtime_projection": {
+    "eligible": false,
+    "experience_card_id": null,
+    "review_trigger": "External-source-specific evidence cannot be projected until a separately reviewed mechanism meets ADR-0016 and M19 evidence requirements."
+  }
+}

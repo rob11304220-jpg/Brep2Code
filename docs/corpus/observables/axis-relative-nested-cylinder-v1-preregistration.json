@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "design_id": "axis-relative-nested-cylinder-v1-m33-001",
+  "decision_id": "q01-axis-relative-nested-cylinder-v1",
+  "status": "preregistered_design_only",
+  "scope": "one temporary +Y rotation of the M32 two-cylinder/planar-shoulder construction; no case asset",
+  "required_measurements": ["cylinder axis direction/location", "radius order", "shared planar adjacency", "shoulder position projected onto the cylinder axis", "shoulder footprint projected onto the plane transverse to the cylinder axis"],
+  "oracle": "Temporary deterministic +Y geometry created by the M33 experiment; no feature label or reference sequence is a reporter input.",
+  "negative_controls": ["same relation evaluated by a global-XY footprint rule", "non-+Y rotated relation", "non-coaxial +Y pair", "missing-shoulder +Y pair"],
+  "classification": {"matched": "axis_relative_nested_cylindrical_shoulder", "otherwise": "unsupported"},
+  "stopping_rule": ["No arbitrary-axis claim.", "No asset creation or public probe/runtime change.", "If the +Y shoulder cannot be measured in the axis-relative frame, record unsupported and do not alter M32."],
+  "next_work": "M33-002 may add an offline-only axis-relative reporter extension and temporary controls."
+}

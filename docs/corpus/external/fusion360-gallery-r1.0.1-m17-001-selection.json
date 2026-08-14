@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "selection_id": "fusion360-gallery-r1.0.1-m17-001",
+  "dataset_id": "fusion360_gallery",
+  "upstream_release": "r1.0.1",
+  "selection_status": "completed_offline_replay_stopped_on_held_out_mismatch",
+  "official_split_file": "data/datasets/fusion360_gallery/r1.0.1/extracted/r1.0.1/train_test.json",
+  "license_boundary": "Non-commercial research only; raw source assets and replay outputs remain ignored and are not provider inputs.",
+  "normalization": {"source_unit": "cm", "target_unit": "mm", "scale": 10.0},
+  "selection_policy": "In official source order, inspect at most the first 200 train and 200 test identifiers, excluding M14 source families. Require the strict M14 parser and a final STEP. Select first accepted Line3D and Circle3D train cases plus first accepted test case; all selected source families must differ.",
+  "scan_evidence": {"train_scanned": 200, "train_parser_accepted": 20, "test_scanned": 2, "test_parser_accepted": 1, "excluded_m14_source_families": ["100243_9fb796fe", "100877_ac1e5a17", "110043_b73b8beb"]},
+  "stopping_condition": "Three fixed cases only. If any required slot were absent inside its 200-item bound, selection would stop without extending the scan or replay syntax. No feature-support expansion follows this record.",
+  "samples": [
+    {"case_id": "145540_a4f54d5f_0010", "split": "development", "official_split": "train", "source_family": "145540_a4f54d5f", "profile_class": "Line3D_polygon", "json_path": "data/datasets/fusion360_gallery/r1.0.1/extracted/r1.0.1/reconstruction/145540_a4f54d5f_0010.json", "step_path": "data/datasets/fusion360_gallery/r1.0.1/extracted/r1.0.1/reconstruction/145540_a4f54d5f_0010.step", "source_sha256": "cad7c7d3315cbac2b6f9c3bf50f0a1239ad4a4a6ba27220d85436cf383708d86", "replay_gates": "pass"},
+    {"case_id": "21646_a2dd0d00_0058", "split": "development", "official_split": "train", "source_family": "21646_a2dd0d00", "profile_class": "Circle3D", "json_path": "data/datasets/fusion360_gallery/r1.0.1/extracted/r1.0.1/reconstruction/21646_a2dd0d00_0058.json", "step_path": "data/datasets/fusion360_gallery/r1.0.1/extracted/r1.0.1/reconstruction/21646_a2dd0d00_0058.step", "source_sha256": "287f3128b60316295f6f73303d621b9880e7d892ea17221abd2762e967cc4d2c", "replay_gates": "pass"},
+    {"case_id": "41026_295d1dc8_0003", "split": "held_out", "official_split": "test", "source_family": "41026_295d1dc8", "profile_class": "Line3D_polygon", "json_path": "data/datasets/fusion360_gallery/r1.0.1/extracted/r1.0.1/reconstruction/41026_295d1dc8_0003.json", "step_path": "data/datasets/fusion360_gallery/r1.0.1/extracted/r1.0.1/reconstruction/41026_295d1dc8_0003.step", "source_sha256": "0e4603c5bd6880f8fd02c030888e3b842bb759abb3b6f0d89f629bfa51b56bd6", "replay_gates": "fail", "failure_class": "strict_Line3D_mapping_mismatch_curve_order_hypothesis_insufficient", "failure_evidence": "Strict parser accepted the feature class and failed with bbox max delta 1016 mm, volume relative delta 1.0, topology total absolute delta 13. M17-002 endpoint ordering left bbox/volume unchanged and reduced topology total absolute delta only to 11, so curve order is not a sufficient root cause."}
+  ],
+  "runtime_boundary": {"manifest_paths": [], "provider_authorized": false, "notes": "Selection and replay are local-only M17 evidence, not an executable corpus admission or hosted evaluation. The bounded expansion stopped after the held-out gate failure; no replacement sample or parser change was attempted."}
+}

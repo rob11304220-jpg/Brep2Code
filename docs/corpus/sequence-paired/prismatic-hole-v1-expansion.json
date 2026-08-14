@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "expansion_id": "prismatic-hole-v1-m20-002",
+  "grammar_version": "prismatic-hole-v1",
+  "oracle_provenance": "self_authored_deterministic_reference",
+  "selection_status": "preregistered",
+  "selection_rule": "Exactly three through-hole development variants, three counterbore development variants, and three blind-hole held-out variants selected before candidate production or audit outcome; no substitutions, split moves, grammar expansion, or additional rows.",
+  "candidate_producer": {
+    "path": "tools/build_m20_counterbore_candidates.py",
+    "family_id": "counterbore",
+    "output_status": "unregistered_active_asset",
+    "admission_boundary": "Under ADR-0019, producer output may be an active case asset but still does not add an executable manifest, corpus/provider input, training input, or runtime resource."
+  },
+  "cases": [
+    {
+      "case_id": "param_through_hole_low",
+      "family_id": "through_hole",
+      "variant": "low",
+      "data_split": "development",
+      "case_record": "case-library/self-authored/param_through_hole_low/case.json",
+      "sequence": {
+        "operations": [
+          {"id": "sketch_1", "kind": "SketchRect", "plane": "XY", "length_x": 30.0, "length_y": 20.0},
+          {"id": "base_1", "kind": "ExtrudeBase", "profile": "sketch_1", "direction": "+Z", "distance": 10.0},
+          {"id": "hole_1", "kind": "CutCylinder", "target": "base_1", "variant": "through", "center_xy": [9.0, 10.0], "axis": "+Z", "radius": 2.0}
+        ],
+        "mutations": [{"kind": "base_length_x", "delta": 2.0}, {"kind": "hole_radius", "delta": 0.5}]
+      }
+    },
+    {
+      "case_id": "param_through_hole_nominal",
+      "family_id": "through_hole",
+      "variant": "nominal",
+      "data_split": "development",
+      "case_record": "case-library/self-authored/param_through_hole_nominal/case.json",
+      "sequence": {
+        "operations": [
+          {"id": "sketch_1", "kind": "SketchRect", "plane": "XY", "length_x": 30.0, "length_y": 20.0},
+          {"id": "base_1", "kind": "ExtrudeBase", "profile": "sketch_1", "direction": "+Z", "distance": 10.0},
+          {"id": "hole_1", "kind": "CutCylinder", "target": "base_1", "variant": "through", "center_xy": [15.0, 10.0], "axis": "+Z", "radius": 3.0}
+        ],
+        "mutations": [{"kind": "base_length_x", "delta": 2.0}, {"kind": "hole_radius", "delta": 0.5}]
+      }
+    },
+    {
+      "case_id": "param_through_hole_high",
+      "family_id": "through_hole",
+      "variant": "high",
+      "data_split": "development",
+      "case_record": "case-library/self-authored/param_through_hole_high/case.json",
+      "sequence": {
+        "operations": [
+          {"id": "sketch_1", "kind": "SketchRect", "plane": "XY", "length_x": 30.0, "length_y": 20.0},
+          {"id": "base_1", "kind": "ExtrudeBase", "profile": "sketch_1", "direction": "+Z", "distance": 10.0},
+          {"id": "hole_1", "kind": "CutCylinder", "target": "base_1", "variant": "through", "center_xy": [21.0, 10.0], "axis": "+Z", "radius": 4.0}
+        ],
+        "mutations": [{"kind": "base_length_x", "delta": 2.0}, {"kind": "hole_radius", "delta": 0.5}]
+      }
+    },
+    {
+      "case_id": "param_counterbore_low",
+      "family_id": "counterbore",
+      "variant": "low",
+      "data_split": "development",
+      "case_record": "case-library/self-authored/param_counterbore_low/case.json",
+      "candidate_sequence": "case-library/self-authored/param_counterbore_low/candidate_sequence.json",
+      "sequence": {
+        "operations": [
+          {"id": "sketch_1", "kind": "SketchRect", "plane": "XY", "length_x": 30.0, "length_y": 20.0},
+          {"id": "base_1", "kind": "ExtrudeBase", "profile": "sketch_1", "direction": "+Z", "distance": 10.0},
+          {"id": "hole_1", "kind": "CutCylinder", "target": "base_1", "variant": "counterbore", "center_xy": [9.0, 10.0], "axis": "+Z", "through_radius": 2.0, "bore_radius": 3.5, "bore_depth": 2.0}
+        ],
+        "mutations": [{"kind": "base_length_x", "delta": 2.0}, {"kind": "bore_depth", "delta": 0.5}]
+      }
+    },
+    {
+      "case_id": "param_counterbore_nominal",
+      "family_id": "counterbore",
+      "variant": "nominal",
+      "data_split": "development",
+      "case_record": "case-library/self-authored/param_counterbore_nominal/case.json",
+      "candidate_sequence": "case-library/self-authored/param_counterbore_nominal/candidate_sequence.json",
+      "sequence": {
+        "operations": [
+          {"id": "sketch_1", "kind": "SketchRect", "plane": "XY", "length_x": 30.0, "length_y": 20.0},
+          {"id": "base_1", "kind": "ExtrudeBase", "profile": "sketch_1", "direction": "+Z", "distance": 10.0},
+          {"id": "hole_1", "kind": "CutCylinder", "target": "base_1", "variant": "counterbore", "center_xy": [15.0, 10.0], "axis": "+Z", "through_radius": 3.0, "bore_radius": 5.0, "bore_depth": 3.0}
+        ],
+        "mutations": [{"kind": "base_length_x", "delta": 2.0}, {"kind": "bore_depth", "delta": 0.5}]
+      }
+    },
+    {
+      "case_id": "param_counterbore_high",
+      "family_id": "counterbore",
+      "variant": "high",
+      "data_split": "development",
+      "case_record": "case-library/self-authored/param_counterbore_high/case.json",
+      "candidate_sequence": "case-library/self-authored/param_counterbore_high/candidate_sequence.json",
+      "sequence": {
+        "operations": [
+          {"id": "sketch_1", "kind": "SketchRect", "plane": "XY", "length_x": 30.0, "length_y": 20.0},
+          {"id": "base_1", "kind": "ExtrudeBase", "profile": "sketch_1", "direction": "+Z", "distance": 10.0},
+          {"id": "hole_1", "kind": "CutCylinder", "target": "base_1", "variant": "counterbore", "center_xy": [21.0, 10.0], "axis": "+Z", "through_radius": 4.0, "bore_radius": 6.5, "bore_depth": 4.0}
+        ],
+        "mutations": [{"kind": "base_length_x", "delta": 2.0}, {"kind": "bore_depth", "delta": 0.5}]
+      }
+    },
+    {
+      "case_id": "param_blind_hole_low",
+      "family_id": "blind_hole",
+      "variant": "low",
+      "data_split": "held_out",
+      "case_record": "case-library/self-authored/param_blind_hole_low/case.json",
+      "sequence": {
+        "operations": [
+          {"id": "sketch_1", "kind": "SketchRect", "plane": "XY", "length_x": 30.0, "length_y": 20.0},
+          {"id": "base_1", "kind": "ExtrudeBase", "profile": "sketch_1", "direction": "+Z", "distance": 10.0},
+          {"id": "hole_1", "kind": "CutCylinder", "target": "base_1", "variant": "blind", "center_xy": [15.0, 10.0], "axis": "+Z", "radius": 2.0, "depth": 3.0}
+        ],
+        "mutations": [{"kind": "base_length_x", "delta": 2.0}, {"kind": "hole_depth", "delta": 1.0}]
+      }
+    },
+    {
+      "case_id": "param_blind_hole_nominal",
+      "family_id": "blind_hole",
+      "variant": "nominal",
+      "data_split": "held_out",
+      "case_record": "case-library/self-authored/param_blind_hole_nominal/case.json",
+      "sequence": {
+        "operations": [
+          {"id": "sketch_1", "kind": "SketchRect", "plane": "XY", "length_x": 30.0, "length_y": 20.0},
+          {"id": "base_1", "kind": "ExtrudeBase", "profile": "sketch_1", "direction": "+Z", "distance": 10.0},
+          {"id": "hole_1", "kind": "CutCylinder", "target": "base_1", "variant": "blind", "center_xy": [15.0, 10.0], "axis": "+Z", "radius": 3.0, "depth": 5.0}
+        ],
+        "mutations": [{"kind": "base_length_x", "delta": 2.0}, {"kind": "hole_depth", "delta": 1.0}]
+      }
+    },
+    {
+      "case_id": "param_blind_hole_high",
+      "family_id": "blind_hole",
+      "variant": "high",
+      "data_split": "held_out",
+      "case_record": "case-library/self-authored/param_blind_hole_high/case.json",
+      "sequence": {
+        "operations": [
+          {"id": "sketch_1", "kind": "SketchRect", "plane": "XY", "length_x": 30.0, "length_y": 20.0},
+          {"id": "base_1", "kind": "ExtrudeBase", "profile": "sketch_1", "direction": "+Z", "distance": 10.0},
+          {"id": "hole_1", "kind": "CutCylinder", "target": "base_1", "variant": "blind", "center_xy": [15.0, 10.0], "axis": "+Z", "radius": 4.0, "depth": 7.0}
+        ],
+        "mutations": [{"kind": "base_length_x", "delta": 2.0}, {"kind": "hole_depth", "delta": 1.0}]
+      }
+    }
+  ]
+}

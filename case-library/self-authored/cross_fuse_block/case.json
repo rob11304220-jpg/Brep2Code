@@ -1,0 +1,54 @@
+{
+  "case_id": "cross_fuse_block",
+  "status": "active",
+  "origin": "self_authored",
+  "tier": "P2",
+  "fixture_version": 1,
+  "input_step": "input.step",
+  "reference_script": "reference_build_sequence.py",
+  "reference_script_status": "available",
+  "sha256": "63e87c73a00478c7c94d7cf090b4d3ee175a4cd27eea575d05cd6678c5ca4621",
+  "unit": "mm",
+  "coordinate_frame": "right_handed_xyz; first prism origin at (0,0,0)",
+  "summary": "Two orthogonal overlapping prisms forming a cross profile.",
+  "key_dimensions": {
+    "prism_x": [
+      30.0,
+      12.0,
+      6.0
+    ],
+    "prism_y": [
+      12.0,
+      30.0,
+      6.0
+    ]
+  },
+  "expected": {
+    "bbox": {
+      "min": [
+        0.0,
+        -9.0,
+        0.0
+      ],
+      "max": [
+        30.0,
+        21.0,
+        6.0
+      ]
+    },
+    "volume": 3456.0,
+    "counts": {
+      "solid": 1,
+      "shell": 1,
+      "face": 22,
+      "edge": 88
+    }
+  },
+  "feature_tags": [
+    "block",
+    "cross-profile",
+    "boolean-fuse"
+  ],
+  "case_directory": "case-library/self-authored/cross_fuse_block",
+  "metadata_authority": "case.json"
+}

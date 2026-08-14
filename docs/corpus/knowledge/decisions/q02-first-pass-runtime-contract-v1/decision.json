@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "decision_id": "q02-first-pass-runtime-contract-v1",
+  "status": "reviewed",
+  "stages": ["Q02", "Q03", "Q04"],
+  "question": "Can an explicit, evidence-bounded runtime contract distinguish first-pass execution incompatibility from B-Rep-to-CAD modeling failure?",
+  "decision_owner": "execution",
+  "model_class": "low-complexity external first-pass B-Rep-to-script reconstruction under an unchanged sandbox and geometry-gate policy",
+  "observation": {
+    "required_facts": ["selected input is readable through the bounded probe", "provider response lifecycle", "script exit and output readability", "sandbox input reference", "OCP import compatibility", "existing bbox, volume, and topology gates"],
+    "ambiguity_or_fail_closed_conditions": ["missing preflight evidence", "provider timeout without a generated artifact", "changed model, provider, executor, gates, or split after development review", "unattributable script failure"]
+  },
+  "constrained_hypothesis": "A concise contract limited to the sandbox input path, output location, installed OCP import compatibility, and execution expectations may reduce execution-readiness failures; it does not infer feature semantics or establish modeling improvement. M43/M44 further show that geometry gates alone accept direct input STEP re-export, so they cannot establish reconstruction provenance.",
+  "execution_and_repair": {
+    "gate_or_diagnostic": ["existing input/output readability and geometry gates", "sanitized provider and execution traces", "path-compatible fixed-script control", "unavailable-import non-match control"],
+    "repair_disposition": "diagnose_only",
+    "stopping_rule": ["no hosted request under this design workpack", "if development evidence lacks attributable gate-level improvement, do not widen context or sample scope", "held-out follows only a frozen development review and separate explicit authorization", "do not promote a contract to a helper, experience card, or runtime policy from this evidence alone"]
+  },
+  "evidence": {
+    "existing": ["M10-012 directly reproduced two sandbox host-path failures and showed that /input/model.step restored fixed-script execution; an unavailable OCP import remained a non-match.", "Completed hosted reports show that many first-pass results fail before readable output, so geometry outcomes are often unavailable."],
+    "required_roles": ["discriminating", "negative_control", "regression"],
+    "missing_counterexample": ["a frozen hosted development comparison showing that the same policy with the bounded contract does not simply shift failures to an unrelated stage", "a separately authorized held-out result under an unchanged selected policy"],
+    "next_minimal_experiment": "M43/M44 completed the separately authorized development and held-out comparison. The held-out all-gate pass was a direct input STEP re-export, so the next eligible work is a separately selected Q03 reconstruction-provenance gate design, not another hosted rerun."
+  },
+  "reference_and_adoption": {
+    "reference_maturity": "L0",
+    "adoption_disposition": "rejected",
+    "not_authorized": ["reconstruction-success claim", "provider request", "prompt or runtime behavior change", "production helper", "runtime retrieval", "manifest or case change", "IR/SDK change", "held-out evaluation"]
+  },
+  "links": {
+    "observable_units": [],
+    "operation_units": [],
+    "execution_units": ["docs/corpus/knowledge/execution/sandbox-input-path-fixed-script-v1.json"],
+    "patterns": [],
+    "coverage_dimensions": ["external_history_validation"],
+    "workpacks": ["docs/workpacks/done/WP-M42-001-first-pass-runtime-contract-design.md"],
+    "adrs": ["docs/architecture/adr/0045-first-pass-runtime-contract-design.md", "docs/architecture/adr/0046-first-pass-outbound-path-sanitization.md", "docs/architecture/adr/0047-first-pass-round-trip-is-not-reconstruction.md"],
+    "paper_evidence": ["D:/paper/Projects/Brep2Code-research/outputs/literature-synthesis-and-validation-handoff.md"]
+  }
+}

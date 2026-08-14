@@ -1,0 +1,54 @@
+{
+  "case_id": "param_additive_boss_nominal",
+  "status": "active",
+  "origin": "self_authored",
+  "tier": "P2",
+  "fixture_version": 1,
+  "family_id": "additive_boss",
+  "data_split": "development",
+  "variant": "nominal",
+  "parameters": {
+    "radius": 4.0,
+    "height": 5.0
+  },
+  "input_step": "input.step",
+  "reference_script": "reference_build_sequence.py",
+  "reference_script_status": "available",
+  "sha256": "2860a07b9bc87c55e59a5308b8f223ff3aedb3b0b0c12147c9637523a4802887",
+  "unit": "mm",
+  "coordinate_frame": "right_handed_xyz; model origin at (0,0,0)",
+  "summary": "M12 additive_boss nominal parameter variant.",
+  "key_dimensions": {
+    "radius": 4.0,
+    "height": 5.0
+  },
+  "expected": {
+    "bbox": {
+      "min": [
+        -1e-07,
+        -1e-07,
+        -1e-07
+      ],
+      "max": [
+        30.0000001,
+        20.0000001,
+        10.0000001
+      ]
+    },
+    "volume": 3251.3274122871835,
+    "counts": {
+      "solid": 1,
+      "shell": 1,
+      "face": 8,
+      "edge": 30
+    }
+  },
+  "feature_tags": [
+    "m12",
+    "parametric",
+    "additive_boss",
+    "nominal"
+  ],
+  "case_directory": "case-library/self-authored/param_additive_boss_nominal",
+  "metadata_authority": "case.json"
+}

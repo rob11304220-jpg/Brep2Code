@@ -1,0 +1,27 @@
+---
+description: Cross-session handoff requirements
+alwaysApply: true
+---
+
+# Handoff Protocol (L1)
+
+## Locations
+
+- Active: `docs/handoff/active/` (template: `docs/handoff/TEMPLATE.md`)
+- Archive: `docs/handoff/archive/`
+
+## Required fields (from template)
+
+Date, Subproject (`brep2code`), Status, Goal, Done, In progress, Next, Decisions, Blockers, Key paths, Resume prompt
+
+## Rules
+
+- Keep `active/` to 1–3 files; archive completed handoffs to `archive/`
+- New session: read latest active handoff before coding (skill `handoff-resume`)
+- Link ADRs from Handoff Decisions when relevant
+- Follow `docs/workflow/task-lifecycle.md`; an active handoff names its related workpack.
+- Every active workpack has one Owner. G2/G3 workpacks also name an independent Reviewer.
+- After changing workpack, handoff, workflow status, or ADR lifecycle records,
+  run `uv run python tools/check_governance.py` before concluding the task.
+
+See `docs/runbooks/handoff-protocol.md`.

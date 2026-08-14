@@ -1,0 +1,49 @@
+{
+  "case_id": "concentric_hole_plate",
+  "status": "active",
+  "origin": "self_authored",
+  "tier": "P3",
+  "fixture_version": 1,
+  "input_step": "input.step",
+  "reference_script": "reference_build_sequence.py",
+  "reference_script_status": "available",
+  "sha256": "ac03018b33675dd65d7a10742fb5af3e92561006a58063376a120f6811283567",
+  "unit": "mm",
+  "coordinate_frame": "right_handed_xyz; plate origin at (0,0,0); hole axis +Z",
+  "summary": "Plate with one centred large through hole.",
+  "key_dimensions": {
+    "length_x": 30.0,
+    "length_y": 20.0,
+    "height_z": 6.0,
+    "hole_diameter": 8.0
+  },
+  "expected": {
+    "bbox": {
+      "min": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max": [
+        30.0,
+        20.0,
+        6.0
+      ]
+    },
+    "volume": 3298.4071052553695,
+    "counts": {
+      "solid": 1,
+      "shell": 1,
+      "face": 7,
+      "edge": 30
+    }
+  },
+  "feature_tags": [
+    "plate",
+    "through-hole",
+    "topology-pair",
+    "boolean-cut"
+  ],
+  "case_directory": "case-library/self-authored/concentric_hole_plate",
+  "metadata_authority": "case.json"
+}

@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "unit_id": "axis-relative-nested-cylinder-v1",
+  "unit_kind": "observable",
+  "status": "reviewed",
+  "question": "When can one temporary +Y rotation evidence the nested-cylinder/shoulder relation in an axis-relative frame?",
+  "measurement": {"scope": "temporary +Y rigid rotation of the M32 two-cylinder construction", "reported_fields": ["+Y axis location/direction", "axis-relative axial span", "XZ transverse shoulder span", "ordered radii", "shared planar shoulder", "axis_relative_nested_cylindrical_shoulder|unsupported"], "matched": "Exactly two +Y coaxial cylinders with ordered radii share one planar shoulder.", "fail_closed": "Non-+Y axes, non-coaxiality, missing shoulder, different cardinality and global-XY substitution are unsupported."},
+  "evidence": {"level": "supported", "supporting_cases": ["temporary +Y rigid rotation of M32 construction"], "negative_controls": ["M32 +Z-only reporter", "temporary +X rotation", "temporary +Y non-coaxial shape", "temporary +Y missing-shoulder shape"], "review": "docs/architecture/v1/m33-axis-relative-nested-cylinder-review.md"},
+  "boundaries": ["Only one +Y temporary control is supported; arbitrary orientation is unverified.", "This is a geometry relation, not a feature label or history claim.", "No public probe/runtime/helper/manifest/provider behavior follows."],
+  "runtime_projection": {"eligible": false, "review_trigger": "Independent direct runtime evidence and a separate adoption review are required."}
+}

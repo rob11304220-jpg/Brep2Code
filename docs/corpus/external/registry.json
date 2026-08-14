@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "registry_scope": "development_governance_only",
+  "authority": "Dataset-level registration only. Registration is not approval to download, redistribute, select samples, run evaluation, or alter Harness.",
+  "datasets": [
+    {
+      "dataset_id": "abc",
+      "name": "ABC Dataset",
+      "official_url": "https://deep-geometry.github.io/abc-dataset/",
+      "release": "v00",
+      "license_or_redistribution_status": "reviewed for local research reproduction only; CAD model copyright remains with original creators, so raw models and reconstructable derivatives must not be committed or redistributed",
+      "formats": ["STEP", "Parasolid", "STL", "metadata"],
+      "suggested_use": "Future robustness assessment of real CAD B-Rep inputs",
+      "activation_status": "locally_enabled_m8_001_m10_003_and_m10_007",
+      "owner": "unassigned",
+      "official_step_index": "https://deep-geometry.github.io/abc-dataset/data/step_v00.txt",
+      "download_terms_url": "https://deep-geometry.github.io/abc-dataset/",
+      "local_storage": "data/datasets/abc/v00/",
+      "usage_boundary": "Explicit local-development input only. It is not a default test fixture, Harness runtime material, prompt resource, or hosted evaluation input.",
+      "future_expansion_policy": "Retain the locally acquired archive as the immutable input source and its complete ignored step/ extraction as a reconstructable local cache under ADR-0011. Completed local selections are abc-v00-m8-001, abc-v00-m10-003, and abc-v00-m10-007. The cache does not enable a full corpus, default test discovery, tracked full manifest, provider input, redistribution, or unreviewed use. A later explicitly approved workpack may admit only a small deterministic batch after source identity, SHA-256, probe viability, split assignment and local-only licensing boundary are recorded."
+    },
+    {
+      "dataset_id": "fusion360_gallery",
+      "name": "Fusion 360 Gallery Dataset",
+      "official_url": "https://github.com/AutodeskAILab/Fusion360GalleryDataset",
+      "release": "r1.0.1",
+      "license_or_redistribution_status": "M12-002 reviewed: non-commercial research use only; complete dataset must not be redistributed. M13-001 completed the ignored local archive/cache; M14-001 selected and replayed three local cases only.",
+      "formats": ["SMT", "STEP", "construction-sequence JSON", "per-extrude states"],
+      "suggested_use": "Future sequence-supervised B-Rep/history feasibility after deterministic local replay",
+      "activation_status": "m17_default_line3d_regression_completed",
+      "owner": "unassigned",
+      "admission_record": "docs/corpus/external/fusion360-gallery-r1.0.1-admission.json",
+      "usage_boundary": "M16 completed explicit development and held-out local-control manifests. M17-001--003 isolated and rejected inadequate Line3D mappings; M17-004--006 established a profile-normal / STEP-projection / extent-boundary selector on five development and two held-out rows. ADR-0017 made that fail-closed selector the default only for the supported Line3D replay subset. M17-008 independently confirmed the default on two further development and one held-out family, without changing syntax or Harness behavior. Existing manifests remain non-default local development inputs only and do not authorize corpus runs, provider input, hosted evaluation or runtime material."
+    },
+    {
+      "dataset_id": "deepcad",
+      "name": "DeepCAD",
+      "official_url": "https://github.com/rundiwu/DeepCAD",
+      "release": null,
+      "license_or_redistribution_status": "unreviewed",
+      "formats": ["construction sequence JSON", "vectorized representation"],
+      "suggested_use": "Future CAD construction-sequence reference",
+      "activation_status": "registered_not_enabled",
+      "owner": "unassigned"
+    },
+    {
+      "dataset_id": "thingi10k",
+      "name": "Thingi10K",
+      "official_url": "https://github.com/Thingi10K/Thingi10K",
+      "release": null,
+      "license_or_redistribution_status": "unreviewed",
+      "formats": ["STL mesh"],
+      "suggested_use": "Future mesh-gate and robustness reference; not a primary B-Rep source",
+      "activation_status": "registered_not_enabled",
+      "owner": "unassigned"
+    }
+  ]
+}

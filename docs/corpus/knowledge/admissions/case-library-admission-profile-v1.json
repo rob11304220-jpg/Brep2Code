@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "profile_id": "case-library-admission-profile-v1-m143",
+  "status": "reviewed",
+  "scope": "Active self-authored registry metadata and already-reviewed documentary evidence only; no STEP, reference script, or held-out fixture is read.",
+  "source_hashes": [
+    {"path": "docs/corpus/registry/self-authored.json", "sha256": "06eefc830c2e45e361b8c7464fa857154f469fa9bc83552c41ccafa1f504a5ed"},
+    {"path": "docs/corpus/knowledge/coverage-matrix.json", "sha256": "e9b5b51b10048ff6c4bb1af5463ff96072d3c160efa325dfcadd16e1a0a26ea7"},
+    {"path": "docs/corpus/knowledge/admissions/selector-ambiguity-v1.json", "sha256": "efb990b147d164e351f4239b63243789d0ad9ddefe76d8afedf9ff84de0101ad"}
+  ],
+  "profiles": [
+    {"id": "baseline_or_unpaired", "modeling_mechanism": "primitive, ladder, or parameter asset without scoped sequence_pair metadata", "entity_reference_stability": "not asserted", "sequence_dependency": "not asserted", "parameter_and_split_role": "registry-declared only", "evidence_maturity": "fixture_and_baseline", "admission_risk": "unknown", "default_disposition": "needs_evidence"},
+    {"id": "family_scoped_sequence", "modeling_mechanism": "frozen sequence_pair grammar", "entity_reference_stability": "grammar-specific; not generic", "sequence_dependency": "declared within one grammar", "parameter_and_split_role": "metadata-declared development or held_out", "evidence_maturity": "family_scoped_replay_and_gates", "admission_risk": "bounded_but_not_admitted", "default_disposition": "needs_evidence"},
+    {"id": "unique_planar_selector", "modeling_mechanism": "face-selected dependent cut", "entity_reference_stability": "exactly one planar +Z maximum-output-Z candidate", "sequence_dependency": "selected boss top is required before blind cut", "parameter_and_split_role": "frozen family split", "evidence_maturity": "M142_hash_bound_admission_record", "admission_risk": "bounded_unique_bind", "default_disposition": "admit"},
+    {"id": "selector_ambiguity_counterexample", "modeling_mechanism": "twin-boss planar selector", "entity_reference_stability": "two eligible candidates", "sequence_dependency": "dependent action prohibited", "parameter_and_split_role": "development discriminating and documentary held_out evidence", "evidence_maturity": "M142_hash_bound_counterexample", "admission_risk": "ambiguous_target", "default_disposition": "fail_closed"}
+  ],
+  "m142_crosswalk": {
+    "admission_id": "selector-ambiguity-v1-m142",
+    "unique_binding_profile": "unique_planar_selector",
+    "unique_binding_disposition": "admit",
+    "twin_boss_profile": "selector_ambiguity_counterexample",
+    "twin_boss_disposition": "fail_closed",
+    "held_out_access": "documentary_evidence_only"
+  },
+  "recommendations": [
+    {"rank": 1, "decision_gap": "q03-editability-oracle-v1", "reason": "Existing profiles expose editability evidence as mechanism-specific and the decision index marks the independent oracle deferred.", "missing_evidence": "independent history or constraint oracle", "stopping_condition": "Do not create or inspect a new case until a user-selected bounded design package freezes its oracle and split."},
+    {"rank": 2, "decision_gap": "q04-sequence-rollback-v1", "reason": "Existing reviewed decision evidence covers a bounded correct-prefix rollback but has no admission-profile cross-family calibration.", "missing_evidence": "one explicitly selected mechanism-specific admission record or counterexample", "stopping_condition": "Do not infer generic sequence repair or edit a runtime/IR route."},
+    {"rank": 3, "decision_gap": "complex_topology shell_or_rib", "reason": "The coverage matrix identifies shell/rib as a separate topology boundary beyond single-solid evidence.", "missing_evidence": "one bounded topology hypothesis, counterexample, and stopping rule", "stopping_condition": "Do not use profile counts as authority for corpus expansion."}
+  ],
+  "non_projection": {"evidence_only": true, "prohibited": ["case admission by classification alone", "case promotion", "manifest", "runtime card", "reference pack", "retrieval", "SDK", "IR", "provider", "training", "hosted execution"]}
+}

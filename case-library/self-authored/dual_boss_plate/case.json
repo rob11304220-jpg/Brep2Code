@@ -1,0 +1,61 @@
+{
+  "case_id": "dual_boss_plate",
+  "status": "active",
+  "origin": "self_authored",
+  "tier": "P2",
+  "fixture_version": 1,
+  "input_step": "input.step",
+  "reference_script": "reference_build_sequence.py",
+  "reference_script_status": "available",
+  "sha256": "ff238eb197f8c1de3c2dbd9462ec5737bf1ff626e80a7302539d8c7b63e116a5",
+  "unit": "mm",
+  "coordinate_frame": "right_handed_xyz; plate origin at (0,0,0); boss axes +Z",
+  "summary": "Plate with two equal fused bosses.",
+  "key_dimensions": {
+    "plate": [
+      30.0,
+      20.0,
+      4.0
+    ],
+    "boss_diameter": 6.0,
+    "boss_height": 6.0,
+    "boss_centers_xy": [
+      [
+        8.0,
+        10.0
+      ],
+      [
+        22.0,
+        10.0
+      ]
+    ]
+  },
+  "expected": {
+    "bbox": {
+      "min": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max": [
+        30.0,
+        20.0,
+        10.0
+      ]
+    },
+    "volume": 2739.2920065877074,
+    "counts": {
+      "solid": 1,
+      "shell": 1,
+      "face": 10,
+      "edge": 36
+    }
+  },
+  "feature_tags": [
+    "plate",
+    "boss-array",
+    "boolean-fuse"
+  ],
+  "case_directory": "case-library/self-authored/dual_boss_plate",
+  "metadata_authority": "case.json"
+}

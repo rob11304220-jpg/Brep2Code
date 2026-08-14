@@ -1,0 +1,48 @@
+{
+  "case_id": "filleted_block",
+  "status": "active",
+  "origin": "self_authored",
+  "tier": "P1",
+  "fixture_version": 1,
+  "input_step": "input.step",
+  "reference_script": "reference_build_sequence.py",
+  "reference_script_status": "available",
+  "sha256": "be33b6183416b2b828d8376011e9469183567596c1297291c809ab0a53a40bed",
+  "unit": "mm",
+  "coordinate_frame": "right_handed_xyz; box origin at (0,0,0)",
+  "summary": "Rectangular block with one radius-1 rounded edge.",
+  "key_dimensions": {
+    "length_x": 16.0,
+    "length_y": 12.0,
+    "height_z": 8.0,
+    "fillet_radius": 1.0
+  },
+  "expected": {
+    "bbox": {
+      "min": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max": [
+        16.0,
+        12.0,
+        8.0
+      ]
+    },
+    "volume": 1534.2831853071807,
+    "counts": {
+      "solid": 1,
+      "shell": 1,
+      "face": 7,
+      "edge": 30
+    }
+  },
+  "feature_tags": [
+    "block",
+    "fillet",
+    "curved-edge"
+  ],
+  "case_directory": "case-library/self-authored/filleted_block",
+  "metadata_authority": "case.json"
+}

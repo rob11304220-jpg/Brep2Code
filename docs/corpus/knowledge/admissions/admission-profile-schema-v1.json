@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "schema_id": "admission-profile-v1",
+  "purpose": "Development-side classification of existing case evidence. A profile is not a case admission or runtime resource.",
+  "axes": [
+    "modeling_mechanism",
+    "entity_reference_stability",
+    "sequence_dependency",
+    "parameter_and_split_role",
+    "evidence_maturity",
+    "admission_risk"
+  ],
+  "dispositions": {
+    "admit": "Only a separately reviewed immutable admission record may support this disposition for its exact bounded scope.",
+    "needs_evidence": "Existing development evidence is insufficient for an admission claim.",
+    "fail_closed": "The mechanism must stop; no target or sequence may be chosen.",
+    "counterexample_only": "Retain as boundary evidence; it cannot support an admission claim."
+  },
+  "prohibitions": [
+    "case lifecycle change",
+    "manifest change",
+    "runtime projection",
+    "provider or hosted use",
+    "training use",
+    "held-out fixture inspection"
+  ]
+}

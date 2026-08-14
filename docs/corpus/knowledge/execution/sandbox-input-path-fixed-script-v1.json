@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "unit_id": "sandbox-input-path-fixed-script-v1",
+  "unit_kind": "failure_boundary",
+  "status": "reviewed",
+  "question": "What bounded Q03/Q04 action is supported when a fixed script reads a host-only STEP path under wsl-bwrap?",
+  "scope": {
+    "kernel_operation": ["wsl-bwrap fixed-script execution", "STEP input mount at /input/model.step"],
+    "brep_observables": ["input probe readable", "script fails before output creation on a host-only input path"],
+    "preconditions": ["fixed local script", "trace-supported host-path failure", "unchanged existing output and geometry gates"],
+    "unsupported_conditions": ["generic generated scripts", "production helper", "hosted-policy improvement", "geometry-fidelity repair"]
+  },
+  "operation_contract": {
+    "function_family": ["diagnose fixed-script sandbox input-path mismatch"],
+    "parameter_contract": ["Only the recorded host-path to /input/model.step substitution is evidenced."],
+    "expected_brep_delta": ["None; this unit concerns execution readability, while existing geometry gates remain authoritative."],
+    "topology_invariants": ["No topology conclusion follows from output readability."],
+    "numeric_or_tolerance_boundary": ["Existing gate tolerances are unchanged."],
+    "unverified_properties": ["A generic path abstraction or generated-script repair policy."]
+  },
+  "sequence": {"canonical_pattern": [], "dependencies": ["input probe", "execution trace", "existing gates"], "admissible_alternatives": []},
+  "evidence": {
+    "level": "direct",
+    "source_kind": "fixed_script_reproduction_with_nonmatching_control",
+    "supporting_case_ids": ["abc_v00_00000027", "abc_v00_00000031"],
+    "held_out_case_ids": [],
+    "audit_links": ["docs/architecture/v1/m10-012-minimal-offline-path-repair-review.md", "docs/architecture/v1/m10-external-attribution-ledger.md"],
+    "authority_links": ["docs/architecture/adr/0010-attribution-driven-repair-governance.md", "docs/architecture/adr/0036-legacy-evidence-disposition-and-decision-index.md"]
+  },
+  "failure_and_repair": {
+    "observable_signals": ["input readable", "host-only STEP path", "no output artifact", "trace-supported STEP-read failure"],
+    "safe_action": "For a matching fixed-script reproduction, test /input/model.step while preserving all output and geometry gates.",
+    "stop_conditions": ["unmatched import or API failure", "claim of generic helper behavior", "any attempt to turn readability into geometry success"],
+    "counterexamples": ["abc_v00_00000030 retains its unavailable-import failure after path correction.", "abc_v00_00000027 remains a strict bbox-gate failure after output becomes readable."]
+  },
+  "runtime_projection": {
+    "eligible": false,
+    "experience_card_id": "sandbox-input-path-fixed-script",
+    "review_trigger": "A third independent direct path case and the separately gated M19 retrieval evaluation are required before any runtime proposal."
+  }
+}

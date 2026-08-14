@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "unit_id": "blind-through-cylindrical-extent-v1",
+  "unit_kind": "observable",
+  "status": "reviewed",
+  "question": "When can the frozen prismatic B-Rep evidence a blind or through cylindrical cut extent?",
+  "measurement": {
+    "scope": "single cylindrical face, axis parallel to +Z, exactly two adjacent planar faces, frozen prismatic-hole-v1 geometry",
+    "reported_fields": ["cylindrical face count", "cylinder axis and radius", "face-edge-face adjacency", "adjacent planar face bbox, area, XY footprint", "blind|through|unsupported"],
+    "blind": "Exactly one adjacent planar face has a local XY footprint no larger than 1.25 times the measured cylinder diameter and the other is exterior-sized.",
+    "through": "Both adjacent planar faces are exterior-sized.",
+    "fail_closed": "Any other cylindrical count, axis, terminal-face cardinality, or footprint combination is unsupported."
+  },
+  "evidence": {
+    "level": "supported",
+    "supporting_cases": ["param_through_hole_low", "param_through_hole_nominal", "param_through_hole_high", "param_blind_hole_low", "param_blind_hole_nominal", "param_blind_hole_high"],
+    "negative_controls": ["param_counterbore_low", "param_counterbore_nominal", "param_counterbore_high"],
+    "review": "docs/architecture/v1/m30-blind-through-measured-fact-audit-review.md"
+  },
+  "boundaries": ["The reporter is offline-only and not part of the public probe contract.", "Only the frozen +Z single-cylinder prismatic scope is supported.", "No feature label or reference-script variant is an input fact.", "No generic feature recognition, history recovery, runtime helper, manifest or provider use follows."],
+  "runtime_projection": {"eligible": false, "review_trigger": "Independent direct runtime evidence and a separate adoption review are required."}
+}

@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "admission_id": "selector-ambiguity-v1-m142",
+  "status": "reviewed",
+  "decision": {
+    "decision_id": "q01-selector-ambiguity-v1",
+    "scope": "Axis-aligned planar +Z maximum-output-Z selector for the frozen face-selected dependent-cut oracle and twin-boss ambiguity controls.",
+    "applicability": "A dependent operation may bind only when the declared predicate has cardinality exactly one.",
+    "prohibitions": [
+      "persistent entity naming",
+      "coordinate-only tie breaking",
+      "generic face recovery",
+      "generic B-Rep-to-history recovery"
+    ]
+  },
+  "family": {
+    "oracle_grammar": "face-selected-dependent-cut-v1",
+    "discriminating_grammar": "selector-ambiguity-v1",
+    "unit": "mm"
+  },
+  "source_hashes": [
+    {"path": "docs/corpus/knowledge/decisions/q01-selector-ambiguity-v1/decision.json", "sha256": "4183f75a1c7d211477de7e1441bb1cbfb650e97c790a3d2fa6d7af26cc2d6cee"},
+    {"path": "docs/corpus/sequence-paired/selector-ambiguity-v1-preregistration.json", "sha256": "a8f1a3d7b94007c860a99ea3239960933c4e9f27b912539882c707a2ae44ef49"},
+    {"path": "docs/architecture/v1/m29-selector-ambiguity-controlled-production-review.md", "sha256": "c8ddf03bf26cabe55569690988b9792394939e7cbd485c08def794241304aa6f"},
+    {"path": "docs/architecture/v1/contracts/classified-repair-policy.md", "sha256": "ce5216d949d0045f9e86a180caf1d92965bf596c0fab06454fa378f7015a810f"},
+    {"path": "docs/corpus/knowledge/observables/planar-face-selector-cardinality-v1.json", "sha256": "6acba051c3aee4773ac79c8aa6f48c39921abf66d8474bb871fb3e6740dd0fb9"}
+  ],
+  "oracle": {
+    "case_id": "param_face_selected_cut_centered_nominal",
+    "data_split": "development",
+    "case_metadata_path": "case-library/self-authored/param_face_selected_cut_centered_nominal/case.json",
+    "case_metadata_sha256": "c99aee606d7c8d79d94c6fca9e337453588c0c66839e073143397ca13ee7453d",
+    "input_sha256": "91ee255f00f47dc6ebe04772df7638fe8e453496aa8c8f95fa757d3e91b6b72b",
+    "expected_selector": {"cardinality": 1, "disposition": "bind_declared_boss_top"},
+    "expected_terminal_operation": "CutCylinder",
+    "replay_and_gate_evidence": "Existing deterministic reference and geometry/topology gates are bound by the source decision and the active case metadata."
+  },
+  "development_discriminating_case": {
+    "case_id": "param_selector_ambiguity_twin_centered_nominal",
+    "data_split": "development",
+    "case_metadata_path": "case-library/self-authored/param_selector_ambiguity_twin_centered_nominal/case.json",
+    "case_metadata_sha256": "4365378c0afd27657a40c16b407c61ee4d5a48e8bcc44938215b389f23628430",
+    "candidate_sequence_path": "case-library/self-authored/param_selector_ambiguity_twin_centered_nominal/candidate_sequence.json",
+    "candidate_sequence_sha256": "f2160d047999be05e764df83b7ee739af7fcac0447d8ee7806fa86af906b7eb5",
+    "input_sha256": "da4499e316a32fe2afc11f61dd07584b44d2d0b5bfdc7a9bf656e975f79625e5",
+    "expected_selector": {"cardinality": 2, "disposition": "FailClosedAmbiguous"},
+    "expected_terminal_operation": "FailClosedAmbiguous",
+    "required_absent_operations": ["SketchCircle", "CutCylinder"],
+    "editability_mutations": ["boss_width_x", "shared_boss_height"],
+    "replay_and_gate_evidence": "M29 reviewed production records stable normalized STEP hashes, geometry replay gates, semantic invariants, and fail-closed termination."
+  },
+  "held_out_split_isolation": {
+    "split": "held_out",
+    "evidence_mode": "reviewed_hash_pinned_documentary_evidence_only",
+    "reviewed_source": "docs/architecture/v1/m29-selector-ambiguity-controlled-production-review.md",
+    "expected_selector": {"cardinality": 2, "disposition": "FailClosedAmbiguous"},
+    "constraint": "No held-out fixture, input hash, parameters, candidate sequence, replay output, or path is included or read by this admission record audit."
+  },
+  "negative_controls": [
+    {"id": "wrong-face-injection", "expected_rejection": "selector_ambiguity"},
+    {"id": "coordinate-tie-breaker-injection", "expected_rejection": "coordinate_only_support"}
+  ],
+  "failure_taxonomy": [
+    "split_leak",
+    "sequence_mismatch",
+    "selector_not_ambiguous",
+    "silent_candidate_choice",
+    "wrong_face_target",
+    "coordinate_only_support",
+    "downstream_operation_after_ambiguity",
+    "hash_nondeterminism",
+    "source_hash_mismatch",
+    "held_out_raw_reference",
+    "runtime_projection_attempt"
+  ],
+  "evidence_source_fields": {
+    "observables": ["planar surface", "+Z normal", "maximum output Z", "candidate cardinality"],
+    "operation_parameter_dependencies": ["base and boss construction precede selector evaluation", "a dependent cut requires a uniquely bound boss-top face"],
+    "entity_reference_policy": "exactly one candidate binds; zero or more than one is terminal and no target is selected",
+    "alternatives": ["coordinate-only selection", "input face enumeration", "choose-first behavior"],
+    "counterexamples": ["twin-boss multi-candidate result"],
+    "repair_signature": {"classification": "selector_ambiguous", "route": "stop", "terminal_reason": "stop_unsupported", "request_count": 0}
+  },
+  "non_projection": {
+    "evidence_only": true,
+    "prohibited": ["case promotion", "manifest", "runtime card", "reference pack", "retrieval", "SDK", "IR", "provider", "training", "hosted execution"]
+  }
+}

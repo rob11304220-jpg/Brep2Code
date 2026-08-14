@@ -1,0 +1,45 @@
+{
+  "grammar_version": "prismatic-hole-v1",
+  "sequence": {
+    "operations": [
+      {
+        "id": "sketch_1",
+        "kind": "SketchRect",
+        "plane": "XY",
+        "length_x": 30.0,
+        "length_y": 20.0
+      },
+      {
+        "id": "base_1",
+        "kind": "ExtrudeBase",
+        "profile": "sketch_1",
+        "direction": "+Z",
+        "distance": 10.0
+      },
+      {
+        "id": "hole_1",
+        "kind": "CutCylinder",
+        "target": "base_1",
+        "variant": "counterbore",
+        "center_xy": [
+          9.0,
+          10.0
+        ],
+        "axis": "+Z",
+        "through_radius": 2.0,
+        "bore_radius": 3.5,
+        "bore_depth": 2.0
+      }
+    ],
+    "mutations": [
+      {
+        "kind": "base_length_x",
+        "delta": 2.0
+      },
+      {
+        "kind": "bore_depth",
+        "delta": 0.5
+      }
+    ]
+  }
+}

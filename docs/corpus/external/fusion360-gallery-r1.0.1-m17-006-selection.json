@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "selection_id": "fusion360-gallery-r1.0.1-m17-006",
+  "workpack": "WP-M17-006",
+  "selection_status": "completed",
+  "policy": "Frozen M17-005 selector; train positions 201--400 selects two Line3D development cases and test positions 1--200 selects one Line3D held-out case, all family-isolated and excluding M14--M17-005.",
+  "excluded_source_families": [
+    "100243_9fb796fe",
+    "100877_ac1e5a17",
+    "110043_b73b8beb",
+    "145540_a4f54d5f",
+    "21646_a2dd0d00",
+    "41026_295d1dc8"
+  ],
+  "samples": [
+    {
+      "case_id": "141323_f85efdd4_0000",
+      "split": "development",
+      "official_split": "train",
+      "source_order": 215,
+      "source_family": "141323_f85efdd4",
+      "json_path": "data/datasets/fusion360_gallery/r1.0.1/extracted/r1.0.1/reconstruction/141323_f85efdd4_0000.json",
+      "step_path": "data/datasets/fusion360_gallery/r1.0.1/extracted/r1.0.1/reconstruction/141323_f85efdd4_0000.step",
+      "input_step_sha256": "b5c9d97ad51f02182435518523d3cbc743933decf828e8cecca6511447cfeb49"
+    },
+    {
+      "case_id": "136900_4fe212e6_0010",
+      "split": "development",
+      "official_split": "train",
+      "source_order": 242,
+      "source_family": "136900_4fe212e6",
+      "json_path": "data/datasets/fusion360_gallery/r1.0.1/extracted/r1.0.1/reconstruction/136900_4fe212e6_0010.json",
+      "step_path": "data/datasets/fusion360_gallery/r1.0.1/extracted/r1.0.1/reconstruction/136900_4fe212e6_0010.step",
+      "input_step_sha256": "7d55b1d7a74229e43b828620e6c6ee58dc20ed56b68c0be6a5f7d5c23763da91"
+    },
+    {
+      "case_id": "143017_21d96cc2_0005",
+      "split": "held_out",
+      "official_split": "test",
+      "source_order": 31,
+      "source_family": "143017_21d96cc2",
+      "json_path": "data/datasets/fusion360_gallery/r1.0.1/extracted/r1.0.1/reconstruction/143017_21d96cc2_0005.json",
+      "step_path": "data/datasets/fusion360_gallery/r1.0.1/extracted/r1.0.1/reconstruction/143017_21d96cc2_0005.step",
+      "input_step_sha256": "adf8a6b0a96fae0d5d720acd2a6a0464d227496d6b8a3cb075e0f8812e105b7a"
+    }
+  ]
+}

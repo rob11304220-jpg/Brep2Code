@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "policy_id": "m127-three-hole-plate-stability-reentry-v1",
+  "status": "frozen_before_authorization",
+  "purpose": "One fresh shared hosted-stability re-entry observation after M118's terminal missing_script_update result. It is not TRG-005 activation, M115 calibration, or a family-scoped campaign.",
+  "scope": {
+    "manifest": "case-library/manifests/self-authored/p1.json",
+    "manifest_case_id": "three_hole_plate",
+    "development_designation": "One checked-in self-authored P1 development row reused only as a shared stability probe; held-out inputs are forbidden.",
+    "input_sha256": "34ef08fd81be048d1ba09066f21f162931d91a2001701f7ad737fb3722ae4418"
+  },
+  "guidance": {
+    "index_sha256": "dfa731d597581b3b4d306782c1078c7de5b79672462229baaf5d7248fa230517",
+    "card_id": "vertical-cylinder-construction",
+    "card_sha256": "55341683e3e7df3e058a845193e34fba20b0650c0db28a31489ad5d343b60d30",
+    "role": "repeated boolean-cut tool"
+  },
+  "provider_boundary": {
+    "destination": "https://api.deepseek.com",
+    "model": "deepseek-v4-pro",
+    "egress": "A path-free observation transcript and fixed instructions; the second request additionally includes only the frozen guidance card. Raw STEP, paths, filenames, reference scripts, previous reports, responses, headers, traces and credentials are forbidden.",
+    "max_output_tokens": 4096,
+    "provider_deadline_seconds": 300,
+    "request_budget": 2,
+    "execution": "two sequential requests, zero retry, zero repair, wsl-bwrap without an input mount"
+  },
+  "fresh_accounting": {
+    "namespace": "m127-three-hole-plate-stability-reentry-v1",
+    "report_path": "data/corpus-runs/m127-three-hole-plate-stability-reentry.json",
+    "monitor_path": "data/monitor-runs/m127-three-hole-plate-stability-reentry.monitor.json",
+    "freshness_rule": "Both paths must be absent before preflight. No M69/M72/M80/M89/M97/M118 policy, accounting, report, monitor, budget or authorization may be reused."
+  },
+  "stability_gate": {
+    "required": [
+      "one parseable terminal report with exactly two issued requests accounted",
+      "no provider timeout or lifecycle error",
+      "same frozen mode and deadline",
+      "failure classes remain separated across lifecycle, script/API, sandbox/provenance, and downstream gates",
+      "independent reviewer confirms scope and accounting"
+    ],
+    "failure": "Any failure is terminal for M127 and does not activate TRG-005 or any family-scoped hosted campaign by default."
+  },
+  "authorization_prerequisite": "After passing offline preflight and independent G3 review, obtain explicit user confirmation of destination/model, egress, case/split, two-request budget, zero retry/repair, 4096-token cap, 300-second deadline, wsl-bwrap no-input execution, and the fresh report/monitor paths."
+}

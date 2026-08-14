@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "id": "vertical-cylinder-construction",
+  "kind": "operation",
+  "status": "experimental",
+  "scope": {
+    "applies_when": [
+      "Observed facts match one declared development role: final circular primitive, single +Z through-cut tool, or repeated +Z through-cut tool.",
+      "The required radius, height, and positioning facts are observed; otherwise this card does not apply."
+    ]
+  },
+  "claim": "The three source-linked development cases directly use OCP.BRepPrimAPI.BRepPrimAPI_MakeCylinder for their declared final-primitive or through-cut-tool role.",
+  "evidence": {
+    "level": "direct",
+    "supporting_cases": [
+      "cylinder: final primitive",
+      "block_with_hole: single boolean-cut tool",
+      "three_hole_plate: repeated boolean-cut tool"
+    ],
+    "counterexamples": [
+      "non-circular profiles or unobserved axis orientations",
+      "blind, angled, offset, or unsupported hole patterns",
+      "disjoint, fused, filleted, chamfered, or arbitrary geometry"
+    ]
+  },
+  "runtime_action": "If and only if the declared scope is met, recommend OCP.BRepPrimAPI.BRepPrimAPI_MakeCylinder as the primitive action; otherwise recommend no action. This experimental card is not mounted, injected, or retrieved.",
+  "validation": {
+    "review_trigger": "Re-review after any OCP API-contract change, new geometry role, axis extension, or before any retrieval experiment."
+  },
+  "sources": [
+    "docs/corpus/reference-packs/m84-cylinder-construction-qualification-v1.json",
+    "docs/corpus/reference-packs/reference-pack-contract-v1.json"
+  ]
+}

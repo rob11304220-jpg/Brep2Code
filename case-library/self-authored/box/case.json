@@ -1,0 +1,46 @@
+{
+  "case_id": "box",
+  "status": "active",
+  "origin": "self_authored",
+  "tier": "P0",
+  "fixture_version": 1,
+  "input_step": "input.step",
+  "reference_script": null,
+  "reference_script_status": "not_applicable_default_scaffold_baseline",
+  "sha256": "c3c80420eaf7376da5675ec1d5ea8fa93ef7a60f7ee24a516454c71e0797227c",
+  "unit": "mm",
+  "coordinate_frame": "right_handed_xyz; origin at bbox minimum",
+  "summary": "Axis-aligned rectangular box used as the baseline primitive.",
+  "key_dimensions": {
+    "length_x": 10.0,
+    "length_y": 20.0,
+    "length_z": 30.0
+  },
+  "expected": {
+    "bbox": {
+      "min": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max": [
+        10.0,
+        20.0,
+        30.0
+      ]
+    },
+    "volume": 6000.0,
+    "counts": {
+      "solid": 1,
+      "shell": 1,
+      "face": 6,
+      "edge": 24
+    }
+  },
+  "feature_tags": [
+    "box",
+    "primitive"
+  ],
+  "case_directory": "case-library/self-authored/box",
+  "metadata_authority": "case.json"
+}

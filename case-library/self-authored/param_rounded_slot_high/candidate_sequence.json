@@ -1,0 +1,4 @@
+{
+  "grammar_version": "rounded-slot-v1",
+  "sequence": {"operations": [{"id": "sketch_1", "kind": "SketchRect", "plane": "XY", "length_x": 30.0, "length_y": 20.0}, {"id": "base_1", "kind": "ExtrudeBase", "profile": "sketch_1", "direction": "+Z", "distance": 5.0}, {"id": "slot_sketch_1", "kind": "SketchRoundedSlot", "plane": "XY", "support": "base_1", "center_xy": [15.0, 10.0], "width": 5.0, "straight_length": 16.0, "cap_radius": 2.5}, {"id": "slot_cut_1", "kind": "CutThrough", "target": "base_1", "profile": "slot_sketch_1", "direction": "+Z"}]}
+}

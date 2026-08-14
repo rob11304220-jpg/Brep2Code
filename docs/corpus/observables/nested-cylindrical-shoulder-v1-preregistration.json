@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "design_id": "nested-cylindrical-shoulder-v1-m32-001",
+  "decision_id": "q01-nested-cylindrical-shoulder-v1",
+  "status": "preregistered_design_only",
+  "scope": "existing +Z prismatic-hole-v1 counterbore records only; offline observable audit",
+  "fixed_oracles": ["param_counterbore_low", "param_counterbore_nominal", "param_counterbore_high"],
+  "measured_relation": ["two and only two cylindrical faces", "same axis location/direction under recorded tolerance", "outer radius greater than inner radius", "one planar face adjacent to both cylinders", "shoulder lies axially between nested-cylinder extents"],
+  "negative_controls": ["any M30 single-cylinder blind or through record", "two cylinders without shared planar adjacency", "non-coaxial cylinders", "use of a counterbore label or reference sequence as a measurement input"],
+  "classification": {"matched": "nested_cylindrical_shoulder", "otherwise": "unsupported"},
+  "stopping_rule": ["No counterbore feature claim or original-history recovery.", "No public probe/runtime/helper/IR/SDK/manifest/provider change.", "If adjacency or axis facts cannot be measured deterministically, retain unsupported and create no observable unit."],
+  "next_work": "M32-002 may add one offline reporter and its controls; no new assets or production behavior are authorized."
+}

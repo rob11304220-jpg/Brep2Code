@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "expansion_id": "shell-v1-m130-001",
+  "grammar_version": "shell-v1",
+  "oracle_provenance": "self_authored_deterministic_reference",
+  "selection_status": "preregistered_before_candidate_production",
+  "selection_rule": "Exactly three symmetric development variants and three asymmetric held-out variants are frozen. No substitutions, split moves, opening changes, thickness changes, grammar expansion, or extra rows are permitted after production or audit begins.",
+  "canonical_sequence": [
+    {"id":"base","kind":"MakeSolidBox"},
+    {"id":"opening","kind":"SelectTopFaceAsOpening","source":"base"},
+    {"id":"shell","kind":"MakeThickSolidInward","source":"base","removed_face":"opening","thickness_role":"uniform_wall_thickness"}
+  ],
+  "candidate_producer": {
+    "planned_path": "tools/build_m130_shell_candidates.py",
+    "output_status": "planned_uncreated_candidate_only",
+    "admission_boundary": "Future output is experimental only and cannot add an executable manifest, corpus/provider input, training input, runtime resource, or active case-library record without separately selected production, review, and promotion workpacks."
+  },
+  "contract": {
+    "units": "mm",
+    "q01_required_facts": ["one rectangular outer solid with length, width and height", "one full top planar face declared as the only opening", "one uniform inward wall thickness strictly smaller than half each outer span and height", "one connected shell with a bottom wall"],
+    "q01_rejections": ["missing or ambiguous top opening", "unknown or non-uniform thickness", "non-rectangular outer solid", "multiple solids", "opening on a side or bottom face"],
+    "q02_allowed_action": "Create exactly one rectangular solid, select its complete top face, then apply one inward OCCT thick-solid/shell operation with the frozen uniform thickness.",
+    "preconditions": ["0 < wall_thickness < min(length, width, height) / 2", "length > 2 * wall_thickness", "width > 2 * wall_thickness", "height > 2 * wall_thickness", "the removed face is exactly the top face"],
+    "semantic_invariants": ["exactly one connected solid remains", "the only opening is the complete top face", "bottom wall thickness equals wall_thickness", "four side walls have uniform wall_thickness", "outer bounding box equals the declared rectangular base", "no through-bottom opening or detached solid exists"],
+    "unsupported_conditions": ["multiple openings, side or bottom openings, variable thickness, ribs, fillets, chamfers, drafts, booleans, internal partitions, multi-solid output, generic shell recognition or generic B-Rep-to-sequence inference"]
+  },
+  "production_checks": {
+    "geometry": ["existing geometry replay gates against each deterministic reference output"],
+    "sequence": ["exact MakeSolidBox -> SelectTopFaceAsOpening -> MakeThickSolidInward sequence"],
+    "editability": ["positive wall-thickness and outer-dimension mutations preserve strict preconditions and opening semantics"],
+    "semantic": ["one solid, complete top opening, uniform bottom/side wall thickness, unchanged outer bbox and no through-bottom"],
+    "hash_stability": ["two clean-directory normalized STEP hashes for every frozen row"],
+    "split_isolation": ["shell_symmetric only in development and shell_asymmetric only in held_out"]
+  },
+  "rejection_taxonomy": ["split_leak", "sequence_mismatch", "wrong_opening_face", "missing_opening", "nonuniform_thickness", "bottom_breakthrough", "multi_solid", "thickness_precondition_failure", "missing_q01_fact", "hash_nondeterminism"],
+  "negative_controls": ["wrong_opening_face: remove one side face; reject by top-opening semantic invariant", "missing_opening: retain the closed box; reject by opening invariant", "bottom_breakthrough: remove top and bottom faces; reject by bottom-wall invariant", "nonuniform_thickness: alter one wall thickness; reject by uniformity invariant", "split_leak: place a shell_symmetric ID in held_out; reject before production"],
+  "cases": [
+    {"case_id":"param_shell_symmetric_low","family_id":"shell_symmetric","variant":"low","data_split":"development","candidate_directory":"case-library/self-authored/param_shell_symmetric_low","parameters":{"length":20.0,"width":14.0,"height":10.0,"wall_thickness":1.5},"mutations":[{"kind":"wall_thickness","delta":0.25},{"kind":"length","delta":2.0}]},
+    {"case_id":"param_shell_symmetric_nominal","family_id":"shell_symmetric","variant":"nominal","data_split":"development","candidate_directory":"case-library/self-authored/param_shell_symmetric_nominal","parameters":{"length":28.0,"width":20.0,"height":14.0,"wall_thickness":2.0},"mutations":[{"kind":"wall_thickness","delta":0.25},{"kind":"height","delta":2.0}]},
+    {"case_id":"param_shell_symmetric_high","family_id":"shell_symmetric","variant":"high","data_split":"development","candidate_directory":"case-library/self-authored/param_shell_symmetric_high","parameters":{"length":36.0,"width":26.0,"height":18.0,"wall_thickness":2.5},"mutations":[{"kind":"wall_thickness","delta":0.5},{"kind":"width","delta":2.0}]},
+    {"case_id":"param_shell_asymmetric_low","family_id":"shell_asymmetric","variant":"low","data_split":"held_out","candidate_directory":"case-library/self-authored/param_shell_asymmetric_low","parameters":{"length":30.0,"width":12.0,"height":11.0,"wall_thickness":1.5},"mutations":[{"kind":"wall_thickness","delta":0.25},{"kind":"length","delta":2.0}]},
+    {"case_id":"param_shell_asymmetric_nominal","family_id":"shell_asymmetric","variant":"nominal","data_split":"held_out","candidate_directory":"case-library/self-authored/param_shell_asymmetric_nominal","parameters":{"length":40.0,"width":16.0,"height":15.0,"wall_thickness":2.0},"mutations":[{"kind":"wall_thickness","delta":0.25},{"kind":"height","delta":2.0}]},
+    {"case_id":"param_shell_asymmetric_high","family_id":"shell_asymmetric","variant":"high","data_split":"held_out","candidate_directory":"case-library/self-authored/param_shell_asymmetric_high","parameters":{"length":48.0,"width":20.0,"height":20.0,"wall_thickness":2.5},"mutations":[{"kind":"wall_thickness","delta":0.5},{"kind":"width","delta":2.0}]}
+  ]
+}

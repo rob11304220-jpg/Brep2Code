@@ -1,0 +1,55 @@
+{
+  "case_id": "param_through_hole_low",
+  "status": "active",
+  "origin": "self_authored",
+  "tier": "P2",
+  "fixture_version": 1,
+  "family_id": "through_hole",
+  "data_split": "development",
+  "variant": "low",
+  "parameters": {
+    "radius": 2.0,
+    "x": 9.0
+  },
+  "input_step": "input.step",
+  "reference_script": "reference_build_sequence.py",
+  "reference_script_status": "available",
+  "sha256": "6239673bb3a2556fc7db2faa0fb35e384377e672e3980cd874c9c33a160b3109",
+  "unit": "mm",
+  "coordinate_frame": "right_handed_xyz; model origin at (0,0,0)",
+  "summary": "M12 through_hole low parameter variant.",
+  "key_dimensions": {
+    "radius": 2.0,
+    "x": 9.0
+  },
+  "expected": {
+    "bbox": {
+      "min": [
+        -1e-07,
+        -1e-07,
+        -1e-07
+      ],
+      "max": [
+        30.0000001,
+        20.0000001,
+        10.0000001
+      ]
+    },
+    "volume": 5874.336293856408,
+    "counts": {
+      "solid": 1,
+      "shell": 1,
+      "face": 7,
+      "edge": 30
+    }
+  },
+  "feature_tags": [
+    "m12",
+    "parametric",
+    "through_hole",
+    "low"
+  ],
+  "case_directory": "case-library/self-authored/param_through_hole_low",
+  "metadata_authority": "case.json",
+  "sequence_pair": {"grammar_version": "prismatic-hole-v1", "oracle_provenance": "self_authored_deterministic_reference", "sequence": {"operations": [{"id": "sketch_1", "kind": "SketchRect", "plane": "XY", "length_x": 30.0, "length_y": 20.0}, {"id": "base_1", "kind": "ExtrudeBase", "profile": "sketch_1", "direction": "+Z", "distance": 10.0}, {"id": "hole_1", "kind": "CutCylinder", "target": "base_1", "variant": "through", "center_xy": [9.0, 10.0], "axis": "+Z", "radius": 2.0}], "mutations": [{"kind": "base_length_x", "delta": 2.0}, {"kind": "hole_radius", "delta": 0.5}]}}
+}

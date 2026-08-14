@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\codeai\Brep2Code\brep2code\cli\__main__.py", line 7, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "D:\codeai\Brep2Code\brep2code\cli\__init__.py", line 51, in main
+    return _observed_development(args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\codeai\Brep2Code\brep2code\cli\__init__.py", line 296, in _observed_development
+    result = ObservedBuildLoopRunner(harness=harness, provider=provider, allow_hosted=allow_hosted).run(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\codeai\Brep2Code\brep2code\agent\observed_build.py", line 96, in run
+    response = _complete_provider(self.provider, request, timeout_seconds=provider_timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\codeai\Brep2Code\brep2code\agent\repair.py", line 258, in _complete_provider
+    raise ProviderRequestTimeoutError(f"DeepSeek request exceeded the {timeout}-second provider timeout")
+brep2code.agent.repair.ProviderRequestTimeoutError: DeepSeek request exceeded the 120-second provider timeout

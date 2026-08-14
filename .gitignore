@@ -1,0 +1,33 @@
+# Secrets
+.env
+.env.*
+!.env.example
+secrets/
+**/secrets/**
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Cursor local cache (keep rules and skills tracked)
+.cursor/cache/
+.cursor/tmp/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
+
+# Brep2Code local runtime outputs
+data/

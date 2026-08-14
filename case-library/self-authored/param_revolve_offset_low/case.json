@@ -1,0 +1,79 @@
+{
+  "case_id": "param_revolve_offset_low",
+  "status": "active",
+  "origin": "self_authored",
+  "tier": "P2",
+  "fixture_version": 1,
+  "family_id": "revolve_offset",
+  "data_split": "held_out",
+  "variant": "low",
+  "parameters": {
+    "axis_x": 12.0,
+    "z_min": 0.0,
+    "inner_radius": 4.0,
+    "lower_outer_radius": 11.0,
+    "upper_outer_radius": 8.0,
+    "lower_height": 13.0,
+    "upper_height": 21.0,
+    "angle_deg": 360.0
+  },
+  "input_step": "input.step",
+  "reference_script_status": "available",
+  "reference_script": "reference_build_sequence.py",
+  "sha256": "f074c7b1d32c1458d06b68f690e137111ee38bfa6c0f5dce19f4801295a23d7f",
+  "unit": "mm",
+  "expected": {
+    "ok": true,
+    "input": "D:\\codeai\\Brep2Code\\case-library\\self-authored\\param_revolve_offset_low\\input.step",
+    "file_name": "input.step",
+    "format": "step",
+    "unit": "unknown",
+    "bbox": {
+      "min": [
+        1.0,
+        -11.0,
+        0.0
+      ],
+      "max": [
+        23.0,
+        11.0,
+        21.0
+      ]
+    },
+    "counts": {
+      "solid": 1,
+      "shell": 1,
+      "face": 6,
+      "edge": 18
+    },
+    "area": 2488.141381643065,
+    "volume": 5494.645551128522
+  },
+  "sequence_pair": {
+    "grammar_version": "revolve-v1",
+    "oracle_provenance": "self_authored_deterministic_reference",
+    "sequence": {
+      "operations": [
+        {
+          "id": "sketch_profile",
+          "kind": "SketchSteppedRadialProfile",
+          "plane": "XZ",
+          "radial_side": "positive_x_from_declared_axis",
+          "axis_x": 12.0
+        },
+        {
+          "id": "revolve",
+          "kind": "RevolveFace",
+          "profile": "sketch_profile",
+          "axis": {
+            "origin_role": "declared_axis_origin",
+            "direction": "+Z"
+          },
+          "angle_deg": 360.0
+        }
+      ]
+    },
+    "candidate_sequence": "candidate_sequence.json"
+  },
+  "admission_boundary": "Active self-authored governance case under ADR-0064; absent from executable manifests, provider inputs, training, and runtime resources."
+}

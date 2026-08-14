@@ -1,0 +1,286 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "case_id": "offset_through_hole_block",
+      "tier": "P2",
+      "input_step": "case-library/self-authored/offset_through_hole_block/input.step",
+      "expected_bbox": {
+        "min": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max": [
+          24.0,
+          18.0,
+          10.0
+        ]
+      },
+      "expected_counts": {
+        "solid": 1,
+        "shell": 1,
+        "face": 7,
+        "edge": 30
+      },
+      "expected_volume": 4037.25666117693,
+      "difficulty_tags": [
+        "block",
+        "offset-hole",
+        "boolean-cut"
+      ],
+      "reference_script": "case-library/self-authored/offset_through_hole_block/reference_build_sequence.py",
+      "notes": "Off-centre through hole distinguishes placement from the P0 centred-hole baseline."
+    },
+    {
+      "case_id": "blind_hole_block",
+      "tier": "P2",
+      "input_step": "case-library/self-authored/blind_hole_block/input.step",
+      "expected_bbox": {
+        "min": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max": [
+          24.0,
+          18.0,
+          10.0
+        ]
+      },
+      "expected_counts": {
+        "solid": 1,
+        "shell": 1,
+        "face": 8,
+        "edge": 30
+      },
+      "expected_volume": 4150.353996706145,
+      "difficulty_tags": [
+        "block",
+        "blind-hole",
+        "boolean-cut"
+      ],
+      "reference_script": "case-library/self-authored/blind_hole_block/reference_build_sequence.py",
+      "notes": "Same exterior envelope as the offset-hole block, with an internal blind-hole floor."
+    },
+    {
+      "case_id": "counterbored_plate",
+      "tier": "P2",
+      "input_step": "case-library/self-authored/counterbored_plate/input.step",
+      "expected_bbox": {
+        "min": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max": [
+          30.0,
+          20.0,
+          6.0
+        ]
+      },
+      "expected_counts": {
+        "solid": 1,
+        "shell": 1,
+        "face": 9,
+        "edge": 36
+      },
+      "expected_volume": 3449.2035526276854,
+      "difficulty_tags": [
+        "plate",
+        "through-hole",
+        "counterbore",
+        "boolean-cut"
+      ],
+      "reference_script": "case-library/self-authored/counterbored_plate/reference_build_sequence.py",
+      "notes": "Two sequential cuts create a through hole and larger top recess."
+    },
+    {
+      "case_id": "stepped_block",
+      "tier": "P2",
+      "input_step": "case-library/self-authored/stepped_block/input.step",
+      "expected_bbox": {
+        "min": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max": [
+          30.0,
+          20.0,
+          12.0
+        ]
+      },
+      "expected_counts": {
+        "solid": 1,
+        "shell": 1,
+        "face": 11,
+        "edge": 48
+      },
+      "expected_volume": 4500.0,
+      "difficulty_tags": [
+        "block",
+        "step",
+        "boolean-fuse"
+      ],
+      "reference_script": "case-library/self-authored/stepped_block/reference_build_sequence.py",
+      "notes": "Base and centred upper block require a fused two-stage construction."
+    },
+    {
+      "case_id": "dual_boss_plate",
+      "tier": "P2",
+      "input_step": "case-library/self-authored/dual_boss_plate/input.step",
+      "expected_bbox": {
+        "min": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max": [
+          30.0,
+          20.0,
+          10.0
+        ]
+      },
+      "expected_counts": {
+        "solid": 1,
+        "shell": 1,
+        "face": 10,
+        "edge": 36
+      },
+      "expected_volume": 2739.2920065877074,
+      "difficulty_tags": [
+        "plate",
+        "boss-array",
+        "boolean-fuse"
+      ],
+      "reference_script": "case-library/self-authored/dual_boss_plate/reference_build_sequence.py",
+      "notes": "Two separated cylindrical bosses on a plate cover repeated fused features."
+    },
+    {
+      "case_id": "boss_with_blind_hole",
+      "tier": "P2",
+      "input_step": "case-library/self-authored/boss_with_blind_hole/input.step",
+      "expected_bbox": {
+        "min": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max": [
+          30.0,
+          20.0,
+          12.0
+        ]
+      },
+      "expected_counts": {
+        "solid": 1,
+        "shell": 1,
+        "face": 10,
+        "edge": 36
+      },
+      "expected_volume": 2952.920307031823,
+      "difficulty_tags": [
+        "plate",
+        "boss",
+        "blind-hole",
+        "fuse-cut"
+      ],
+      "reference_script": "case-library/self-authored/boss_with_blind_hole/reference_build_sequence.py",
+      "notes": "A fused boss followed by an axial blind cut tests operation sequencing."
+    },
+    {
+      "case_id": "cross_fuse_block",
+      "tier": "P2",
+      "input_step": "case-library/self-authored/cross_fuse_block/input.step",
+      "expected_bbox": {
+        "min": [
+          0.0,
+          -9.0,
+          0.0
+        ],
+        "max": [
+          30.0,
+          21.0,
+          6.0
+        ]
+      },
+      "expected_counts": {
+        "solid": 1,
+        "shell": 1,
+        "face": 22,
+        "edge": 88
+      },
+      "expected_volume": 3456.0,
+      "difficulty_tags": [
+        "block",
+        "cross-profile",
+        "boolean-fuse"
+      ],
+      "reference_script": "case-library/self-authored/cross_fuse_block/reference_build_sequence.py",
+      "notes": "Orthogonal overlapping prisms form a non-rectangular plan profile."
+    },
+    {
+      "case_id": "hollow_open_box",
+      "tier": "P2",
+      "input_step": "case-library/self-authored/hollow_open_box/input.step",
+      "expected_bbox": {
+        "min": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max": [
+          30.0,
+          20.0,
+          12.0
+        ]
+      },
+      "expected_counts": {
+        "solid": 1,
+        "shell": 1,
+        "face": 11,
+        "edge": 48
+      },
+      "expected_volume": 5088.0,
+      "difficulty_tags": [
+        "box",
+        "cavity",
+        "boolean-cut"
+      ],
+      "reference_script": "case-library/self-authored/hollow_open_box/reference_build_sequence.py",
+      "notes": "Open-top cavity distinguishes an exterior box envelope from its internal topology."
+    },
+    {
+      "case_id": "slot_plate",
+      "tier": "P2",
+      "input_step": "case-library/self-authored/slot_plate/input.step",
+      "expected_bbox": {
+        "min": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max": [
+          30.0,
+          20.0,
+          5.0
+        ]
+      },
+      "expected_counts": {
+        "solid": 1,
+        "shell": 1,
+        "face": 11,
+        "edge": 54
+      },
+      "expected_volume": 2697.1681469281943,
+      "difficulty_tags": [
+        "plate",
+        "slot",
+        "boolean-fuse-cut"
+      ],
+      "reference_script": "case-library/self-authored/slot_plate/reference_build_sequence.py",
+      "notes": "Fused rectangular and circular cutters form a rounded through slot."
+    }
+  ]
+}

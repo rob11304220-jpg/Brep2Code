@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "id": "input-probe-fail-closed",
+  "kind": "operation",
+  "status": "supported",
+  "scope": {
+    "applies_when": ["An input STEP summary is unavailable before first-pass generation or repair."]
+  },
+  "claim": "An unavailable input summary is an input failure, not a geometry-gate skip that permits execution or a provider request.",
+  "evidence": {
+    "level": "direct",
+    "supporting_cases": ["M9-002 offline revalidation: 12 accepted ABC inputs"],
+    "counterexamples": []
+  },
+  "runtime_action": "Stop the attempt, report input_model_step_readable failure, and request no provider action until a readable input is available.",
+  "validation": {
+    "review_trigger": "Re-review whenever the input-probe contract or deadline policy changes."
+  },
+  "sources": [
+    "docs/workflow/status.md",
+    "docs/architecture/v1/contracts/signal-bundle.md"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "expansion_id": "oriented-rounded-slot-v1-m27-001",
+  "grammar_version": "oriented-rounded-slot-v1",
+  "oracle_provenance": "self_authored_deterministic_reference",
+  "selection_status": "preregistered_before_candidate_production",
+  "selection_rule": "Exactly three +X development variants and three +Y held-out variants below. No substitutions, split moves, frame additions, angle changes, grammar expansion, or additional rows are permitted after candidate production or audit begins.",
+  "canonical_sequence": [
+    {"id": "sketch_base", "kind": "SketchRect", "plane": "XY"},
+    {"id": "base", "kind": "ExtrudeBase", "profile": "sketch_base", "direction": "+Z"},
+    {"id": "sketch_slot", "kind": "SketchRoundedSlot", "plane": "XY", "support": "base.top_face", "local_axis": "+X or +Y"},
+    {"id": "slot_cut", "kind": "CutThrough", "target": "base", "profile": "sketch_slot", "direction": "+Z"}
+  ],
+  "candidate_producer": {
+    "planned_path": "tools/build_m27_oriented_rounded_slot_candidates.py",
+    "output_status": "planned_uncreated_candidate_only",
+    "admission_boundary": "A later M27 production output remains experimental and may not add an executable manifest, corpus/provider input, training input, runtime resource, or active case-library record without separate review and ADR."
+  },
+  "contract": {
+    "units": "mm",
+    "preconditions": ["orientation_degrees is exactly 0 or 90", "the complete capped slot profile is strictly contained in the base top face", "width and straight_length are positive", "the through cut uses the declared XY local axis and +Z direction"],
+    "semantic_invariants": ["one connected solid remains", "the slot is a through cut", "two semicircular caps and two straight segments remain", "the declared local axis determines the cap-to-cap direction", "the outer base extents remain"],
+    "unsupported_conditions": ["angles other than 0 or 90 degrees", "arcs beyond the two fixed semicircular caps", "splines", "rotated base planes", "generic sketch-frame inference", "generic profile recognition", "generic B-Rep-to-sequence inference"]
+  },
+  "production_checks": {
+    "geometry": ["existing geometry replay gates against deterministic reference output"],
+    "sequence": ["exact four-operation sequence with declared local_axis and orientation_degrees"],
+    "editability": ["base extent, width, straight length, and local-axis-perpendicular centre mutations preserve declared observables"],
+    "semantic": ["one solid, through-cut, cap-and-segment profile, outer extents, and orientation invariants"],
+    "hash_stability": ["two clean-directory normalized STEP hashes for every frozen row"],
+    "split_isolation": ["+X family only in development and +Y family only in held_out"]
+  },
+  "rejection_taxonomy": ["split_leak", "sequence_mismatch", "wrong_local_axis", "wrong_orientation", "incorrect_frame", "slot_out_of_bounds", "nonthrough_cut", "profile_degeneration", "hash_nondeterminism"],
+  "cases": [
+    {"case_id":"param_oriented_rounded_slot_x_low","family_id":"oriented_rounded_slot_x","variant":"low","data_split":"development","candidate_directory":"case-library/self-authored/param_oriented_rounded_slot_x_low","parameters":{"base_length_x":42.0,"base_length_y":30.0,"base_height":6.0,"center_xy":[21.0,15.0],"width":3.0,"straight_length":10.0,"orientation_degrees":0,"local_axis":"+X"},"mutations":[{"kind":"base_length_x","delta":2.0},{"kind":"slot_width","delta":0.5},{"kind":"straight_length","delta":2.0},{"kind":"center_perpendicular","delta":1.0}]},
+    {"case_id":"param_oriented_rounded_slot_x_nominal","family_id":"oriented_rounded_slot_x","variant":"nominal","data_split":"development","candidate_directory":"case-library/self-authored/param_oriented_rounded_slot_x_nominal","parameters":{"base_length_x":42.0,"base_length_y":30.0,"base_height":6.0,"center_xy":[21.0,15.0],"width":4.0,"straight_length":14.0,"orientation_degrees":0,"local_axis":"+X"},"mutations":[{"kind":"base_length_x","delta":2.0},{"kind":"slot_width","delta":0.5},{"kind":"straight_length","delta":2.0},{"kind":"center_perpendicular","delta":1.0}]},
+    {"case_id":"param_oriented_rounded_slot_x_high","family_id":"oriented_rounded_slot_x","variant":"high","data_split":"development","candidate_directory":"case-library/self-authored/param_oriented_rounded_slot_x_high","parameters":{"base_length_x":42.0,"base_length_y":30.0,"base_height":6.0,"center_xy":[21.0,15.0],"width":5.0,"straight_length":18.0,"orientation_degrees":0,"local_axis":"+X"},"mutations":[{"kind":"base_length_x","delta":2.0},{"kind":"slot_width","delta":0.5},{"kind":"straight_length","delta":2.0},{"kind":"center_perpendicular","delta":1.0}]},
+    {"case_id":"param_oriented_rounded_slot_y_low","family_id":"oriented_rounded_slot_y","variant":"low","data_split":"held_out","candidate_directory":"case-library/self-authored/param_oriented_rounded_slot_y_low","parameters":{"base_length_x":42.0,"base_length_y":30.0,"base_height":6.0,"center_xy":[15.0,12.0],"width":3.0,"straight_length":10.0,"orientation_degrees":90,"local_axis":"+Y"},"mutations":[{"kind":"base_length_x","delta":2.0},{"kind":"slot_width","delta":0.5},{"kind":"straight_length","delta":2.0},{"kind":"center_perpendicular","delta":1.0}]},
+    {"case_id":"param_oriented_rounded_slot_y_nominal","family_id":"oriented_rounded_slot_y","variant":"nominal","data_split":"held_out","candidate_directory":"case-library/self-authored/param_oriented_rounded_slot_y_nominal","parameters":{"base_length_x":42.0,"base_length_y":30.0,"base_height":6.0,"center_xy":[27.0,16.0],"width":4.0,"straight_length":14.0,"orientation_degrees":90,"local_axis":"+Y"},"mutations":[{"kind":"base_length_x","delta":2.0},{"kind":"slot_width","delta":0.5},{"kind":"straight_length","delta":2.0},{"kind":"center_perpendicular","delta":1.0}]},
+    {"case_id":"param_oriented_rounded_slot_y_high","family_id":"oriented_rounded_slot_y","variant":"high","data_split":"held_out","candidate_directory":"case-library/self-authored/param_oriented_rounded_slot_y_high","parameters":{"base_length_x":42.0,"base_length_y":30.0,"base_height":6.0,"center_xy":[16.0,15.0],"width":5.0,"straight_length":18.0,"orientation_degrees":90,"local_axis":"+Y"},"mutations":[{"kind":"base_length_x","delta":2.0},{"kind":"slot_width","delta":0.5},{"kind":"straight_length","delta":2.0},{"kind":"center_perpendicular","delta":1.0}]}
+  ]
+}

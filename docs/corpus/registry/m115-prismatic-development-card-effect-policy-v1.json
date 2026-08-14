@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "policy_id": "m115-prismatic-development-card-effect-v1",
+  "status": "frozen_offline_prerequisite",
+  "scope": {
+    "family": "prismatic through cylindrical cut",
+    "admission": "A later selected G3 campaign may admit only rows explicitly labelled development in a fresh, separately hashed development manifest. A held_out label, an absent split label, a duplicate case identifier, or a manifest hash mismatch fails integrity before any condition is constructed.",
+    "held_out_access": "forbidden",
+    "case_selection": "No case identifiers, inputs, hashes, guidance card, prompt, model, endpoint, or provider are selected by this policy."
+  },
+  "estimand": "For one admitted finite row, under an equal measured-fact transcript and all other frozen execution conditions, does the card condition reach a better declared end-to-end terminal category than the no-card condition? Static API-admissibility is part of the end-to-end outcome.",
+  "integrity_predicate": {
+    "required_equal_fields": [
+      "policy_id",
+      "row_id",
+      "development_manifest_sha256",
+      "input_sha256",
+      "measured_fact_transcript_sha256",
+      "observation_contract_version",
+      "prompt_template_sha256",
+      "model_identifier",
+      "provider_identifier",
+      "executor_version",
+      "sandbox_profile_version",
+      "static_api_classifier_version",
+      "downstream_gate_bundle_version"
+    ],
+    "allowed_difference": "condition_treatment, whose only values are card and no_card; the card artifact hash is recorded only for card.",
+    "failure_action": "Terminate the entire policy as integrity_failed. Do not issue, retry, repair, reinterpret, or compare that row."
+  },
+  "static_api_classifier": {
+    "version": "m115-prismatic-through-cut-static-api-v1",
+    "implementation": "tools.m115_prismatic_policy.classify_static_api",
+    "classification_stage": "after a script is available and before sandbox launch",
+    "declared_imports": {
+      "pathlib": ["Path"],
+      "OCP.BRepAlgoAPI": ["BRepAlgoAPI_Cut"],
+      "OCP.BRepPrimAPI": ["BRepPrimAPI_MakeBox", "BRepPrimAPI_MakeCylinder"],
+      "OCP.IFSelect": ["IFSelect_RetDone"],
+      "OCP.STEPControl": ["STEPControl_AsIs", "STEPControl_Writer"],
+      "OCP.gp": ["gp_Ax2", "gp_Dir", "gp_Pnt"]
+    },
+    "declared_recipe": "Exactly one BRepPrimAPI_MakeBox(three positional arguments), BRepPrimAPI_MakeCylinder(gp_Ax2(...), radius, height), BRepAlgoAPI_Cut(two positional arguments), and STEPControl_Writer(no arguments); aliases, wildcard imports, keyword constructor arguments and additional imported symbols are inadmissible.",
+    "outcomes": ["api_admissible", "api_inadmissible"],
+    "inadmissible_reasons": ["syntax_error", "forbidden_import", "missing_or_unsupported_import_symbol", "unsupported_symbol", "constructor_arity_mismatch", "missing_through_cut_recipe"]
+  },
+  "terminal_categories": {
+    "policy_level": ["integrity_failed"],
+    "condition_level_order": [
+      "lifecycle_ended_before_script",
+      "static_api_inadmissible",
+      "sandbox_execution_failed",
+      "downstream_gate_failed",
+      "full_success"
+    ],
+    "classification_rule": "After integrity passes, assign exactly one condition-level category in this order. A later category is unreachable once an earlier category applies. A lifecycle outcome without a generated script is lifecycle_ended_before_script and is unavailable for the estimand."
+  },
+  "paired_interpretation": {
+    "card_full_success_no_card_static_api_inadmissible": "Observed finite end-to-end treatment advantage at the preregistered static API-admissibility stage only.",
+    "card_full_success_no_card_later_failure": "Observed finite end-to-end treatment advantage at the declared later terminal stage only.",
+    "both_full_success": "Feasibility under both conditions for that row; no observed treatment advantage.",
+    "no_card_full_success": "No observed treatment advantage for that row.",
+    "integrity_failure_or_lifecycle_before_script_or_unclassifiable_pair": "Unavailable or inconclusive; no treatment interpretation."
+  },
+  "stop_rule": "Each condition has one terminal observation. Retry, repair, continuation, prompt/card adjustment, reclassification after terminal assignment, and capacity reuse are forbidden.",
+  "fresh_accounting": {
+    "accounting_namespace": "m115-prismatic-development-card-effect-v1",
+    "future_report_id_template": "m115-prismatic-development-card-effect-v1-{campaign_nonce}-report.json",
+    "future_monitor_id_template": "m115-prismatic-development-card-effect-v1-{campaign_nonce}-monitor.json",
+    "collision_rule": "A future G3 preflight must prove both destinations are new, absent, and outside every terminal M97 policy, accounting, report, monitor, budget, and authorization namespace. An existing running or interrupted checkpoint is not reusable."
+  },
+  "future_g3_prerequisite": "A separately selected G3 workpack must choose the development manifest and its hashes, card/prompt/model/provider/executor values, maximum requests, deadline, report and monitor destinations; complete hosted preflight; and receive itemized user authorization before any provider construction or request.",
+  "nonclaims": [
+    "No held-out result or authority.",
+    "No general card effect, model capability, parameter generalization, or conditional geometry-quality claim.",
+    "No reusable runtime knowledge or Harness-gate change."
+  ]
+}

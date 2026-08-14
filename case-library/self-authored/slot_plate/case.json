@@ -1,0 +1,51 @@
+{
+  "case_id": "slot_plate",
+  "status": "active",
+  "origin": "self_authored",
+  "tier": "P2",
+  "fixture_version": 1,
+  "input_step": "input.step",
+  "reference_script": "reference_build_sequence.py",
+  "reference_script_status": "available",
+  "sha256": "074159cf3dad3355bd7a0caf800edb7878c5e2204a08d2253f2b015fbcdb73a5",
+  "unit": "mm",
+  "coordinate_frame": "right_handed_xyz; plate origin at (0,0,0); slot axis +Z",
+  "summary": "Plate with a rounded through slot.",
+  "key_dimensions": {
+    "plate": [
+      30.0,
+      20.0,
+      5.0
+    ],
+    "slot_straight_length": 12.0,
+    "slot_width": 4.0
+  },
+  "expected": {
+    "bbox": {
+      "min": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max": [
+        30.0,
+        20.0,
+        5.0
+      ]
+    },
+    "volume": 2697.1681469281943,
+    "counts": {
+      "solid": 1,
+      "shell": 1,
+      "face": 11,
+      "edge": 54
+    }
+  },
+  "feature_tags": [
+    "plate",
+    "slot",
+    "boolean-fuse-cut"
+  ],
+  "case_directory": "case-library/self-authored/slot_plate",
+  "metadata_authority": "case.json"
+}

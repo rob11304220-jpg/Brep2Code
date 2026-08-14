@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "pilot_id": "prismatic-hole-v1",
+  "grammar_version": "prismatic-hole-v1",
+  "oracle_provenance": "self_authored_deterministic_reference",
+  "selection_status": "preregistered",
+  "selection_rule": "Two development families and one held-out family, selected before audit outcome; no substitutions or grammar expansion.",
+  "cases": [
+    {
+      "case_id": "block_with_hole",
+      "family_id": "centered_through_hole",
+      "data_split": "development",
+      "case_record": "case-library/self-authored/block_with_hole/case.json",
+      "sequence": {
+        "operations": [
+          {"id": "sketch_1", "kind": "SketchRect", "plane": "XY", "length_x": 20.0, "length_y": 20.0},
+          {"id": "base_1", "kind": "ExtrudeBase", "profile": "sketch_1", "direction": "+Z", "distance": 8.0},
+          {"id": "hole_1", "kind": "CutCylinder", "target": "base_1", "variant": "through", "center_xy": [10.0, 10.0], "axis": "+Z", "radius": 4.0}
+        ],
+        "mutations": [
+          {"kind": "base_length_x", "delta": 2.0},
+          {"kind": "hole_radius", "delta": 0.5}
+        ]
+      }
+    },
+    {
+      "case_id": "counterbored_plate",
+      "family_id": "counterbored_plate",
+      "data_split": "development",
+      "case_record": "case-library/self-authored/counterbored_plate/case.json",
+      "sequence": {
+        "operations": [
+          {"id": "sketch_1", "kind": "SketchRect", "plane": "XY", "length_x": 30.0, "length_y": 20.0},
+          {"id": "base_1", "kind": "ExtrudeBase", "profile": "sketch_1", "direction": "+Z", "distance": 6.0},
+          {"id": "hole_1", "kind": "CutCylinder", "target": "base_1", "variant": "counterbore", "center_xy": [15.0, 10.0], "axis": "+Z", "through_radius": 2.0, "bore_radius": 4.0, "bore_depth": 2.0}
+        ],
+        "mutations": [
+          {"kind": "base_length_x", "delta": 2.0},
+          {"kind": "bore_depth", "delta": 0.5}
+        ]
+      }
+    },
+    {
+      "case_id": "blind_hole_block",
+      "family_id": "blind_hole_block",
+      "data_split": "held_out",
+      "case_record": "case-library/self-authored/blind_hole_block/case.json",
+      "sequence": {
+        "operations": [
+          {"id": "sketch_1", "kind": "SketchRect", "plane": "XY", "length_x": 24.0, "length_y": 18.0},
+          {"id": "base_1", "kind": "ExtrudeBase", "profile": "sketch_1", "direction": "+Z", "distance": 10.0},
+          {"id": "hole_1", "kind": "CutCylinder", "target": "base_1", "variant": "blind", "center_xy": [12.0, 9.0], "axis": "+Z", "radius": 3.0, "depth": 6.0}
+        ],
+        "mutations": [
+          {"kind": "base_length_x", "delta": 2.0},
+          {"kind": "hole_depth", "delta": 1.0}
+        ]
+      }
+    }
+  ]
+}

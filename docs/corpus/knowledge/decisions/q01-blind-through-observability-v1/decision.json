@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "decision_id": "q01-blind-through-observability-v1",
+  "status": "reviewed",
+  "stages": ["Q01", "Q02"],
+  "question": "Which measured B-Rep facts distinguish a bounded blind cylindrical cut from a through cylindrical cut, and when must the system stop rather than assert cut extent?",
+  "decision_owner": "observables",
+  "model_class": "cylindrical subtractive extent with locally similar walls and distinct termination evidence",
+  "observation": {
+    "required_facts": ["cylindrical wall candidates", "candidate terminal planar face", "loop/containment relation", "through-connectivity candidate", "axis, extent, and tolerance convention"],
+    "ambiguity_or_fail_closed_conditions": ["multiple compatible terminal faces", "trim/import semantics make connectivity unreliable", "the facts do not distinguish blind from through extent"]
+  },
+  "constrained_hypothesis": "A cut-extent hypothesis may be proposed only when recorded terminal-face or through-connectivity facts discriminate it; otherwise the result remains ambiguous or unsupported.",
+  "execution_and_repair": {
+    "gate_or_diagnostic": ["observable-cardinality audit", "fixed blind/through discriminating control", "existing geometry/topology gates"],
+    "repair_disposition": "stop",
+    "stopping_rule": ["do not infer original history", "do not turn a feature label into an observable", "do not promote the existing deterministic hole oracle as Q01 recognition evidence"]
+  },
+  "evidence": {
+    "existing": ["prismatic-hole-v1 contains family-scoped blind and through deterministic replay evidence, but no reviewed Q01 observable unit or same-condition discriminating audit."],
+    "required_roles": ["oracle", "discriminating", "negative_control"],
+    "missing_counterexample": ["a locally similar cylindrical pattern whose termination/connectivity facts are ambiguous or unavailable"],
+    "next_minimal_experiment": "Completed by M30-002: the offline reporter classified the frozen three through development records and three blind held-out records from measured adjacency and planar-footprint facts; the multi-cylinder counterbore control stayed unsupported. Any extension must isolate a new geometry or axis condition without widening this rule."
+  },
+  "reference_and_adoption": {
+    "reference_maturity": "L1",
+    "adoption_disposition": "development_only",
+    "not_authorized": ["feature classifier", "generic feature recognition", "runtime retrieval", "manifest or provider use", "persistent entity identifiers"]
+  },
+  "links": {
+    "observable_units": ["docs/corpus/knowledge/observables/blind-through-cylindrical-extent-v1.json"],
+    "operation_units": ["docs/corpus/knowledge/operations/prismatic-hole-v1.json"],
+    "execution_units": [],
+    "patterns": [],
+    "coverage_dimensions": ["feature_semantics", "sequence_dependency"],
+    "workpacks": ["docs/workpacks/done/WP-M30-001-blind-through-observability-design.md", "docs/workpacks/done/WP-M30-002-blind-through-measured-fact-audit.md"],
+    "adrs": ["docs/architecture/adr/0035-harness-oriented-knowledge-base-architecture.md"],
+    "paper_evidence": ["D:/paper/Projects/Brep2Code-research/outputs/literature-synthesis-and-validation-handoff.md", "D:/paper/Projects/Brep2Code-research/routes/q01-feature-recognition-evidence-boundaries.md"]
+  }
+}

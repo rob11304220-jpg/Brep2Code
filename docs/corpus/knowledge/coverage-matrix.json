@@ -1,0 +1,126 @@
+{
+  "schema_version": 2,
+  "scope": "development-side planning and evidence index; not runtime material",
+  "authority": "ADR-0022 and docs/architecture/v1/modeling-knowledge-system.md",
+  "maintenance": "docs/runbooks/modeling-knowledge-maintenance.md",
+  "planning_model": {
+    "authority": "ADR-0035 and docs/architecture/v1/knowledge-base-architecture.md",
+    "unit_of_progress": "a bounded Q01-Q04 decision gap with observable evidence, a constrained action or hypothesis, a counterexample, and a stopping rule",
+    "non_metric": [
+      "case count",
+      "difficulty-tier count",
+      "feature-name coverage",
+      "parameter-variant count"
+    ]
+  },
+  "decision_packages": {
+    "index": "docs/corpus/knowledge/decisions/index.json",
+    "selection_rule": "A coverage gap may be selected only through one decision package whose status and linked workpack trigger are compatible. A planned package identifies a gap; it does not authorize asset production, runtime behavior, or a provider request.",
+    "current_priority": "M108 completed the offline-only `revolve-v1` family. Further coverage requires a separately selected, isolated `shell-v1` or `rib-v1` design package; completion does not authorize manifests, runtime behavior, or provider requests."
+  },
+  "dimensions": [
+    {
+      "id": "sketch_topology",
+      "current_evidence": {
+        "statement": "Self-authored deterministic records cover single outer rectangular profiles, composite rounded-slot cuts in declared +X/+Y frames, nested-rectangle blind-pocket grammars with one and two inner islands, and rectangular base-plus-boss profiles.",
+        "sources": [
+          "docs/corpus/sequence-paired/prismatic-hole-v1-expansion.json",
+          "docs/corpus/sequence-paired/rounded-slot-v1-expansion.json",
+          "docs/architecture/v1/m21-cross-family-sequence-pair-governance-review.md",
+          "docs/corpus/knowledge/operations/multi-contour-pocket-v1.json",
+          "docs/corpus/knowledge/operations/additive-boss-dependent-cut-v1.json",
+          "docs/corpus/knowledge/operations/multi-inner-loop-pocket-v1.json",
+          "docs/corpus/knowledge/operations/oriented-rounded-slot-v1.json"
+        ]
+      },
+      "known_gap": ["arcs/splines beyond the fixed rounded-slot construction", "arbitrary profile orientation or sketch-frame recovery"],
+      "next_eligible_workpack": null,
+      "unlock_condition": "A later selected family must isolate one bounded orientation or curve hypothesis without treating the M27 +X/+Y result as arbitrary-frame evidence."
+    },
+    {
+      "id": "feature_semantics",
+      "current_evidence": {
+        "statement": "Deterministic self-authored evidence covers base extrusion followed by cylindrical through, blind, and counterbore cuts; M30 additionally reviews a +Z single-cylinder blind/through observable using measured adjacency and planar footprints. Rounded-slot through cuts, blind pockets with one or two inner islands, a rectangular joined boss followed by a blind circular cut, and a uniquely selected boss-top dependent cut remain family-scoped evidence. None establishes generic feature recovery.",
+        "sources": [
+          "docs/corpus/knowledge/operations/prismatic-hole-v1.json",
+          "docs/corpus/knowledge/operations/rounded-slot-v1.json",
+          "docs/corpus/knowledge/operations/multi-contour-pocket-v1.json",
+          "docs/corpus/knowledge/operations/additive-boss-dependent-cut-v1.json",
+          "docs/corpus/knowledge/operations/face-selected-dependent-cut-v1.json",
+          "docs/corpus/knowledge/operations/multi-inner-loop-pocket-v1.json",
+          "docs/corpus/knowledge/operations/oriented-rounded-slot-v1.json",
+          "docs/corpus/knowledge/operations/repeated-feature-pattern-v1.json",
+          "docs/corpus/knowledge/observables/blind-through-cylindrical-extent-v1.json"
+        ]
+      },
+      "known_gap": ["multi-extrude beyond one rectangular join", "revolve/sweep/loft", "generic inner-profile pocket", "blind/through outside the frozen +Z single-cylinder prismatic scope"],
+      "next_eligible_workpack": null,
+      "unlock_condition": "A later selected family must state one bounded feature-semantic hypothesis, counterexample, and stopping rule. Revolve, sweep and loft remain separate families."
+    },
+    {
+      "id": "sequence_dependency",
+      "current_evidence": {
+        "statement": "Seven self-authored families verify frozen base-to-cut, profile-to-cut, boss-to-blind-cut, unique planar boss-top selector, one- and two-inner-island loop roles, and +X/+Y local-axis dependencies. They do not demonstrate generic face/edge references or sequence recovery from B-Rep.",
+        "sources": [
+          "docs/corpus/knowledge/operations/prismatic-hole-v1.json",
+          "docs/corpus/knowledge/operations/rounded-slot-v1.json",
+          "docs/architecture/v1/m21-cross-family-sequence-pair-governance-review.md",
+          "docs/corpus/knowledge/operations/multi-contour-pocket-v1.json",
+          "docs/corpus/knowledge/operations/additive-boss-dependent-cut-v1.json",
+          "docs/corpus/knowledge/operations/face-selected-dependent-cut-v1.json",
+          "docs/corpus/knowledge/operations/multi-inner-loop-pocket-v1.json",
+          "docs/corpus/knowledge/operations/oriented-rounded-slot-v1.json"
+        ]
+      },
+      "known_gap": ["q01-selector-ambiguity-v1: multi-candidate selector control", "q04-sequence-rollback-v1: correct-prefix repair", "generic face/edge-referenced downstream feature", "equivalent-sequence ambiguity"],
+      "next_eligible_workpack": null,
+      "unlock_condition": "A later selected family must isolate one bounded downstream dependency; neither face selection, loop roles, nor local axes may be generalized from their frozen grammars."
+    },
+    {
+      "id": "parameter_robustness",
+      "current_evidence": {
+        "statement": "The prismatic-hole, rounded-slot, multi-contour-pocket, additive-boss-dependent-cut, face-selected-dependent-cut, multi-inner-loop-pocket, and oriented-rounded-slot families have frozen low/nominal/high variants and directional editability mutations. This is family-scoped parameter evidence, not a robustness envelope for arbitrary geometry.",
+        "sources": [
+          "docs/corpus/sequence-paired/prismatic-hole-v1-expansion.json",
+          "docs/corpus/sequence-paired/rounded-slot-v1-expansion.json",
+          "docs/architecture/v1/m21-cross-family-sequence-pair-governance-review.md",
+          "docs/corpus/knowledge/operations/multi-contour-pocket-v1.json",
+          "docs/corpus/knowledge/operations/additive-boss-dependent-cut-v1.json",
+          "docs/corpus/knowledge/operations/face-selected-dependent-cut-v1.json",
+          "docs/corpus/knowledge/operations/multi-inner-loop-pocket-v1.json",
+          "docs/corpus/knowledge/operations/oriented-rounded-slot-v1.json"
+        ]
+      },
+      "known_gap": ["thin-wall", "near-tangent", "boundary-adjacent", "unit/scale", "orientation stress"],
+      "next_eligible_workpack": null,
+      "unlock_condition": "A later, explicitly selected family design identifies one bounded robustness hypothesis, counterexample, and stopping rule."
+    },
+    {
+      "id": "complex_topology",
+      "current_evidence": {
+        "statement": "The active self-authored ladder and the admitted ABC controls supply only single-solid handling evidence. The fixed-box ABC scaffold is a robustness control and is not operation-semantic evidence.",
+        "sources": [
+          "docs/corpus/README.md",
+          "docs/architecture/v1/m8-abc-external-admission-review.md"
+        ]
+      },
+      "known_gap": ["shell", "rib", "multi-solid", "intersecting/contacting features"],
+      "next_eligible_workpack": null,
+      "unlock_condition": "Earlier sketch and dependency evidence is reviewed without gate regression, then a separately selected workpack states a bounded topology hypothesis."
+    },
+    {
+      "id": "external_history_validation",
+      "current_evidence": {
+        "statement": "Fusion provides restricted, hash-linked Line3D replay evidence, while ABC provides B-Rep-only input/sandbox robustness evidence. Neither source establishes general native-history compatibility or B-Rep-to-sequence recovery.",
+        "sources": [
+          "docs/architecture/v1/fusion360-m17-independent-line3d-selector-validation-review.md",
+          "docs/architecture/v1/m8-abc-external-admission-review.md",
+          "docs/corpus/knowledge/patterns/external-history-boundary.json"
+        ]
+      },
+      "known_gap": ["q03-editability-oracle-v1: independent history/constraint oracle", "operation-diverse native history", "DeepCAD replay compatibility", "BRep2Seq vocabulary/license review"],
+      "next_eligible_workpack": null,
+      "unlock_condition": "Self-authored dependency-family evidence is complete and an external route is explicitly selected after source, license, and representation review."
+    }
+  ]
+}

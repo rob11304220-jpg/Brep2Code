@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "unit_id": "planar-face-selector-cardinality-v1",
+  "unit_kind": "observable",
+  "status": "reviewed",
+  "question": "When may a planar +Z maximum-output-Z predicate bind a face, and when must it stop?",
+  "measurement": {"predicate": ["planar surface", "+Z normal", "maximum output Z within existing geometry tolerance"], "reported_fields": ["candidate cardinality", "unique|ambiguous|empty"], "fail_closed": "Only cardinality exactly one permits the family-bounded bind; every other cardinality stops before a dependent operation."},
+  "evidence": {"level": "supported", "supporting_cases": ["param_face_selected_cut_centered_nominal", "param_face_selected_cut_offset_nominal"], "discriminating_cases": ["param_selector_ambiguity_twin_centered_nominal", "param_selector_ambiguity_twin_offset_nominal"], "negative_controls": ["wrong-face-injection", "coordinate-tie-breaker-injection"], "reviews": ["docs/architecture/v1/m29-selector-ambiguity-controlled-production-review.md"]},
+  "boundaries": ["Only axis-aligned planar boss tops under the frozen predicate are evidenced.", "No persistent naming, coordinate tie-break, generic face recovery, runtime helper, or B-Rep history claim follows."],
+  "runtime_projection": {"eligible": false, "review_trigger": "Independent direct runtime evidence and separate adoption review are required."}
+}

@@ -1,0 +1,26 @@
+{
+  "grammar_version": "shell-v1",
+  "sequence": {
+    "operations": [
+      {
+        "id": "base",
+        "kind": "MakeSolidBox",
+        "length": 28.0,
+        "width": 20.0,
+        "height": 14.0
+      },
+      {
+        "id": "opening",
+        "kind": "SelectTopFaceAsOpening",
+        "source": "base"
+      },
+      {
+        "id": "shell",
+        "kind": "MakeThickSolidInward",
+        "source": "base",
+        "removed_face": "opening",
+        "thickness": 2.0
+      }
+    ]
+  }
+}

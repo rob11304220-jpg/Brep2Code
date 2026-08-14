@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "unit_id": "additive-boss-dependent-cut-v1",
+  "unit_kind": "operation",
+  "status": "reviewed",
+  "question": "Which bounded self-authored sequence is evidenced for a rectangular base, a joined rectangular boss, and a blind circular cut constrained within that boss?",
+  "scope": {
+    "kernel_operation": ["SketchRect on XY", "ExtrudeBase along +Z", "SketchRect on the declared base top face", "ExtrudeBoss join along +Z", "SketchCircle on the declared boss top face", "blind CutCylinder along -Z"],
+    "brep_observables": ["one connected rectangular base-plus-boss solid", "boss strictly contained in the base top face", "circular blind cut strictly contained in the boss", "base outer extents", "boss height", "blind-cut volume"],
+    "preconditions": ["one frozen additive-boss-dependent-cut-v1 record", "self-authored deterministic reference", "positive clearances and 0 < cut depth < boss height"],
+    "unsupported_conditions": ["runtime face or edge discovery", "arbitrary face/edge-referenced features", "multiple bosses or cuts", "rotated profiles", "fillets/chamfers", "alternate sequences", "generic B-Rep-to-sequence inference", "automatic case or manifest admission"]
+  },
+  "operation_contract": {
+    "function_family": ["SketchRect", "ExtrudeBase", "ExtrudeBoss(join)", "SketchCircle", "CutCylinder(blind)"],
+    "parameter_contract": ["Only the six frozen record-specific base, boss, circle, and blind-cut dimensions in additive-boss-dependent-cut-v1 are evidenced."],
+    "expected_brep_delta": ["A single prismatic base receives a joined rectangular boss, then a blind circular subtraction that starts at the declared boss top and leaves the base intact."],
+    "topology_invariants": ["One connected solid remains; base outer extents and declared boss height remain; the circular cut stays within the boss and its floor stays above the base top."],
+    "numeric_or_tolerance_boundary": ["No general parameter domain, tolerance, or selector algorithm is claimed; values are those in the frozen preregistration and existing geometry-gate tolerance."],
+    "unverified_properties": ["Actual face identity discovery from B-Rep, edge references, arbitrary dependent features, multiple feature dependencies, native history, alternate sequences, and generic CAD-kernel API behavior."]
+  },
+  "sequence": {
+    "canonical_pattern": ["SketchRect", "ExtrudeBase", "SketchRect", "ExtrudeBoss(join)", "SketchCircle", "CutCylinder(blind)"],
+    "dependencies": ["ExtrudeBase consumes the base sketch", "ExtrudeBoss joins the base from the declared base-top support", "CutCylinder consumes the circle and targets the boss from the declared boss-top support"],
+    "admissible_alternatives": []
+  },
+  "evidence": {
+    "level": "supported",
+    "source_kind": "self_authored_deterministic_oracle",
+    "supporting_case_ids": ["param_additive_boss_dependent_cut_centered_low", "param_additive_boss_dependent_cut_centered_nominal", "param_additive_boss_dependent_cut_centered_high"],
+    "held_out_case_ids": ["param_additive_boss_dependent_cut_offset_low", "param_additive_boss_dependent_cut_offset_nominal", "param_additive_boss_dependent_cut_offset_high"],
+    "audit_links": ["docs/corpus/sequence-paired/additive-boss-dependent-cut-v1-preregistration.json", "docs/architecture/v1/m23-additive-boss-dependent-cut-controlled-production-review.md", "tools/audit_sequence_paired_additive_boss_dependent_cut.py"],
+    "authority_links": ["docs/architecture/adr/0020-two-phase-cross-family-sequence-pair-expansion.md", "docs/architecture/adr/0025-additive-boss-dependent-cut-design.md", "docs/architecture/adr/0026-case-family-intake-contract.md"]
+  },
+  "failure_and_repair": {
+    "observable_signals": ["base-targeted rather than boss-targeted cut", "missing or disconnected boss", "through cut", "split leakage", "hash/path drift", "failed deterministic replay or editability mutation"],
+    "safe_action": "Reject the record from this family-scoped evidence set and preserve the first failing predicate; do not replace it with a base cut, coordinate-only claim of face selection, or broaden the grammar.",
+    "stop_conditions": ["any actual face/edge selector claim", "multiple or rotated features", "any case substitution or split move", "claim beyond the frozen boss-to-blind-cut grammar"],
+    "counterexamples": ["The declared boss-top support in this deterministic oracle is not evidence of runtime face identity discovery.", "A base-targeted or through cut is not an admissible substitute for this dependency chain."]
+  },
+  "runtime_projection": {
+    "eligible": false,
+    "experience_card_id": null,
+    "review_trigger": "No runtime projection is justified: the evidence is a family-specific deterministic contract, not independent direct runtime mechanism evidence."
+  }
+}

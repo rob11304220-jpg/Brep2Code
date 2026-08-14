@@ -1,0 +1,79 @@
+{
+  "case_id": "param_revolve_centered_low",
+  "status": "active",
+  "origin": "self_authored",
+  "tier": "P2",
+  "fixture_version": 1,
+  "family_id": "revolve_centered",
+  "data_split": "development",
+  "variant": "low",
+  "parameters": {
+    "axis_x": 0.0,
+    "z_min": 0.0,
+    "inner_radius": 4.0,
+    "lower_outer_radius": 10.0,
+    "upper_outer_radius": 7.0,
+    "lower_height": 12.0,
+    "upper_height": 20.0,
+    "angle_deg": 360.0
+  },
+  "input_step": "input.step",
+  "reference_script_status": "available",
+  "reference_script": "reference_build_sequence.py",
+  "sha256": "d4d1e7c619f7be419d4d32a0b75f9572427733441a4e9f4334d91d5b3ee195bd",
+  "unit": "mm",
+  "expected": {
+    "ok": true,
+    "input": "D:\\codeai\\Brep2Code\\case-library\\self-authored\\param_revolve_centered_low\\input.step",
+    "file_name": "input.step",
+    "format": "step",
+    "unit": "unknown",
+    "bbox": {
+      "min": [
+        -10.0,
+        -10.0,
+        0.0
+      ],
+      "max": [
+        10.0,
+        10.0,
+        20.0
+      ]
+    },
+    "counts": {
+      "solid": 1,
+      "shell": 1,
+      "face": 6,
+      "edge": 18
+    },
+    "area": 2136.2830044410193,
+    "volume": 3996.105855366201
+  },
+  "sequence_pair": {
+    "grammar_version": "revolve-v1",
+    "oracle_provenance": "self_authored_deterministic_reference",
+    "sequence": {
+      "operations": [
+        {
+          "id": "sketch_profile",
+          "kind": "SketchSteppedRadialProfile",
+          "plane": "XZ",
+          "radial_side": "positive_x_from_declared_axis",
+          "axis_x": 0.0
+        },
+        {
+          "id": "revolve",
+          "kind": "RevolveFace",
+          "profile": "sketch_profile",
+          "axis": {
+            "origin_role": "declared_axis_origin",
+            "direction": "+Z"
+          },
+          "angle_deg": 360.0
+        }
+      ]
+    },
+    "candidate_sequence": "candidate_sequence.json"
+  },
+  "admission_boundary": "Active self-authored governance case under ADR-0064; absent from executable manifests, provider inputs, training, and runtime resources."
+}

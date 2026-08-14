@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "expansion_id": "rounded-slot-v1-m21-002",
+  "grammar_version": "rounded-slot-v1",
+  "oracle_provenance": "self_authored_deterministic_reference",
+  "selection_status": "preregistered_before_candidate_production",
+  "selection_rule": "Exactly the three existing rounded-slot development variants and three new offset-rounded-slot held-out candidates below. No substitutions, split moves, grammar expansion, or additional rows are permitted after production or audit begins.",
+  "candidate_producer": {
+    "path": "tools/build_m21_offset_rounded_slot_candidates.py",
+    "output_status": "experimental_candidate_only",
+    "admission_boundary": "Passing candidate production or audit does not add an executable manifest, corpus/provider input, training input, runtime resource, or active case-library record."
+  },
+  "cases": [
+    {"case_id": "param_rounded_slot_low", "family_id": "rounded_slot", "variant": "low", "data_split": "development", "case_record": "case-library/self-authored/param_rounded_slot_low/case.json", "parameters": {"center_xy": [15.0, 10.0], "width": 3.0, "straight_length": 8.0}, "mutations": [{"kind": "base_length_x", "delta": 2.0}, {"kind": "slot_width", "delta": 0.5}, {"kind": "straight_length", "delta": 2.0}]},
+    {"case_id": "param_rounded_slot_nominal", "family_id": "rounded_slot", "variant": "nominal", "data_split": "development", "case_record": "case-library/self-authored/param_rounded_slot_nominal/case.json", "parameters": {"center_xy": [15.0, 10.0], "width": 4.0, "straight_length": 12.0}, "mutations": [{"kind": "base_length_x", "delta": 2.0}, {"kind": "slot_width", "delta": 0.5}, {"kind": "straight_length", "delta": 2.0}]},
+    {"case_id": "param_rounded_slot_high", "family_id": "rounded_slot", "variant": "high", "data_split": "development", "case_record": "case-library/self-authored/param_rounded_slot_high/case.json", "parameters": {"center_xy": [15.0, 10.0], "width": 5.0, "straight_length": 16.0}, "mutations": [{"kind": "base_length_x", "delta": 2.0}, {"kind": "slot_width", "delta": 0.5}, {"kind": "straight_length", "delta": 2.0}]},
+    {"case_id": "param_offset_rounded_slot_low", "family_id": "offset_rounded_slot", "variant": "low", "data_split": "held_out", "candidate_directory": "case-library/self-authored/param_offset_rounded_slot_low", "parameters": {"center_xy": [10.0, 8.0], "width": 3.0, "straight_length": 8.0}, "mutations": [{"kind": "base_length_x", "delta": 2.0}, {"kind": "slot_width", "delta": 0.5}, {"kind": "straight_length", "delta": 2.0}]},
+    {"case_id": "param_offset_rounded_slot_nominal", "family_id": "offset_rounded_slot", "variant": "nominal", "data_split": "held_out", "candidate_directory": "case-library/self-authored/param_offset_rounded_slot_nominal", "parameters": {"center_xy": [15.0, 10.0], "width": 4.0, "straight_length": 10.0}, "mutations": [{"kind": "base_length_x", "delta": 2.0}, {"kind": "slot_width", "delta": 0.5}, {"kind": "straight_length", "delta": 2.0}]},
+    {"case_id": "param_offset_rounded_slot_high", "family_id": "offset_rounded_slot", "variant": "high", "data_split": "held_out", "candidate_directory": "case-library/self-authored/param_offset_rounded_slot_high", "parameters": {"center_xy": [20.0, 12.0], "width": 5.0, "straight_length": 12.0}, "mutations": [{"kind": "base_length_x", "delta": 2.0}, {"kind": "slot_width", "delta": 0.5}, {"kind": "straight_length", "delta": 2.0}]}
+  ]
+}

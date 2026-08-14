@@ -1,0 +1,60 @@
+{
+  "case_id": "param_rounded_slot_high",
+  "status": "active",
+  "origin": "self_authored",
+  "tier": "P2",
+  "fixture_version": 1,
+  "family_id": "rounded_slot",
+  "data_split": "development",
+  "variant": "high",
+  "parameters": {
+    "width": 5.0,
+    "straight_length": 16.0
+  },
+  "input_step": "input.step",
+  "reference_script": "reference_build_sequence.py",
+  "reference_script_status": "available",
+  "sha256": "bf202c06586cd8bdda9653a53a43a22f20a5eb1ed1c858f79a5f2f41af06d959",
+  "unit": "mm",
+  "coordinate_frame": "right_handed_xyz; model origin at (0,0,0)",
+  "summary": "M12 rounded_slot high parameter variant.",
+  "key_dimensions": {
+    "width": 5.0,
+    "straight_length": 16.0
+  },
+  "expected": {
+    "bbox": {
+      "min": [
+        -1.5e-07,
+        -1.5e-07,
+        -1.5e-07
+      ],
+      "max": [
+        30.00000015,
+        20.00000015,
+        5.00000015
+      ]
+    },
+    "volume": 2501.8252295753196,
+    "counts": {
+      "solid": 1,
+      "shell": 1,
+      "face": 11,
+      "edge": 54
+    }
+  },
+  "feature_tags": [
+    "m12",
+    "parametric",
+    "rounded_slot",
+    "high"
+  ],
+  "case_directory": "case-library/self-authored/param_rounded_slot_high",
+  "sequence_pair": {
+    "grammar_version": "rounded-slot-v1",
+    "oracle_provenance": "self_authored_deterministic_reference",
+    "sequence": {"operations": [{"id": "sketch_1", "kind": "SketchRect", "plane": "XY", "length_x": 30.0, "length_y": 20.0}, {"id": "base_1", "kind": "ExtrudeBase", "profile": "sketch_1", "direction": "+Z", "distance": 5.0}, {"id": "slot_sketch_1", "kind": "SketchRoundedSlot", "plane": "XY", "support": "base_1", "center_xy": [15.0, 10.0], "width": 5.0, "straight_length": 16.0, "cap_radius": 2.5}, {"id": "slot_cut_1", "kind": "CutThrough", "target": "base_1", "profile": "slot_sketch_1", "direction": "+Z"}]},
+    "candidate_sequence": "candidate_sequence.json"
+  },
+  "metadata_authority": "case.json"
+}

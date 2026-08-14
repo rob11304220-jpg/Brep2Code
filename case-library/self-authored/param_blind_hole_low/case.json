@@ -1,0 +1,55 @@
+{
+  "case_id": "param_blind_hole_low",
+  "status": "active",
+  "origin": "self_authored",
+  "tier": "P2",
+  "fixture_version": 1,
+  "family_id": "blind_hole",
+  "data_split": "held_out",
+  "variant": "low",
+  "parameters": {
+    "radius": 2.0,
+    "depth": 3.0
+  },
+  "input_step": "input.step",
+  "reference_script": "reference_build_sequence.py",
+  "reference_script_status": "available",
+  "sha256": "ac827ba81fceadc0c5c12e85cbb32ce0f15aadd2db3bf09273111ab225e3cca2",
+  "unit": "mm",
+  "coordinate_frame": "right_handed_xyz; model origin at (0,0,0)",
+  "summary": "M12 blind_hole low parameter variant.",
+  "key_dimensions": {
+    "radius": 2.0,
+    "depth": 3.0
+  },
+  "expected": {
+    "bbox": {
+      "min": [
+        -1e-07,
+        -1e-07,
+        -1e-07
+      ],
+      "max": [
+        30.0000001,
+        20.0000001,
+        10.0000001
+      ]
+    },
+    "volume": 5962.300888156922,
+    "counts": {
+      "solid": 1,
+      "shell": 1,
+      "face": 8,
+      "edge": 30
+    }
+  },
+  "feature_tags": [
+    "m12",
+    "parametric",
+    "blind_hole",
+    "low"
+  ],
+  "case_directory": "case-library/self-authored/param_blind_hole_low",
+  "metadata_authority": "case.json",
+  "sequence_pair": {"grammar_version": "prismatic-hole-v1", "oracle_provenance": "self_authored_deterministic_reference", "sequence": {"operations": [{"id": "sketch_1", "kind": "SketchRect", "plane": "XY", "length_x": 30.0, "length_y": 20.0}, {"id": "base_1", "kind": "ExtrudeBase", "profile": "sketch_1", "direction": "+Z", "distance": 10.0}, {"id": "hole_1", "kind": "CutCylinder", "target": "base_1", "variant": "blind", "center_xy": [15.0, 10.0], "axis": "+Z", "radius": 2.0, "depth": 3.0}], "mutations": [{"kind": "base_length_x", "delta": 2.0}, {"kind": "hole_depth", "delta": 1.0}]}}
+}

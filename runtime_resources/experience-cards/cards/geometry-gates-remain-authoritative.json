@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "id": "geometry-gates-remain-authoritative",
+  "kind": "counterexample",
+  "status": "supported",
+  "scope": {
+    "applies_when": ["A script produces a readable output STEP after a bounded repair or compatibility treatment."]
+  },
+  "claim": "Readable output alone is insufficient: existing bbox, volume, and topology gates remain authoritative for the stated case policy.",
+  "evidence": {
+    "level": "direct",
+    "supporting_cases": ["abc_v00_00000031: readable output and all gates pass"],
+    "counterexamples": ["abc_v00_00000027: readable output but strict bbox gate remains fail"]
+  },
+  "runtime_action": "Do not claim success or suppress comparison gates after output readability; surface each gate outcome and keep a failed geometry result actionable.",
+  "validation": {
+    "review_trigger": "Re-review whenever a gate definition, tolerance, or case baseline changes."
+  },
+  "sources": [
+    "docs/architecture/v1/m10-012-minimal-offline-path-repair-review.md",
+    "docs/architecture/v1/contracts/signal-bundle.md"
+  ]
+}

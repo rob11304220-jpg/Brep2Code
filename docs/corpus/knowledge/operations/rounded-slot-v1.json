@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "unit_id": "rounded-slot-v1",
+  "unit_kind": "operation",
+  "status": "reviewed",
+  "question": "Which bounded self-authored sequence is evidenced for a prismatic base followed by a composite rounded-slot through cut?",
+  "scope": {
+    "kernel_operation": ["SketchRect on XY", "ExtrudeBase along +Z", "composite rounded-slot profile", "through CutPocket on the base"],
+    "brep_observables": ["single prismatic base solid", "planar top face", "two semicircular ends joined by straight segments", "through-cut topology produced by the deterministic oracle"],
+    "preconditions": ["one frozen rounded-slot-v1 record", "self-authored deterministic reference", "recorded center, width, straight length, split, and canonical dependencies"],
+    "unsupported_conditions": ["outer-plus-inner loop sketches", "arbitrary arcs or splines", "generic profile recognition", "B-Rep-to-sequence inference", "automatic case or manifest admission"]
+  },
+  "operation_contract": {
+    "function_family": ["SketchRect", "ExtrudeBase", "SketchRoundedSlot", "CutPocket"],
+    "parameter_contract": ["Only the frozen record-specific base, centre, slot width, straight length, and through-cut parameters in rounded-slot-v1 are evidenced."],
+    "expected_brep_delta": ["A single prismatic base receives one through subtraction whose fixed composite profile has two semicircular caps and two straight segments."],
+    "topology_invariants": ["The second profile dependency, cap-radius-to-width relation, and through-cut semantics must agree with the deterministic reference and anti-degeneration audit."],
+    "numeric_or_tolerance_boundary": ["No general parameter domain or numeric tolerance is claimed; values are those in the frozen expansion record."],
+    "unverified_properties": ["Outer-plus-inner loops, arbitrary curves, alternate sequences, and generic profile recognition."]
+  },
+  "sequence": {
+    "canonical_pattern": ["SketchRect", "ExtrudeBase", "SketchRoundedSlot", "CutPocket"],
+    "dependencies": ["ExtrudeBase consumes SketchRect", "SketchRoundedSlot supplies the cut profile", "CutPocket targets the base and consumes SketchRoundedSlot"],
+    "admissible_alternatives": []
+  },
+  "evidence": {
+    "level": "supported",
+    "source_kind": "self_authored_deterministic_oracle",
+    "supporting_case_ids": ["param_rounded_slot_low", "param_rounded_slot_nominal", "param_rounded_slot_high"],
+    "held_out_case_ids": ["param_offset_rounded_slot_low", "param_offset_rounded_slot_nominal", "param_offset_rounded_slot_high"],
+    "audit_links": ["docs/corpus/sequence-paired/rounded-slot-v1-expansion.json", "docs/architecture/v1/m21-rounded-slot-controlled-expansion-review.md"],
+    "authority_links": ["docs/architecture/adr/0023-rounded-slot-sequence-pair-governance.md"]
+  },
+  "failure_and_repair": {
+    "observable_signals": ["frozen-sequence mismatch", "composite-profile semantic degeneration", "split leakage", "hash/path drift", "failed deterministic replay or editability mutation"],
+    "safe_action": "Reject the record from this family-scoped evidence set and preserve the failed predicate; do not replace it with a simpler profile or broaden the grammar.",
+    "stop_conditions": ["outer-plus-inner-loop requirement", "profile orientation ambiguity", "any grammar expansion", "any case substitution or split move"],
+    "counterexamples": ["A rounded-slot composite profile is not evidence for a multi-contour pocket or a general inner-loop cut rule."]
+  },
+  "runtime_projection": {
+    "eligible": false,
+    "experience_card_id": null,
+    "review_trigger": "No runtime projection is justified: the evidence is a family-specific deterministic contract, not independent direct runtime repair evidence."
+  }
+}

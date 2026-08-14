@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "status": "review_approved",
+  "policy": "m182-asymmetric-case-local-continuation-v1",
+  "m182_spec": {
+    "path": "docs/corpus/knowledge/m182-asymmetric-case-local-continuation-v1.json",
+    "sha256": "7d42c9ebf516a5ecd3c22f7999ba633c1052a3a98d06ed6fb72a15fed7e2372b"
+  },
+  "destination": "https://api.deepseek.com",
+  "provider": {
+    "name": "deepseek",
+    "model": "deepseek-v4-pro",
+    "max_output_tokens": 4096,
+    "deadline_seconds": 120,
+    "serial_only": true,
+    "retry": "forbidden"
+  },
+  "outbound": {
+    "main_cohort": "bounded Q01 facts only for 30 development cases",
+    "feasibility_annex": "bounded Q01 facts plus one returned hash-bound card for 3 development cases"
+  },
+  "bounds": {
+    "main_cases": 30,
+    "annex_cases": 3,
+    "completion_slots_cap": 102,
+    "provider_http_request_cap": 69,
+    "repair": "at most one M141-classified source_only edit per case; no retry",
+    "case_local_terminalization": "record an eligible DeepSeek provider timeout or failure for that case and continue serially; no retry or resume"
+  },
+  "executor": {
+    "name": "wsl-bwrap",
+    "input_mount": "no-input"
+  },
+  "reports": {
+    "annex_report": "data/hosted/m182-annex.json",
+    "annex_monitor": "data/hosted/m182-annex.monitor.json",
+    "main_report": "data/hosted/m182-main.json",
+    "main_monitor": "data/hosted/m182-main.monitor.json"
+  },
+  "authorization_boundary": "This packet is not authorization. A user authorization must approve every listed field and does not permit reuse, retry, resume, policy changes, held-out access, or M179/M181 report, monitor, budget, or authorization reuse."
+}

@@ -1,0 +1,37 @@
+[project]
+name = "brep2code"
+version = "0.1.0"
+description = "Harness-first B-Rep to executable CAD script research implementation."
+readme = "README.md"
+requires-python = ">=3.12,<3.15"
+dependencies = [
+  "cadquery-ocp>=7.9,<8",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8",
+  "ruff>=0.8",
+]
+
+[project.scripts]
+brep2code = "brep2code.cli:main"
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["brep2code*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "fast: deterministic unit and metadata checks; intended for rapid developer feedback",
+  "standard: credential-free checks that do not execute the Harness/corpus process boundary",
+  "sandbox: Harness, executor, or corpus integration checks that spawn local CAD/Python processes",
+]

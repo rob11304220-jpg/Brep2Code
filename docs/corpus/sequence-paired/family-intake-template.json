@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "expansion_id": "replace-with-family-and-workpack-id",
+  "grammar_version": "replace-with-frozen-grammar-version",
+  "oracle_provenance": "self_authored_deterministic_reference",
+  "selection_status": "preregistered_before_candidate_production",
+  "selection_rule": "Replace before production: list every frozen row, split, and the no-substitution rule.",
+  "canonical_sequence": [
+    {"id": "replace-with-unique-operation-id", "kind": "replace-with-operation-kind"}
+  ],
+  "candidate_producer": {
+    "planned_path": "tools/build_mxx_family_candidates.py",
+    "output_status": "planned_uncreated_candidate_only",
+    "admission_boundary": "Candidate output remains experimental; it cannot change a manifest, provider, training, runtime, or active registry path."
+  },
+  "contract": {
+    "units": "mm",
+    "preconditions": ["replace-with-valid-parameter-and-dependency-precondition"],
+    "semantic_invariants": ["replace-with-observable-semantic-invariant"],
+    "unsupported_conditions": ["replace-with-explicit-non-claim"]
+  },
+  "production_checks": {
+    "geometry": ["existing geometry replay gates"],
+    "sequence": ["exact agreement with the frozen canonical sequence"],
+    "editability": ["all declared directional mutations"],
+    "semantic": ["family-specific anti-degeneration invariants"],
+    "hash_stability": ["two clean-directory normalized STEP hashes"],
+    "split_isolation": ["each template family appears in exactly one split"]
+  },
+  "rejection_taxonomy": ["split_leak", "sequence_mismatch", "semantic_degeneration"],
+  "cases": [
+    {
+      "case_id": "replace-with-stable-case-id",
+      "family_id": "replace-with-template-family-id",
+      "variant": "replace-with-variant",
+      "data_split": "development",
+      "candidate_directory": "case-library/self-authored/replace-with-case-id",
+      "parameters": {"replace-with-parameter": 1.0},
+      "mutations": [{"kind": "replace-with-directional-mutation", "delta": 1.0}]
+    },
+    {
+      "case_id": "replace-with-held-out-case-id",
+      "family_id": "replace-with-held-out-template-family-id",
+      "variant": "replace-with-variant",
+      "data_split": "held_out",
+      "candidate_directory": "case-library/self-authored/replace-with-held-out-case-id",
+      "parameters": {"replace-with-parameter": 1.0},
+      "mutations": [{"kind": "replace-with-directional-mutation", "delta": 1.0}]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+---
+description: Brep2Code core conventions for all agent work
+alwaysApply: true
+---
+
+# Brep2Code Core (L0)
+
+## Before any task
+
+1. Read root `AGENTS.md`
+2. New session: run skill `handoff-resume` or read latest `docs/handoff/active/`
+3. Design background: see `docs/links/paper-vault.md` (link only, do not copy paper content)
+
+## During work
+
+- Prefer Skills in `.cursor/skills/` over ad-hoc workflows
+- Architecture decisions → ADR under `docs/architecture/adr/`
+- Repeatable steps → update `docs/runbooks/`
+- Q01–Q04 status lives in paper vault; this repo tracks implementation status in `docs/architecture/pipeline.md`
+
+## Before ending a session
+
+- Update Handoff in `docs/handoff/active/` (skill `handoff-create`)
+- Do not git commit unless the user explicitly asks

@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "expansion_id": "selector-ambiguity-v1-m29-001",
+  "grammar_version": "selector-ambiguity-v1",
+  "oracle_provenance": "existing_face_selected_dependent_cut_v1_unique_oracle_plus_planned_self_authored_discriminating_controls",
+  "selection_status": "preregistered_before_candidate_production",
+  "selection_rule": "The existing unique-selector oracle remains unchanged. Exactly two planned twin-boss multi-candidate rows below are the only proposed candidate rows. No substitutions, split moves, predicate relaxation, coordinate tie-breaker, grammar expansion, or additional rows are permitted after candidate production or audit begins.",
+  "selector_contract": {
+    "predicate": {"surface": "planar", "normal": "+Z", "z_role": "maximum_output_z"},
+    "measurement_convention": "Use the existing output-coordinate frame and geometry-gate tolerance; candidate count is evaluated on the transient boss output before any dependent sketch or cut.",
+    "unique_oracle": {"source_family": "face-selected-dependent-cut-v1", "expected_cardinality": 1, "permitted_action": "bind the declared boss-top face"},
+    "multi_candidate_control": {"expected_cardinality": 2, "permitted_action": "stop as ambiguous before SketchCircle or CutCylinder"},
+    "forbidden_tie_breakers": ["input face enumeration", "session address", "unrecorded coordinate-only choice", "choose-first/choose-largest behavior"]
+  },
+  "canonical_sequence": [
+    {"id": "sketch_base", "kind": "SketchRect", "plane": "XY"},
+    {"id": "base", "kind": "ExtrudeBase", "profile": "sketch_base", "direction": "+Z"},
+    {"id": "sketch_bosses", "kind": "SketchTwoRects", "support": "base.top_face"},
+    {"id": "bosses", "kind": "ExtrudeBosses", "target": "base", "profile": "sketch_bosses", "direction": "+Z", "operation": "join"},
+    {"id": "candidate_audit", "kind": "SelectPlanarFace", "source": "bosses", "selector": {"surface": "planar", "normal": "+Z", "z_role": "maximum_output_z", "cardinality": "exactly_one_required"}},
+    {"id": "stop", "kind": "FailClosedAmbiguous", "condition": "candidate_audit.cardinality != 1"}
+  ],
+  "candidate_producer": {
+    "planned_path": "tools/build_m29_selector_ambiguity_candidates.py",
+    "output_status": "planned_uncreated_candidate_only",
+    "admission_boundary": "A future M29-002 output may not add an executable manifest, corpus/provider input, training input, runtime resource, or active case-library record without a later review and ADR."
+  },
+  "contract": {
+    "units": "mm",
+    "preconditions": ["two rectangular bosses are disjoint, strictly contained in the base top face, and joined to the same base", "both boss tops are planar, have +Z normal, and share the same maximum output Z within the recorded tolerance", "no dependent sketch or cut is attempted after a multi-candidate result"],
+    "semantic_invariants": ["one connected solid remains before selector evaluation", "the unchanged predicate returns exactly two candidates for each twin-boss row", "the multi-candidate path records ambiguous and creates no selected-face-dependent artifact", "the unique oracle still returns exactly one candidate"],
+    "unsupported_conditions": ["generic topological naming", "arbitrary face frames", "edge references", "unequal-height tie breaking", "coordinate-only selector rules", "generic B-Rep-to-sequence inference", "runtime selector/helper adoption"]
+  },
+  "production_checks": {
+    "geometry": ["existing geometry replay gates apply only to the unchanged unique oracle and any explicitly generated pre-selector base-plus-boss artifact"],
+    "sequence": ["multi-candidate rows end at FailClosedAmbiguous and must not contain SketchCircle or CutCylinder"],
+    "editability": ["boss-width mutation preserves two eligible faces; shared-height mutation preserves ambiguity; unequal-height mutation is a rejected out-of-scope perturbation, not a tie-breaker treatment"],
+    "semantic": ["selector cardinality audit", "no downstream selected-face artifact", "wrong-face injection is rejected before geometry success can be claimed"],
+    "hash_stability": ["two clean-directory normalized STEP hashes for every planned candidate row"],
+    "split_isolation": ["centered twin-boss template appears only in development and offset twin-boss template only in held_out; the existing unique oracle is reused as a fixed reference, not moved between splits"]
+  },
+  "negative_controls": [
+    {"id": "wrong-face-injection", "method": "Attempt to bind one named twin-boss top after cardinality=2.", "expected_result": "reject with selector_ambiguity; no dependent operation is emitted."},
+    {"id": "coordinate-tie-breaker-injection", "method": "Attempt to choose a candidate by unrecorded X/Y position or enumeration.", "expected_result": "reject with coordinate_only_support; no geometry pass may override the rejection."}
+  ],
+  "rejection_taxonomy": ["split_leak", "sequence_mismatch", "selector_not_ambiguous", "silent_candidate_choice", "wrong_face_target", "coordinate_only_support", "downstream_operation_after_ambiguity", "hash_nondeterminism"],
+  "cases": [
+    {"case_id": "param_selector_ambiguity_twin_centered_nominal", "family_id": "selector_ambiguity_twin_centered", "variant": "nominal", "data_split": "development", "candidate_directory": "case-library/self-authored/param_selector_ambiguity_twin_centered_nominal", "parameters": {"base_length_x": 56.0, "base_length_y": 40.0, "base_height": 8.0, "boss_length_x": 12.0, "boss_length_y": 10.0, "boss_height": 10.0, "boss_centers_xy": [[18.0, 20.0], [38.0, 20.0]]}, "mutations": [{"kind": "boss_width_x", "delta": 2.0}, {"kind": "shared_boss_height", "delta": 2.0}]},
+    {"case_id": "param_selector_ambiguity_twin_offset_nominal", "family_id": "selector_ambiguity_twin_offset", "variant": "nominal", "data_split": "held_out", "candidate_directory": "case-library/self-authored/param_selector_ambiguity_twin_offset_nominal", "parameters": {"base_length_x": 56.0, "base_length_y": 40.0, "base_height": 8.0, "boss_length_x": 14.0, "boss_length_y": 8.0, "boss_height": 9.0, "boss_centers_xy": [[16.0, 14.0], [40.0, 27.0]]}, "mutations": [{"kind": "boss_width_x", "delta": 2.0}, {"kind": "shared_boss_height", "delta": 2.0}]}
+  ]
+}

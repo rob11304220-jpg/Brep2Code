@@ -1,0 +1,77 @@
+{
+  "case_id": "param_shell_symmetric_low",
+  "status": "experimental",
+  "origin": "self_authored",
+  "tier": "P2",
+  "fixture_version": 1,
+  "family_id": "shell_symmetric",
+  "data_split": "development",
+  "variant": "low",
+  "parameters": {
+    "length": 20.0,
+    "width": 14.0,
+    "height": 10.0,
+    "wall_thickness": 1.5
+  },
+  "input_step": "input.step",
+  "reference_script_status": "available",
+  "reference_script": "reference_build_sequence.py",
+  "sha256": "a970ef67ca03a75afa77c0a2020f8930c95a4d0c08be458b16554c48b0c2ba08",
+  "unit": "mm",
+  "expected": {
+    "ok": true,
+    "input": "D:\\codeai\\Brep2Code\\case-library\\self-authored\\param_shell_symmetric_low\\input.step",
+    "file_name": "input.step",
+    "format": "step",
+    "unit": "unknown",
+    "bbox": {
+      "min": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max": [
+        20.0,
+        14.0,
+        10.0
+      ]
+    },
+    "counts": {
+      "solid": 1,
+      "shell": 1,
+      "face": 11,
+      "edge": 48
+    },
+    "area": 1715.9999999999998,
+    "volume": 1210.5
+  },
+  "sequence_pair": {
+    "grammar_version": "shell-v1",
+    "oracle_provenance": "self_authored_deterministic_reference",
+    "sequence": {
+      "operations": [
+        {
+          "id": "base",
+          "kind": "MakeSolidBox",
+          "length": 20.0,
+          "width": 14.0,
+          "height": 10.0
+        },
+        {
+          "id": "opening",
+          "kind": "SelectTopFaceAsOpening",
+          "source": "base"
+        },
+        {
+          "id": "shell",
+          "kind": "MakeThickSolidInward",
+          "source": "base",
+          "removed_face": "opening",
+          "thickness": 1.5
+        }
+      ]
+    },
+    "candidate_sequence": "candidate_sequence.json"
+  },
+  "admission_boundary": "Experimental candidate only; absent from registry, manifest, provider, training, and runtime paths."
+}

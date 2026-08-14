@@ -1,0 +1,421 @@
+{
+  "schema_version": 2,
+  "registry_scope": "development_governance_only",
+  "authority": "Per-case case.json files under case-library/self-authored are authoritative for self-authored fixture identity, reference-script status, numeric baselines, and case metadata. This index is not a Harness manifest or runtime material.",
+  "cases": [
+    {
+      "case_id": "box",
+      "status": "active",
+      "tier": "P0",
+      "case_record": "case-library/self-authored/box/case.json"
+    },
+    {
+      "case_id": "cylinder",
+      "status": "active",
+      "tier": "P0",
+      "case_record": "case-library/self-authored/cylinder/case.json"
+    },
+    {
+      "case_id": "block_with_hole",
+      "status": "active",
+      "tier": "P0",
+      "case_record": "case-library/self-authored/block_with_hole/case.json"
+    },
+    {
+      "case_id": "filleted_block",
+      "status": "active",
+      "tier": "P1",
+      "case_record": "case-library/self-authored/filleted_block/case.json"
+    },
+    {
+      "case_id": "chamfered_block",
+      "status": "active",
+      "tier": "P1",
+      "case_record": "case-library/self-authored/chamfered_block/case.json"
+    },
+    {
+      "case_id": "three_hole_plate",
+      "status": "active",
+      "tier": "P1",
+      "case_record": "case-library/self-authored/three_hole_plate/case.json"
+    },
+    {
+      "case_id": "box_cylinder_union",
+      "status": "active",
+      "tier": "P1",
+      "case_record": "case-library/self-authored/box_cylinder_union/case.json"
+    },
+    {
+      "case_id": "offset_through_hole_block",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/offset_through_hole_block/case.json"
+    },
+    {
+      "case_id": "blind_hole_block",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/blind_hole_block/case.json"
+    },
+    {
+      "case_id": "counterbored_plate",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/counterbored_plate/case.json"
+    },
+    {
+      "case_id": "stepped_block",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/stepped_block/case.json"
+    },
+    {
+      "case_id": "dual_boss_plate",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/dual_boss_plate/case.json"
+    },
+    {
+      "case_id": "boss_with_blind_hole",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/boss_with_blind_hole/case.json"
+    },
+    {
+      "case_id": "cross_fuse_block",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/cross_fuse_block/case.json"
+    },
+    {
+      "case_id": "hollow_open_box",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/hollow_open_box/case.json"
+    },
+    {
+      "case_id": "slot_plate",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/slot_plate/case.json"
+    },
+    {
+      "case_id": "small_cylinder",
+      "status": "active",
+      "tier": "P3",
+      "case_record": "case-library/self-authored/small_cylinder/case.json"
+    },
+    {
+      "case_id": "large_box",
+      "status": "active",
+      "tier": "P3",
+      "case_record": "case-library/self-authored/large_box/case.json"
+    },
+    {
+      "case_id": "side_hole_block",
+      "status": "active",
+      "tier": "P3",
+      "case_record": "case-library/self-authored/side_hole_block/case.json"
+    },
+    {
+      "case_id": "concentric_hole_plate",
+      "status": "active",
+      "tier": "P3",
+      "case_record": "case-library/self-authored/concentric_hole_plate/case.json"
+    },
+    {
+      "case_id": "thin_plate",
+      "status": "active",
+      "tier": "P3",
+      "case_record": "case-library/self-authored/thin_plate/case.json"
+    },
+    {
+      "case_id": "param_additive_boss_low",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_additive_boss_low/case.json"
+    },
+    {
+      "case_id": "param_additive_boss_nominal",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_additive_boss_nominal/case.json"
+    },
+    {
+      "case_id": "param_additive_boss_high",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_additive_boss_high/case.json"
+    },
+    {
+      "case_id": "param_through_hole_low",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_through_hole_low/case.json"
+    },
+    {
+      "case_id": "param_through_hole_nominal",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_through_hole_nominal/case.json"
+    },
+    {
+      "case_id": "param_through_hole_high",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_through_hole_high/case.json"
+    },
+    {
+      "case_id": "param_counterbore_low",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_counterbore_low/case.json"
+    },
+    {
+      "case_id": "param_counterbore_nominal",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_counterbore_nominal/case.json"
+    },
+    {
+      "case_id": "param_counterbore_high",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_counterbore_high/case.json"
+    },
+    {
+      "case_id": "param_rounded_slot_low",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_rounded_slot_low/case.json"
+    },
+    {
+      "case_id": "param_rounded_slot_nominal",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_rounded_slot_nominal/case.json"
+    },
+    {
+      "case_id": "param_rounded_slot_high",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_rounded_slot_high/case.json"
+    },
+    {
+      "case_id": "param_fillet_low",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_fillet_low/case.json"
+    },
+    {
+      "case_id": "param_fillet_nominal",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_fillet_nominal/case.json"
+    },
+    {
+      "case_id": "param_fillet_high",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_fillet_high/case.json"
+    },
+    {
+      "case_id": "param_blind_hole_low",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_blind_hole_low/case.json"
+    },
+    {
+      "case_id": "param_blind_hole_nominal",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_blind_hole_nominal/case.json"
+    },
+    {
+      "case_id": "param_blind_hole_high",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_blind_hole_high/case.json"
+    },
+    {
+      "case_id": "param_chamfer_low",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_chamfer_low/case.json"
+    },
+    {
+      "case_id": "param_chamfer_nominal",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_chamfer_nominal/case.json"
+    },
+    {
+      "case_id": "param_chamfer_high",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_chamfer_high/case.json"
+    },
+    {
+      "case_id": "param_multi_contour_pocket_centered_low",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_multi_contour_pocket_centered_low/case.json"
+    },
+    {
+      "case_id": "param_multi_contour_pocket_centered_nominal",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_multi_contour_pocket_centered_nominal/case.json"
+    },
+    {
+      "case_id": "param_multi_contour_pocket_centered_high",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_multi_contour_pocket_centered_high/case.json"
+    },
+    {
+      "case_id": "param_multi_contour_pocket_offset_low",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_multi_contour_pocket_offset_low/case.json"
+    },
+    {
+      "case_id": "param_multi_contour_pocket_offset_nominal",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_multi_contour_pocket_offset_nominal/case.json"
+    },
+    {
+      "case_id": "param_multi_contour_pocket_offset_high",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_multi_contour_pocket_offset_high/case.json"
+    },
+    {
+      "case_id": "param_additive_boss_dependent_cut_centered_low",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_additive_boss_dependent_cut_centered_low/case.json"
+    },
+    {
+      "case_id": "param_additive_boss_dependent_cut_centered_nominal",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_additive_boss_dependent_cut_centered_nominal/case.json"
+    },
+    {
+      "case_id": "param_additive_boss_dependent_cut_centered_high",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_additive_boss_dependent_cut_centered_high/case.json"
+    },
+    {
+      "case_id": "param_additive_boss_dependent_cut_offset_low",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_additive_boss_dependent_cut_offset_low/case.json"
+    },
+    {
+      "case_id": "param_additive_boss_dependent_cut_offset_nominal",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_additive_boss_dependent_cut_offset_nominal/case.json"
+    },
+    {
+      "case_id": "param_additive_boss_dependent_cut_offset_high",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_additive_boss_dependent_cut_offset_high/case.json"
+    },
+    {
+      "case_id": "param_multi_inner_loop_pocket_centered_low",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_multi_inner_loop_pocket_centered_low/case.json"
+    },
+    {
+      "case_id": "param_multi_inner_loop_pocket_centered_nominal",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_multi_inner_loop_pocket_centered_nominal/case.json"
+    },
+    {
+      "case_id": "param_multi_inner_loop_pocket_centered_high",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_multi_inner_loop_pocket_centered_high/case.json"
+    },
+    {
+      "case_id": "param_multi_inner_loop_pocket_offset_low",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_multi_inner_loop_pocket_offset_low/case.json"
+    },
+    {
+      "case_id": "param_multi_inner_loop_pocket_offset_nominal",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_multi_inner_loop_pocket_offset_nominal/case.json"
+    },
+    {
+      "case_id": "param_multi_inner_loop_pocket_offset_high",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_multi_inner_loop_pocket_offset_high/case.json"
+    },
+    {"case_id":"param_oriented_rounded_slot_x_low","status":"active","tier":"P2","case_record":"case-library/self-authored/param_oriented_rounded_slot_x_low/case.json"},
+    {"case_id":"param_oriented_rounded_slot_x_nominal","status":"active","tier":"P2","case_record":"case-library/self-authored/param_oriented_rounded_slot_x_nominal/case.json"},
+    {"case_id":"param_oriented_rounded_slot_x_high","status":"active","tier":"P2","case_record":"case-library/self-authored/param_oriented_rounded_slot_x_high/case.json"},
+    {"case_id":"param_oriented_rounded_slot_y_low","status":"active","tier":"P2","case_record":"case-library/self-authored/param_oriented_rounded_slot_y_low/case.json"},
+    {"case_id":"param_oriented_rounded_slot_y_nominal","status":"active","tier":"P2","case_record":"case-library/self-authored/param_oriented_rounded_slot_y_nominal/case.json"},
+    {"case_id":"param_oriented_rounded_slot_y_high","status":"active","tier":"P2","case_record":"case-library/self-authored/param_oriented_rounded_slot_y_high/case.json"},
+    {
+      "case_id": "param_face_selected_cut_centered_low",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_face_selected_cut_centered_low/case.json"
+    },
+    {
+      "case_id": "param_face_selected_cut_centered_nominal",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_face_selected_cut_centered_nominal/case.json"
+    },
+    {
+      "case_id": "param_face_selected_cut_centered_high",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_face_selected_cut_centered_high/case.json"
+    },
+    {
+      "case_id": "param_face_selected_cut_offset_low",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_face_selected_cut_offset_low/case.json"
+    },
+    {
+      "case_id": "param_face_selected_cut_offset_nominal",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_face_selected_cut_offset_nominal/case.json"
+    },
+    {
+      "case_id": "param_face_selected_cut_offset_high",
+      "status": "active",
+      "tier": "P2",
+      "case_record": "case-library/self-authored/param_face_selected_cut_offset_high/case.json"
+    },
+    {"case_id":"param_repeated_feature_pattern_centered_low","status":"active","tier":"P2","case_record":"case-library/self-authored/param_repeated_feature_pattern_centered_low/case.json"},
+    {"case_id":"param_repeated_feature_pattern_centered_nominal","status":"active","tier":"P2","case_record":"case-library/self-authored/param_repeated_feature_pattern_centered_nominal/case.json"},
+    {"case_id":"param_repeated_feature_pattern_centered_high","status":"active","tier":"P2","case_record":"case-library/self-authored/param_repeated_feature_pattern_centered_high/case.json"},
+    {"case_id":"param_repeated_feature_pattern_offset_low","status":"active","tier":"P2","case_record":"case-library/self-authored/param_repeated_feature_pattern_offset_low/case.json"},
+    {"case_id":"param_repeated_feature_pattern_offset_nominal","status":"active","tier":"P2","case_record":"case-library/self-authored/param_repeated_feature_pattern_offset_nominal/case.json"},
+    {"case_id":"param_repeated_feature_pattern_offset_high","status":"active","tier":"P2","case_record":"case-library/self-authored/param_repeated_feature_pattern_offset_high/case.json"},
+    {"case_id":"param_revolve_centered_low","status":"active","tier":"P2","case_record":"case-library/self-authored/param_revolve_centered_low/case.json"},
+    {"case_id":"param_revolve_centered_nominal","status":"active","tier":"P2","case_record":"case-library/self-authored/param_revolve_centered_nominal/case.json"},
+    {"case_id":"param_revolve_centered_high","status":"active","tier":"P2","case_record":"case-library/self-authored/param_revolve_centered_high/case.json"},
+    {"case_id":"param_revolve_offset_low","status":"active","tier":"P2","case_record":"case-library/self-authored/param_revolve_offset_low/case.json"},
+    {"case_id":"param_revolve_offset_nominal","status":"active","tier":"P2","case_record":"case-library/self-authored/param_revolve_offset_nominal/case.json"},
+    {"case_id":"param_revolve_offset_high","status":"active","tier":"P2","case_record":"case-library/self-authored/param_revolve_offset_high/case.json"}
+  ]
+}

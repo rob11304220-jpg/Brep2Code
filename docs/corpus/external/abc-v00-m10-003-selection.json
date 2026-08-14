@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "selection_id": "abc-v00-m10-003",
+  "dataset_id": "abc",
+  "upstream_release": "v00",
+  "selection_status": "completed",
+  "official_step_index": "https://deep-geometry.github.io/abc-dataset/data/step_v00.txt",
+  "source_chunk": {
+    "chunk_id": "abc_0000_step_v00.7z",
+    "url": "https://archive.nyu.edu/rest/bitstreams/88598/retrieve",
+    "local_archive": "data/datasets/abc/v00/archives/abc_0000_step_v00.7z"
+  },
+  "license_review": {
+    "status": "local_research_only",
+    "reviewed_on": "2026-08-02",
+    "source_url": "https://deep-geometry.github.io/abc-dataset/",
+    "redistribution_permitted": false,
+    "notes": "ABC states that CAD-model copyright remains with original creators. The repository records only source identities, hashes and non-sensitive baselines."
+  },
+  "normalization": {
+    "source_format": "STEP",
+    "source_unit": "unknown",
+    "coordinate_frame": "upstream as supplied",
+    "conversion_tool": null,
+    "conversion_version": null,
+    "transform_applied": null
+  },
+  "selection_policy": {
+    "scan_order": "archive STEP-member order, continuing after abc-v00-m8-001 cutoff 00000022",
+    "scan_start_source_sample_id": "00000023",
+    "acceptance_rule": "existing input probe succeeds and reports exactly one solid",
+    "development_count": 2,
+    "held_out_count": 1,
+    "scan_cutoff_source_sample_id": "00000026"
+  },
+  "rejected_candidates": [
+    {"source_sample_id": "00000025", "reason": "solid_count_not_one", "solid_count": 3}
+  ],
+  "samples": [
+    {"case_id": "abc_v00_00000023", "source_sample_id": "00000023", "source_relative_path": "step/00000023/00000023_ad34a3f60c4a4caa99646600_step_003.step", "source_sha256": "df279cd73c5ad232b336a15f08edb217509da81bfd4bf31efcdd6e1fc22774c4", "split": "development", "local_storage": "data/datasets/abc/v00/step/00000023/00000023_ad34a3f60c4a4caa99646600_step_003.step", "status": "accepted"},
+    {"case_id": "abc_v00_00000024", "source_sample_id": "00000024", "source_relative_path": "step/00000024/00000024_ad34a3f60c4a4caa99646600_step_004.step", "source_sha256": "426ad96ce4f14561ce048cca1f4aa56226690516b15b75d27650a97d7d4398c9", "split": "development", "local_storage": "data/datasets/abc/v00/step/00000024/00000024_ad34a3f60c4a4caa99646600_step_004.step", "status": "accepted"},
+    {"case_id": "abc_v00_00000026", "source_sample_id": "00000026", "source_relative_path": "step/00000026/00000026_ad34a3f60c4a4caa99646600_step_006.step", "source_sha256": "a3a1ed78e2afd0b19e2c92146c200ee1beaa9c02b131621a14d9e7f61367cd6a", "split": "held_out", "local_storage": "data/datasets/abc/v00/step/00000026/00000026_ad34a3f60c4a4caa99646600_step_006.step", "status": "accepted"}
+  ]
+}

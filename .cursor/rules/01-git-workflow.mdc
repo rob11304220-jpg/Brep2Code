@@ -1,0 +1,16 @@
+---
+description: Git safety and commit conventions
+alwaysApply: true
+---
+
+# Git Workflow (L1)
+
+- Never force-push to `main`/`master`
+- Never skip hooks unless the user explicitly requests
+- Never commit secrets, `.env`, or `**/secrets/**`
+- Never run `git commit` unless the user explicitly asks
+- Branch naming: `feat/<topic>`, `fix/<topic>`, `chore/<topic>`
+- Commits: Conventional Commits (`feat`, `fix`, `docs`, `chore`, `refactor`)
+- Include Handoff updates in the same commit as related work when committing
+
+See `docs/runbooks/git-setup.md` for details.

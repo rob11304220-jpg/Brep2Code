@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "mechanism_id": "vertical-cylinder-construction-v1",
+  "status": "qualified",
+  "development_only": true,
+  "source_contract": "docs/corpus/reference-packs/reference-pack-contract-v1.json",
+  "candidate_card": "runtime_resources/experience-cards/cards/vertical-cylinder-construction.json",
+  "recommended_action": "OCP.BRepPrimAPI.BRepPrimAPI_MakeCylinder",
+  "fixed_fixture_policy": "Inspect only the three fixed local source records and their available reference scripts; no fake provider, replay output, extra case, held-out evidence, or parameter-family substitution is permitted.",
+  "stopping_rule": "Reject qualification if any fixed case lacks the declared direct action, source link, distinct role, or bounded counterexample; do not substitute or add a case.",
+  "cases": [
+    {
+      "case_id": "cylinder",
+      "pack_id": "reference-pack-cylinder",
+      "source_case_record": "case-library/self-authored/cylinder/case.json",
+      "role": "final primitive",
+      "counterexamples": ["non-circular profiles", "unobserved axis orientations"]
+    },
+    {
+      "case_id": "block_with_hole",
+      "pack_id": "reference-pack-block-with-hole",
+      "source_case_record": "case-library/self-authored/block_with_hole/case.json",
+      "role": "single boolean-cut tool",
+      "counterexamples": ["blind holes", "angled or multiple holes"]
+    },
+    {
+      "case_id": "three_hole_plate",
+      "pack_id": "reference-pack-three-hole-plate",
+      "source_case_record": "case-library/self-authored/three_hole_plate/case.json",
+      "role": "repeated boolean-cut tool",
+      "counterexamples": ["nonuniform hole patterns", "blind or angled holes"]
+    }
+  ]
+}

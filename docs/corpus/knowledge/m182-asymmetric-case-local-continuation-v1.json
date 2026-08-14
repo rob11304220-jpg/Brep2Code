@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "policy": "m182-asymmetric-case-local-continuation-v1",
+  "m179_spec_sha256": "fd1aac4bcb3a2b8f743fc771652d7bd3795b7b6647a03717303aef71c47f65cf",
+  "continuation": "case-local DeepSeek provider failures are terminal results; campaign-global contract, authorization, configuration, identity, and accounting errors remain fail-closed",
+  "report_identities": {
+    "annex_report": "data/hosted/m182-annex.json",
+    "annex_monitor": "data/hosted/m182-annex.monitor.json",
+    "main_report": "data/hosted/m182-main.json",
+    "main_monitor": "data/hosted/m182-main.monitor.json"
+  }
+}

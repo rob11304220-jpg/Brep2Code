@@ -1,0 +1,45 @@
+{
+  "case_id": "cylinder",
+  "status": "active",
+  "origin": "self_authored",
+  "tier": "P0",
+  "fixture_version": 1,
+  "input_step": "input.step",
+  "reference_script": "reference_build_sequence.py",
+  "reference_script_status": "available",
+  "sha256": "b1cdeb7a6e3da089ef401bdf101048476033c4f9bf44e635266f4dcc45b46eda",
+  "unit": "mm",
+  "coordinate_frame": "right_handed_xyz; cylinder axis +Z; base centered at origin",
+  "summary": "Vertical circular cylinder for curved-face and circular-edge coverage.",
+  "key_dimensions": {
+    "diameter": 10.0,
+    "height_z": 12.0
+  },
+  "expected": {
+    "bbox": {
+      "min": [
+        -5.0,
+        -5.0,
+        0.0
+      ],
+      "max": [
+        5.0,
+        5.0,
+        12.0
+      ]
+    },
+    "volume": 942.4777960769379,
+    "counts": {
+      "solid": 1,
+      "shell": 1,
+      "face": 3,
+      "edge": 6
+    }
+  },
+  "feature_tags": [
+    "cylinder",
+    "primitive"
+  ],
+  "case_directory": "case-library/self-authored/cylinder",
+  "metadata_authority": "case.json"
+}

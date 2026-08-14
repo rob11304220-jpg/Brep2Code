@@ -1,0 +1,458 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "case_id": "param_additive_boss_low",
+      "tier": "P2",
+      "family_id": "additive_boss",
+      "data_split": "development",
+      "parameters": {
+        "radius": 3.0,
+        "height": 3.0
+      },
+      "input_step": "case-library/self-authored/param_additive_boss_low/input.step",
+      "expected_bbox": {
+        "min": [
+          -1e-07,
+          -1e-07,
+          -1e-07
+        ],
+        "max": [
+          30.0000001,
+          20.0000001,
+          8.0000001
+        ]
+      },
+      "expected_counts": {
+        "solid": 1,
+        "shell": 1,
+        "face": 8,
+        "edge": 30
+      },
+      "expected_volume": 3084.8230016469242,
+      "difficulty_tags": [
+        "m12",
+        "parametric",
+        "additive_boss",
+        "low"
+      ],
+      "reference_script": "case-library/self-authored/param_additive_boss_low/reference_build_sequence.py",
+      "notes": "M12 additive_boss low parameter variant."
+    },
+    {
+      "case_id": "param_additive_boss_nominal",
+      "tier": "P2",
+      "family_id": "additive_boss",
+      "data_split": "development",
+      "parameters": {
+        "radius": 4.0,
+        "height": 5.0
+      },
+      "input_step": "case-library/self-authored/param_additive_boss_nominal/input.step",
+      "expected_bbox": {
+        "min": [
+          -1e-07,
+          -1e-07,
+          -1e-07
+        ],
+        "max": [
+          30.0000001,
+          20.0000001,
+          10.0000001
+        ]
+      },
+      "expected_counts": {
+        "solid": 1,
+        "shell": 1,
+        "face": 8,
+        "edge": 30
+      },
+      "expected_volume": 3251.3274122871835,
+      "difficulty_tags": [
+        "m12",
+        "parametric",
+        "additive_boss",
+        "nominal"
+      ],
+      "reference_script": "case-library/self-authored/param_additive_boss_nominal/reference_build_sequence.py",
+      "notes": "M12 additive_boss nominal parameter variant."
+    },
+    {
+      "case_id": "param_additive_boss_high",
+      "tier": "P2",
+      "family_id": "additive_boss",
+      "data_split": "development",
+      "parameters": {
+        "radius": 5.0,
+        "height": 7.0
+      },
+      "input_step": "case-library/self-authored/param_additive_boss_high/input.step",
+      "expected_bbox": {
+        "min": [
+          -1e-07,
+          -1e-07,
+          -1e-07
+        ],
+        "max": [
+          30.0000001,
+          20.0000001,
+          12.0000001
+        ]
+      },
+      "expected_counts": {
+        "solid": 1,
+        "shell": 1,
+        "face": 8,
+        "edge": 30
+      },
+      "expected_volume": 3549.7787143782143,
+      "difficulty_tags": [
+        "m12",
+        "parametric",
+        "additive_boss",
+        "high"
+      ],
+      "reference_script": "case-library/self-authored/param_additive_boss_high/reference_build_sequence.py",
+      "notes": "M12 additive_boss high parameter variant."
+    },
+    {
+      "case_id": "param_through_hole_low",
+      "tier": "P2",
+      "family_id": "through_hole",
+      "data_split": "development",
+      "parameters": {
+        "radius": 2.0,
+        "x": 9.0
+      },
+      "input_step": "case-library/self-authored/param_through_hole_low/input.step",
+      "expected_bbox": {
+        "min": [
+          -1e-07,
+          -1e-07,
+          -1e-07
+        ],
+        "max": [
+          30.0000001,
+          20.0000001,
+          10.0000001
+        ]
+      },
+      "expected_counts": {
+        "solid": 1,
+        "shell": 1,
+        "face": 7,
+        "edge": 30
+      },
+      "expected_volume": 5874.336293856408,
+      "difficulty_tags": [
+        "m12",
+        "parametric",
+        "through_hole",
+        "low"
+      ],
+      "reference_script": "case-library/self-authored/param_through_hole_low/reference_build_sequence.py",
+      "notes": "M12 through_hole low parameter variant."
+    },
+    {
+      "case_id": "param_through_hole_nominal",
+      "tier": "P2",
+      "family_id": "through_hole",
+      "data_split": "development",
+      "parameters": {
+        "radius": 3.0,
+        "x": 15.0
+      },
+      "input_step": "case-library/self-authored/param_through_hole_nominal/input.step",
+      "expected_bbox": {
+        "min": [
+          -1e-07,
+          -1e-07,
+          -1e-07
+        ],
+        "max": [
+          30.0000001,
+          20.0000001,
+          10.0000001
+        ]
+      },
+      "expected_counts": {
+        "solid": 1,
+        "shell": 1,
+        "face": 7,
+        "edge": 30
+      },
+      "expected_volume": 5717.256661176919,
+      "difficulty_tags": [
+        "m12",
+        "parametric",
+        "through_hole",
+        "nominal"
+      ],
+      "reference_script": "case-library/self-authored/param_through_hole_nominal/reference_build_sequence.py",
+      "notes": "M12 through_hole nominal parameter variant."
+    },
+    {
+      "case_id": "param_through_hole_high",
+      "tier": "P2",
+      "family_id": "through_hole",
+      "data_split": "development",
+      "parameters": {
+        "radius": 4.0,
+        "x": 21.0
+      },
+      "input_step": "case-library/self-authored/param_through_hole_high/input.step",
+      "expected_bbox": {
+        "min": [
+          -1e-07,
+          -1e-07,
+          -1e-07
+        ],
+        "max": [
+          30.0000001,
+          20.0000001,
+          10.0000001
+        ]
+      },
+      "expected_counts": {
+        "solid": 1,
+        "shell": 1,
+        "face": 7,
+        "edge": 30
+      },
+      "expected_volume": 5497.345175425633,
+      "difficulty_tags": [
+        "m12",
+        "parametric",
+        "through_hole",
+        "high"
+      ],
+      "reference_script": "case-library/self-authored/param_through_hole_high/reference_build_sequence.py",
+      "notes": "M12 through_hole high parameter variant."
+    },
+    {
+      "case_id": "param_rounded_slot_low",
+      "tier": "P2",
+      "family_id": "rounded_slot",
+      "data_split": "development",
+      "parameters": {
+        "width": 3.0,
+        "straight_length": 8.0
+      },
+      "input_step": "case-library/self-authored/param_rounded_slot_low/input.step",
+      "expected_bbox": {
+        "min": [
+          -1.5e-07,
+          -1.5e-07,
+          -1.5e-07
+        ],
+        "max": [
+          30.00000015,
+          20.00000015,
+          5.00000015
+        ]
+      },
+      "expected_counts": {
+        "solid": 1,
+        "shell": 1,
+        "face": 11,
+        "edge": 54
+      },
+      "expected_volume": 2844.657082647115,
+      "difficulty_tags": [
+        "m12",
+        "parametric",
+        "rounded_slot",
+        "low"
+      ],
+      "reference_script": "case-library/self-authored/param_rounded_slot_low/reference_build_sequence.py",
+      "notes": "M12 rounded_slot low parameter variant."
+    },
+    {
+      "case_id": "param_rounded_slot_nominal",
+      "tier": "P2",
+      "family_id": "rounded_slot",
+      "data_split": "development",
+      "parameters": {
+        "width": 4.0,
+        "straight_length": 12.0
+      },
+      "input_step": "case-library/self-authored/param_rounded_slot_nominal/input.step",
+      "expected_bbox": {
+        "min": [
+          -1.5e-07,
+          -1.5e-07,
+          -1.5e-07
+        ],
+        "max": [
+          30.00000015,
+          20.00000015,
+          5.00000015
+        ]
+      },
+      "expected_counts": {
+        "solid": 1,
+        "shell": 1,
+        "face": 11,
+        "edge": 54
+      },
+      "expected_volume": 2697.1681469282044,
+      "difficulty_tags": [
+        "m12",
+        "parametric",
+        "rounded_slot",
+        "nominal"
+      ],
+      "reference_script": "case-library/self-authored/param_rounded_slot_nominal/reference_build_sequence.py",
+      "notes": "M12 rounded_slot nominal parameter variant."
+    },
+    {
+      "case_id": "param_rounded_slot_high",
+      "tier": "P2",
+      "family_id": "rounded_slot",
+      "data_split": "development",
+      "parameters": {
+        "width": 5.0,
+        "straight_length": 16.0
+      },
+      "input_step": "case-library/self-authored/param_rounded_slot_high/input.step",
+      "expected_bbox": {
+        "min": [
+          -1.5e-07,
+          -1.5e-07,
+          -1.5e-07
+        ],
+        "max": [
+          30.00000015,
+          20.00000015,
+          5.00000015
+        ]
+      },
+      "expected_counts": {
+        "solid": 1,
+        "shell": 1,
+        "face": 11,
+        "edge": 54
+      },
+      "expected_volume": 2501.8252295753196,
+      "difficulty_tags": [
+        "m12",
+        "parametric",
+        "rounded_slot",
+        "high"
+      ],
+      "reference_script": "case-library/self-authored/param_rounded_slot_high/reference_build_sequence.py",
+      "notes": "M12 rounded_slot high parameter variant."
+    },
+    {
+      "case_id": "param_fillet_low",
+      "tier": "P2",
+      "family_id": "fillet",
+      "data_split": "development",
+      "parameters": {
+        "radius": 0.5
+      },
+      "input_step": "case-library/self-authored/param_fillet_low/input.step",
+      "expected_bbox": {
+        "min": [
+          -1.000000001110223e-07,
+          -1.000000001110223e-07,
+          -1e-07
+        ],
+        "max": [
+          24.0000001,
+          18.0000001,
+          10.0000001
+        ]
+      },
+      "expected_counts": {
+        "solid": 1,
+        "shell": 1,
+        "face": 7,
+        "edge": 30
+      },
+      "expected_volume": 4319.463495408493,
+      "difficulty_tags": [
+        "m12",
+        "parametric",
+        "fillet",
+        "low"
+      ],
+      "reference_script": "case-library/self-authored/param_fillet_low/reference_build_sequence.py",
+      "notes": "M12 fillet low parameter variant."
+    },
+    {
+      "case_id": "param_fillet_nominal",
+      "tier": "P2",
+      "family_id": "fillet",
+      "data_split": "development",
+      "parameters": {
+        "radius": 1.0
+      },
+      "input_step": "case-library/self-authored/param_fillet_nominal/input.step",
+      "expected_bbox": {
+        "min": [
+          -1.000000002220446e-07,
+          -1.000000002220446e-07,
+          -1e-07
+        ],
+        "max": [
+          24.0000001,
+          18.0000001,
+          10.0000001
+        ]
+      },
+      "expected_counts": {
+        "solid": 1,
+        "shell": 1,
+        "face": 7,
+        "edge": 30
+      },
+      "expected_volume": 4317.8539816339735,
+      "difficulty_tags": [
+        "m12",
+        "parametric",
+        "fillet",
+        "nominal"
+      ],
+      "reference_script": "case-library/self-authored/param_fillet_nominal/reference_build_sequence.py",
+      "notes": "M12 fillet nominal parameter variant."
+    },
+    {
+      "case_id": "param_fillet_high",
+      "tier": "P2",
+      "family_id": "fillet",
+      "data_split": "development",
+      "parameters": {
+        "radius": 1.5
+      },
+      "input_step": "case-library/self-authored/param_fillet_high/input.step",
+      "expected_bbox": {
+        "min": [
+          -1.000000002220446e-07,
+          -1.000000002220446e-07,
+          -1e-07
+        ],
+        "max": [
+          24.0000001,
+          18.0000001,
+          10.0000001
+        ]
+      },
+      "expected_counts": {
+        "solid": 1,
+        "shell": 1,
+        "face": 7,
+        "edge": 30
+      },
+      "expected_volume": 4315.171458676442,
+      "difficulty_tags": [
+        "m12",
+        "parametric",
+        "fillet",
+        "high"
+      ],
+      "reference_script": "case-library/self-authored/param_fillet_high/reference_build_sequence.py",
+      "notes": "M12 fillet high parameter variant."
+    }
+  ]
+}

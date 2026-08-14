@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "mapping_id": "case-evidence-relationships-v1",
+  "scope": "Development-side companion mapping from selected reviewed case/documentary evidence sets to M146 hypotheses; not a case registry, manifest, runtime resource, training dataset, or hosted authorization.",
+  "crosswalk": {
+    "id": "development-evidence-crosswalk-v1",
+    "path": "docs/corpus/knowledge/development-evidence-crosswalk-v1.json",
+    "sha256": "abcb68630f188feae4ddc4f757617aa33f227aa0fbdd3515e33f7811267cf128"
+  },
+  "source_hashes": [
+    {"path": "docs/corpus/knowledge/admissions/selector-ambiguity-v1.json", "sha256": "efb990b147d164e351f4239b63243789d0ad9ddefe76d8afedf9ff84de0101ad"},
+    {"path": "docs/corpus/knowledge/observables/blind-through-cylindrical-extent-v1.json", "sha256": "b756fd0b42b46847d4f4ab677401e7a08929f121cf3ec6975a9c66b4313017fc"},
+    {"path": "docs/corpus/knowledge/operations/rounded-slot-v1.json", "sha256": "28b424928e1cb5fd882a5ea1c7056398d3f01ff89fde90b404b2a049a6827650"},
+    {"path": "docs/corpus/knowledge/operations/multi-contour-pocket-v1.json", "sha256": "e9ce1717925a0325ae96eec198994f1d4aa0faa326f6a5ee1a470740b6ae5728"},
+    {"path": "docs/corpus/knowledge/operations/additive-boss-dependent-cut-v1.json", "sha256": "d8e809d29e713a0741573e7ef6497b171b031c26ed46d816fdf1b86e706f93f3"},
+    {"path": "docs/corpus/knowledge/operations/multi-inner-loop-pocket-v1.json", "sha256": "f48638bc723b0b76e70e0a03c205e5537ccc028120abcf8fd9b1c59a113b17ab"},
+    {"path": "docs/corpus/knowledge/operations/oriented-rounded-slot-v1.json", "sha256": "74f9afc306e34d303d4e143208b4ece1d78bac7fec7e2589fcace768a187a5b6"},
+    {"path": "docs/corpus/knowledge/operations/repeated-feature-pattern-v1.json", "sha256": "a3e2d76d742394ba50fd6e276ddd6b5fa5d099b87f08d137f1c9b0e768e81ed4"},
+    {"path": "docs/corpus/knowledge/patterns/external-history-boundary.json", "sha256": "f304f443ef0b8eea47edc7c99fa1ffcddba89b996e3cc667ad4e9be57d723027"},
+    {"path": "docs/corpus/knowledge/evidence-disposition.json", "sha256": "1c383e51662f9798804a62ba72c1e1234bd416ab87f047ac390b427f10dadb03"}
+  ],
+  "relationships": [
+    {
+      "id": "selector-cardinality-development-oracle",
+      "hypothesis_id": "hm-q01-selector-cardinality-v1",
+      "evidence_role": "oracle",
+      "case_ids": ["param_face_selected_cut_centered_nominal"],
+      "evidence_mode": "development_source_linked",
+      "source_path": "docs/corpus/knowledge/admissions/selector-ambiguity-v1.json",
+      "boundary": "One declared unique planar selector oracle; no generic face identity or runtime selection claim."
+    },
+    {
+      "id": "selector-cardinality-development-discriminating",
+      "hypothesis_id": "hm-q01-selector-cardinality-v1",
+      "evidence_role": "discriminating",
+      "case_ids": ["param_selector_ambiguity_twin_centered_nominal"],
+      "evidence_mode": "development_source_linked",
+      "source_path": "docs/corpus/knowledge/admissions/selector-ambiguity-v1.json",
+      "boundary": "Multiple eligible selector candidates must stop; no choose-first or coordinate tie-break."
+    },
+    {
+      "id": "selector-cardinality-held-out-documentary-control",
+      "hypothesis_id": "hm-q01-selector-cardinality-v1",
+      "evidence_role": "documentary",
+      "case_ids": [],
+      "evidence_mode": "held_out_documentary_only",
+      "source_path": "docs/corpus/knowledge/admissions/selector-ambiguity-v1.json",
+      "boundary": "Reviewed held-out evidence records only ambiguous cardinality and fail-closed disposition; no fixture, path, raw metadata, parameter, hash, or sequence is represented."
+    },
+    {
+      "id": "blind-through-development-observable",
+      "hypothesis_id": "hm-q01-blind-through-observability-v1",
+      "evidence_role": "oracle",
+      "case_ids": ["param_through_hole_low", "param_through_hole_nominal", "param_through_hole_high"],
+      "evidence_mode": "development_source_linked",
+      "source_path": "docs/corpus/knowledge/observables/blind-through-cylindrical-extent-v1.json",
+      "boundary": "Only the reviewed +Z single-cylinder observable is supported."
+    },
+    {
+      "id": "blind-through-held-out-documentary-observable",
+      "hypothesis_id": "hm-q01-blind-through-observability-v1",
+      "evidence_role": "documentary",
+      "case_ids": [],
+      "evidence_mode": "held_out_documentary_only",
+      "source_path": "docs/corpus/knowledge/observables/blind-through-cylindrical-extent-v1.json",
+      "boundary": "Held-out blind records are already declared by the reviewed observable; this mapping intentionally records no held-out case details."
+    },
+    {
+      "id": "blind-through-negative-control",
+      "hypothesis_id": "hm-q01-blind-through-observability-v1",
+      "evidence_role": "negative_control",
+      "case_ids": ["param_counterbore_low", "param_counterbore_nominal", "param_counterbore_high"],
+      "evidence_mode": "development_source_linked",
+      "source_path": "docs/corpus/knowledge/observables/blind-through-cylindrical-extent-v1.json",
+      "boundary": "Counterbore records must remain outside the blind/through observable."
+    },
+    {
+      "id": "rounded-slot-development-oracles",
+      "hypothesis_id": "hm-q02-family-scoped-sequence-grammars-v1",
+      "evidence_role": "oracle",
+      "case_ids": ["param_rounded_slot_low", "param_rounded_slot_nominal", "param_rounded_slot_high"],
+      "evidence_mode": "development_source_linked",
+      "source_path": "docs/corpus/knowledge/operations/rounded-slot-v1.json",
+      "boundary": "Only the reviewed rounded-slot frozen grammar is supported."
+    },
+    {
+      "id": "multi-contour-pocket-development-oracles",
+      "hypothesis_id": "hm-q02-family-scoped-sequence-grammars-v1",
+      "evidence_role": "oracle",
+      "case_ids": ["param_multi_contour_pocket_centered_low", "param_multi_contour_pocket_centered_nominal", "param_multi_contour_pocket_centered_high"],
+      "evidence_mode": "development_source_linked",
+      "source_path": "docs/corpus/knowledge/operations/multi-contour-pocket-v1.json",
+      "boundary": "Only the reviewed multi-contour-pocket frozen grammar is supported."
+    },
+    {
+      "id": "additive-boss-dependent-cut-development-oracles",
+      "hypothesis_id": "hm-q02-family-scoped-sequence-grammars-v1",
+      "evidence_role": "oracle",
+      "case_ids": ["param_additive_boss_dependent_cut_centered_low", "param_additive_boss_dependent_cut_centered_nominal", "param_additive_boss_dependent_cut_centered_high"],
+      "evidence_mode": "development_source_linked",
+      "source_path": "docs/corpus/knowledge/operations/additive-boss-dependent-cut-v1.json",
+      "boundary": "Only the reviewed boss-to-blind-cut frozen grammar is supported."
+    },
+    {
+      "id": "multi-inner-loop-pocket-development-oracles",
+      "hypothesis_id": "hm-q02-family-scoped-sequence-grammars-v1",
+      "evidence_role": "oracle",
+      "case_ids": ["param_multi_inner_loop_pocket_centered_low", "param_multi_inner_loop_pocket_centered_nominal", "param_multi_inner_loop_pocket_centered_high"],
+      "evidence_mode": "development_source_linked",
+      "source_path": "docs/corpus/knowledge/operations/multi-inner-loop-pocket-v1.json",
+      "boundary": "Only the reviewed multi-inner-loop-pocket frozen grammar is supported."
+    },
+    {
+      "id": "oriented-rounded-slot-development-oracles",
+      "hypothesis_id": "hm-q02-family-scoped-sequence-grammars-v1",
+      "evidence_role": "oracle",
+      "case_ids": ["param_oriented_rounded_slot_x_low", "param_oriented_rounded_slot_x_nominal", "param_oriented_rounded_slot_x_high"],
+      "evidence_mode": "development_source_linked",
+      "source_path": "docs/corpus/knowledge/operations/oriented-rounded-slot-v1.json",
+      "boundary": "Only the reviewed +X oriented rounded-slot frozen grammar is supported."
+    },
+    {
+      "id": "repeated-feature-pattern-development-oracles",
+      "hypothesis_id": "hm-q02-family-scoped-sequence-grammars-v1",
+      "evidence_role": "oracle",
+      "case_ids": ["param_repeated_feature_pattern_centered_low", "param_repeated_feature_pattern_centered_nominal", "param_repeated_feature_pattern_centered_high"],
+      "evidence_mode": "development_source_linked",
+      "source_path": "docs/corpus/knowledge/operations/repeated-feature-pattern-v1.json",
+      "boundary": "Only the reviewed fixed rectangular-grid four-hole frozen grammar is supported."
+    },
+    {
+      "id": "family-grammar-held-out-documentary-evidence",
+      "hypothesis_id": "hm-q02-family-scoped-sequence-grammars-v1",
+      "evidence_role": "documentary",
+      "case_ids": [],
+      "evidence_mode": "held_out_documentary_only",
+      "source_path": "docs/corpus/knowledge/evidence-disposition.json",
+      "boundary": "Reviewed operation units declare held-out family evidence; no held-out fixture, case metadata, parameter, hash, or sequence detail is copied here."
+    },
+    {
+      "id": "external-history-reviewed-boundary",
+      "hypothesis_id": "hm-external-history-boundary-v1",
+      "evidence_role": "documentary",
+      "case_ids": ["141323_f85efdd4_0000", "136900_4fe212e6_0010", "143017_21d96cc2_0005"],
+      "evidence_mode": "documentary_external_source",
+      "source_path": "docs/corpus/knowledge/patterns/external-history-boundary.json",
+      "boundary": "External source-specific evidence bounds reconstruction claims; it does not establish generic native-history compatibility or B-Rep-to-sequence recovery."
+    }
+  ],
+  "non_projection": {
+    "evidence_only": true,
+    "prohibited": ["case lifecycle or promotion", "manifest", "runtime card", "reference pack", "retrieval", "SDK", "IR", "provider", "training", "hosted execution"]
+  },
+  "maintenance": {
+    "update_order": ["update the authoritative documentary source", "update this companion relationship and declared hashes", "run tools/audit_case_evidence_relationships.py", "run tools/audit_development_evidence_crosswalk.py", "update navigation if reader-facing scope changes"],
+    "drift_disposition": "Missing source, hash drift, unknown hypothesis, unregistered development case ID, invalid role/mode, forbidden path, or held-out case detail fails the audit. Repair the source or mapping without inspecting fixtures/scripts.",
+    "migration_boundary": "M150 adds a companion relationship layer only. It does not alter the M146 crosswalk, case metadata, registry, manifests, runtime resources, or source layout."
+  }
+}

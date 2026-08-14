@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Brep2Code experience card",
+  "type": "object",
+  "required": [
+    "schema_version", "id", "kind", "status", "scope", "claim",
+    "evidence", "runtime_action", "validation", "sources"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "kind": {"enum": ["operation", "diagnosis", "counterexample"]},
+    "status": {"enum": ["experimental", "supported", "deprecated"]},
+    "scope": {
+      "type": "object",
+      "required": ["applies_when"],
+      "properties": {"applies_when": {"type": "array", "minItems": 1, "items": {"type": "string"}}}
+    },
+    "claim": {"type": "string", "minLength": 1},
+    "evidence": {
+      "type": "object",
+      "required": ["level", "supporting_cases", "counterexamples"],
+      "properties": {
+        "level": {"enum": ["direct", "supported", "unknown"]},
+        "supporting_cases": {"type": "array", "items": {"type": "string"}},
+        "counterexamples": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "runtime_action": {"type": "string", "minLength": 1},
+    "validation": {
+      "type": "object",
+      "required": ["review_trigger"],
+      "properties": {"review_trigger": {"type": "string", "minLength": 1}}
+    },
+    "sources": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+  }
+}

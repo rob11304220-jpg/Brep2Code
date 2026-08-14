@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "unit_id": "sequence-rollback-verified-prefix-v1",
+  "unit_kind": "execution",
+  "status": "reviewed",
+  "question": "When may a fixed sequence regenerate a suffix without rewriting a verified prefix?",
+  "scope": "offline additive-boss-dependent-cut-v1 nominal rows with retained STEP artifacts",
+  "contract": {
+    "verified_prefix": "The baseline after-boss.step artifact must have passed frozen prefix checks and be reused as a byte-identical file.",
+    "allowed_action": "Only regenerate the canonical sketch_cut/cut suffix after a suffix-only invalid-depth defect.",
+    "success": "The reused prefix hash matches baseline and the final regenerated artifact passes existing bbox, volume and topology comparison gates.",
+    "fail_closed": "A defect before after-boss.step, a missing prefix artifact, a changed prefix hash, or a re-exported replacement prefix is unsupported."
+  },
+  "evidence": {
+    "level": "supported",
+    "supporting_cases": ["param_additive_boss_dependent_cut_centered_nominal", "param_additive_boss_dependent_cut_offset_nominal"],
+    "negative_control": "early defect before the boss prefix",
+    "review": "docs/architecture/v1/m31-sequence-rollback-fixed-script-review.md"
+  },
+  "boundaries": ["STEP re-export is not byte-stable evidence of the same prefix because exporter metadata can change.", "Only the frozen six-step sequence and invalid-depth suffix defect are supported.", "No automatic runtime rollback, generated-script repair, history recovery, public schema change, helper, IR/SDK, manifest or provider use follows."],
+  "runtime_projection": {"eligible": false, "review_trigger": "Independent direct runtime evidence and a separate adoption review are required."}
+}

@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "decision_id": "q01-selector-ambiguity-v1",
+  "status": "reviewed",
+  "stages": ["Q01", "Q02", "Q03", "Q04"],
+  "question": "When may a predicate-based planar-face selector bind a downstream dependent feature, and when must the Harness stop as ambiguous?",
+  "decision_owner": "observables",
+  "model_class": "dependent selection with symmetry or multiple eligible targets",
+  "observation": {
+    "required_facts": ["selector predicate", "measurement tolerance", "candidate cardinality", "eligible face geometry and topology"],
+    "ambiguity_or_fail_closed_conditions": ["candidate cardinality is zero or greater than one", "predicate depends on input face enumeration", "eligible targets require an unrecorded coordinate-only tie-breaker"]
+  },
+  "constrained_hypothesis": "A downstream feature may bind only when the declared live predicate yields exactly one eligible face; otherwise the result is ambiguous and no target is silently selected.",
+  "execution_and_repair": {
+    "gate_or_diagnostic": ["selector cardinality audit", "wrong-face negative control", "post-step geometry and topology gate"],
+    "repair_disposition": "stop",
+    "stopping_rule": ["do not substitute a coordinate-only rule", "do not claim persistent naming or generic face recovery", "do not change a parser, helper, IR, or runtime selector from this package alone"]
+  },
+  "evidence": {
+    "existing": ["face-selected-dependent-cut-v1 provides a family-bounded unique maximum-Z boss-top oracle and explicitly excludes multiple eligible faces."],
+    "required_roles": ["oracle", "discriminating", "negative_control"],
+    "missing_counterexample": ["a symmetric or otherwise multi-eligible target pair in which the same predicate returns ambiguous rather than binding either face"],
+    "next_minimal_experiment": "Completed by M29-002: the frozen twin-boss controls return ambiguous. Any extension must isolate a new selector ambiguity condition without relaxing this predicate."
+  },
+  "reference_and_adoption": {
+    "reference_maturity": "L1",
+    "adoption_disposition": "development_only",
+    "not_authorized": ["runtime retrieval", "LLM prompt injection", "persistent entity IDs", "generic selector helper", "IR or SDK change", "manifest or provider use"]
+  },
+  "links": {
+    "observable_units": ["docs/corpus/knowledge/observables/planar-face-selector-cardinality-v1.json"],
+    "operation_units": ["docs/corpus/knowledge/operations/face-selected-dependent-cut-v1.json"],
+    "execution_units": [],
+    "patterns": [],
+    "coverage_dimensions": ["sequence_dependency"],
+    "workpacks": ["docs/workpacks/done/WP-M25-001-face-selected-dependent-cut-design.md", "docs/workpacks/done/WP-M25-002-face-selected-dependent-cut-controlled-production.md", "docs/workpacks/done/WP-M29-001-selector-ambiguity-design.md", "docs/workpacks/done/WP-M29-002-selector-ambiguity-controlled-production.md"],
+    "adrs": ["docs/architecture/adr/0028-face-selected-dependent-cut-design.md", "docs/architecture/adr/0029-face-selected-dependent-cut-governance.md", "docs/architecture/adr/0035-harness-oriented-knowledge-base-architecture.md", "docs/architecture/adr/0037-selector-ambiguity-pair-preregistration.md"],
+    "paper_evidence": ["D:/paper/Projects/Brep2Code-research/outputs/literature-synthesis-and-validation-handoff.md", "D:/paper/Projects/Brep2Code-research/routes/q01-feature-recognition-evidence-boundaries.md", "D:/paper/Projects/Brep2Code-research/routes/q02-operation-dependency-evidence-boundaries.md"]
+  }
+}

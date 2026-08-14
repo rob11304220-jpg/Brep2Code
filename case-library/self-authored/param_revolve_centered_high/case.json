@@ -1,0 +1,79 @@
+{
+  "case_id": "param_revolve_centered_high",
+  "status": "active",
+  "origin": "self_authored",
+  "tier": "P2",
+  "fixture_version": 1,
+  "family_id": "revolve_centered",
+  "data_split": "development",
+  "variant": "high",
+  "parameters": {
+    "axis_x": 0.0,
+    "z_min": 0.0,
+    "inner_radius": 6.0,
+    "lower_outer_radius": 18.0,
+    "upper_outer_radius": 12.0,
+    "lower_height": 16.0,
+    "upper_height": 28.0,
+    "angle_deg": 360.0
+  },
+  "input_step": "input.step",
+  "reference_script_status": "available",
+  "reference_script": "reference_build_sequence.py",
+  "sha256": "2cb592eb3ed098eec6612b46ccc9e55fd7c24f92b6848bd04938cc316e181e2e",
+  "unit": "mm",
+  "expected": {
+    "ok": true,
+    "input": "D:\\codeai\\Brep2Code\\case-library\\self-authored\\param_revolve_centered_high\\input.step",
+    "file_name": "input.step",
+    "format": "step",
+    "unit": "unknown",
+    "bbox": {
+      "min": [
+        -18.0,
+        -18.0,
+        0.0
+      ],
+      "max": [
+        18.0,
+        18.0,
+        28.0
+      ]
+    },
+    "counts": {
+      "solid": 1,
+      "shell": 1,
+      "face": 6,
+      "edge": 18
+    },
+    "area": 5579.468552775364,
+    "volume": 18547.96302679404
+  },
+  "sequence_pair": {
+    "grammar_version": "revolve-v1",
+    "oracle_provenance": "self_authored_deterministic_reference",
+    "sequence": {
+      "operations": [
+        {
+          "id": "sketch_profile",
+          "kind": "SketchSteppedRadialProfile",
+          "plane": "XZ",
+          "radial_side": "positive_x_from_declared_axis",
+          "axis_x": 0.0
+        },
+        {
+          "id": "revolve",
+          "kind": "RevolveFace",
+          "profile": "sketch_profile",
+          "axis": {
+            "origin_role": "declared_axis_origin",
+            "direction": "+Z"
+          },
+          "angle_deg": 360.0
+        }
+      ]
+    },
+    "candidate_sequence": "candidate_sequence.json"
+  },
+  "admission_boundary": "Active self-authored governance case under ADR-0064; absent from executable manifests, provider inputs, training, and runtime resources."
+}

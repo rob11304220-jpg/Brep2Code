@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "decision_id": "q04-sequence-rollback-v1",
+  "status": "reviewed",
+  "stages": ["Q03", "Q04"],
+  "question": "Does bounded rollback to a verified sequence prefix reduce error propagation without rewriting a correct prefix?",
+  "decision_owner": "execution",
+  "model_class": "longer constrained sequence with a localized injected mid-sequence defect",
+  "observation": {
+    "required_facts": ["step-indexed intermediate B-Rep states", "verified prefix boundary", "localized failure signature", "suffix regeneration scope"],
+    "ambiguity_or_fail_closed_conditions": ["no step-level artifacts", "failure cannot be localized to a prefix/suffix boundary", "rollback changes the already verified prefix"]
+  },
+  "constrained_hypothesis": "For a preregistered constrained sequence, rollback may regenerate only the suffix after the first failing step and must retain the verified prefix and its gate evidence.",
+  "execution_and_repair": {
+    "gate_or_diagnostic": ["per-step artifact comparison", "injected-error control", "verified-prefix regression", "existing final geometry/topology gates"],
+    "repair_disposition": "diagnose_only",
+    "stopping_rule": ["no source-patch and sequence-rollback conflation", "no production repair behavior before a controlled comparison", "do not claim B-Rep history recovery"]
+  },
+  "evidence": {
+    "existing": ["M10 fixed-script path treatment is an execution compatibility result and does not test step rollback or B-Rep fidelity repair."],
+    "required_roles": ["oracle", "negative_control", "regression"],
+    "missing_counterexample": ["a mid-sequence error whose proposed rollback either damages a correct prefix or cannot improve the suffix"],
+    "next_minimal_experiment": "Completed by M31-002: both frozen nominal rows retained a byte-identical verified boss-prefix artifact through a suffix-only defect and canonical suffix regeneration restored existing final gates. The early defect was unsupported. Any extension must isolate a new sequence/defect condition without treating a re-exported shape as the same prefix artifact."
+  },
+  "reference_and_adoption": {
+    "reference_maturity": "L0",
+    "adoption_disposition": "development_only",
+    "not_authorized": ["automatic runtime rollback", "provider request", "IR/SDK change", "new helper", "manifest change"]
+  },
+  "links": {
+    "observable_units": [], "operation_units": [], "execution_units": ["docs/corpus/knowledge/execution/sandbox-input-path-fixed-script-v1.json", "docs/corpus/knowledge/execution/sequence-rollback-verified-prefix-v1.json"], "patterns": [],
+    "coverage_dimensions": ["sequence_dependency"], "workpacks": ["docs/workpacks/done/WP-M31-001-sequence-rollback-design.md", "docs/workpacks/done/WP-M31-002-sequence-rollback-fixed-script-experiment.md"],
+    "adrs": ["docs/architecture/adr/0035-harness-oriented-knowledge-base-architecture.md", "docs/architecture/adr/0038-sequence-rollback-design-preregistration.md"],
+    "paper_evidence": ["D:/paper/Projects/Brep2Code-research/outputs/literature-synthesis-and-validation-handoff.md"]
+  }
+}

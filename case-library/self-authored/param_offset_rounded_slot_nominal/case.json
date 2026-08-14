@@ -1,0 +1,93 @@
+{
+  "case_id": "param_offset_rounded_slot_nominal",
+  "status": "experimental",
+  "origin": "self_authored",
+  "tier": "P2",
+  "fixture_version": 1,
+  "family_id": "offset_rounded_slot",
+  "data_split": "held_out",
+  "variant": "nominal",
+  "parameters": {
+    "center_xy": [
+      15.0,
+      10.0
+    ],
+    "width": 4.0,
+    "straight_length": 10.0
+  },
+  "input_step": "input.step",
+  "reference_script_status": "unavailable",
+  "sha256": "12dc5f25f1db86bb8d334ba9c325d1b4edee330d252b477185f62c5721805df1",
+  "unit": "mm",
+  "expected": {
+    "ok": true,
+    "input": "D:\\codeai\\Brep2Code\\case-library\\self-authored\\param_offset_rounded_slot_nominal\\input.step",
+    "file_name": "input.step",
+    "format": "step",
+    "unit": "unknown",
+    "bbox": {
+      "min": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max": [
+        30.0,
+        20.0,
+        5.0
+      ]
+    },
+    "counts": {
+      "solid": 1,
+      "shell": 1,
+      "face": 11,
+      "edge": 54
+    },
+    "area": 1757.6991118430817,
+    "volume": 2737.1681469281953
+  },
+  "sequence_pair": {
+    "grammar_version": "rounded-slot-v1",
+    "oracle_provenance": "self_authored_deterministic_reference",
+    "sequence": {
+      "operations": [
+        {
+          "id": "sketch_1",
+          "kind": "SketchRect",
+          "plane": "XY",
+          "length_x": 30.0,
+          "length_y": 20.0
+        },
+        {
+          "id": "base_1",
+          "kind": "ExtrudeBase",
+          "profile": "sketch_1",
+          "direction": "+Z",
+          "distance": 5.0
+        },
+        {
+          "id": "slot_sketch_1",
+          "kind": "SketchRoundedSlot",
+          "plane": "XY",
+          "support": "base_1",
+          "center_xy": [
+            15.0,
+            10.0
+          ],
+          "width": 4.0,
+          "straight_length": 10.0,
+          "cap_radius": 2.0
+        },
+        {
+          "id": "slot_cut_1",
+          "kind": "CutThrough",
+          "target": "base_1",
+          "profile": "slot_sketch_1",
+          "direction": "+Z"
+        }
+      ]
+    },
+    "candidate_sequence": "candidate_sequence.json"
+  },
+  "admission_boundary": "Experimental candidate only; absent from registry, manifest, provider, training, and runtime paths."
+}

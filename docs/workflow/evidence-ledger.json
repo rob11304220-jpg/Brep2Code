@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "records": [
+    {"decision_id":"q03-local-geometry-feedback-v1","status":"deferred","reentry_condition":"Three executable and readable geometry failures must be globally non-actionable under existing gates.","evidence_paths":["docs/architecture/v1/m34-next-decision-gate-review.md","docs/workpacks/deferred/WP-TRG-001-geometry-delta-diagnostics.md"]},
+    {"decision_id":"q03-editability-oracle-v1","status":"deferred","reentry_condition":"An admissible source/history oracle and the documented Fusion blocker must both be resolved.","evidence_paths":["docs/architecture/v1/m34-next-decision-gate-review.md","docs/workpacks/deferred/WP-TRG-004-deepcad-admission-audit.md"]},
+    {"decision_id":"q04-runtime-guidance-retrieval-v1","status":"backlog","reentry_condition":"One mechanism must accumulate three independent direct evidence records, then pass development-only review.","evidence_paths":["docs/workpacks/done/WP-M19-002-development-guidance-retrieval-evaluation.md","docs/workpacks/done/WP-M19-003-bounded-runtime-guidance-retrieval.md"]},
+    {"decision_id":"hosted-campaign-readiness-lifecycle-v1","status":"deferred","reentry_condition":"The current asymmetric campaign has an independently reviewed terminal report and the user selects a new G2 lifecycle-improvement workpack.","evidence_paths":["docs/architecture/v1/hosted-campaign-readiness-lifecycle-proposal.md","docs/workpacks/deferred/WP-TRG-042-hosted-campaign-readiness-lifecycle.md"]}
+  ]
+}

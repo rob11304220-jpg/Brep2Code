@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "scope": "development-side migration index; not a case registry, manifest, runtime authorization, or training dataset",
+  "authority": "docs/architecture/adr/0036-legacy-evidence-disposition-and-decision-index.md",
+  "dispositions": [
+    {
+      "id": "m20-m27-sequence-paired-operation-families",
+      "source_assets": "Seven self-authored deterministic sequence-paired families promoted through M20--M27.",
+      "q_stages": ["Q02", "Q03"],
+      "evidence_roles": ["oracle", "regression"],
+      "disposition": "reviewed_knowledge_unit",
+      "knowledge_links": [
+        "docs/corpus/knowledge/operations/prismatic-hole-v1.json",
+        "docs/corpus/knowledge/operations/rounded-slot-v1.json",
+        "docs/corpus/knowledge/operations/multi-contour-pocket-v1.json",
+        "docs/corpus/knowledge/operations/additive-boss-dependent-cut-v1.json",
+        "docs/corpus/knowledge/operations/face-selected-dependent-cut-v1.json",
+        "docs/corpus/knowledge/operations/multi-inner-loop-pocket-v1.json",
+        "docs/corpus/knowledge/operations/oriented-rounded-slot-v1.json"
+      ],
+      "boundary": "Family-scoped deterministic replay is not generic B-Rep-to-sequence recovery, selector grounding, or runtime guidance."
+    },
+    {
+      "id": "m90-repeated-feature-pattern-family",
+      "source_assets": "Six self-authored deterministic repeated-feature-pattern records promoted through M90.",
+      "q_stages": ["Q02", "Q03"],
+      "evidence_roles": ["oracle", "regression"],
+      "disposition": "reviewed_knowledge_unit",
+      "knowledge_links": ["docs/corpus/knowledge/operations/repeated-feature-pattern-v1.json"],
+      "boundary": "Only the frozen four-instance axis-aligned rectangular-grid through-cut grammar is supported; it is not generic pattern recognition, manifest admission, provider input, or runtime guidance."
+    },
+    {
+      "id": "m7-m12-self-authored-ladder-and-parametric-assets",
+      "source_assets": "The 21 P0--P3 capability-ladder cases and pre-M20 parametric assets retained in the self-authored registry.",
+      "q_stages": ["Q01", "Q02", "Q03", "Q04"],
+      "evidence_roles": ["unclassified_evidence_asset"],
+      "disposition": "retained_no_reusable_knowledge",
+      "knowledge_links": [],
+      "boundary": "These assets remain available for a decision-specific audit, but tier, feature label, replay pass, or parameter variation alone does not establish a Q01--Q04 claim."
+    },
+    {
+      "id": "m8-m17-external-source-controls",
+      "source_assets": "ABC B-Rep-only controls and restricted Fusion Line3D replay evidence.",
+      "q_stages": ["Q01", "Q03"],
+      "evidence_roles": ["ood_robustness", "native_history_validation"],
+      "disposition": "reviewed_boundary",
+      "knowledge_links": ["docs/corpus/knowledge/patterns/external-history-boundary.json"],
+      "boundary": "No generic native-history compatibility or B-Rep-to-sequence claim is permitted."
+    },
+    {
+      "id": "m10-sandbox-path-fixed-script-repair",
+      "source_assets": "Two direct sandbox input-path reproductions, one non-matching import control, and the M10-012 review.",
+      "q_stages": ["Q03", "Q04"],
+      "evidence_roles": ["negative_control", "fixed_script_diagnostic"],
+      "disposition": "reviewed_knowledge_unit",
+      "knowledge_links": ["docs/corpus/knowledge/execution/sandbox-input-path-fixed-script-v1.json"],
+      "runtime_card_links": ["runtime_resources/experience-cards/cards/sandbox-input-path-fixed-script.json", "runtime_resources/experience-cards/cards/geometry-gates-remain-authoritative.json"],
+      "boundary": "This is fixed-script compatibility and gate-preservation evidence, not a generic helper, generated-script improvement, or fidelity-repair rule."
+    },
+    {
+      "id": "m19-experience-card-foundation",
+      "source_assets": "Three experimental source-linked experience cards and their audit contract.",
+      "q_stages": ["Q03", "Q04"],
+      "evidence_roles": ["runtime_projection_candidate"],
+      "disposition": "retained_runtime_projection",
+      "knowledge_links": ["docs/corpus/knowledge/execution/sandbox-input-path-fixed-script-v1.json"],
+      "boundary": "Cards remain experimental projections. The disposition index supplies traceability only and does not satisfy M19-002's retrieval-entry criteria."
+    },
+    {
+      "id": "m29-selector-ambiguity-controls",
+      "source_assets": "Two preregistered experimental twin-boss candidates plus the existing unique-selector oracle.",
+      "q_stages": ["Q01", "Q02"],
+      "evidence_roles": ["oracle", "discriminating", "negative_control"],
+      "disposition": "reviewed_knowledge_unit",
+      "knowledge_links": ["docs/corpus/knowledge/observables/planar-face-selector-cardinality-v1.json"],
+      "boundary": "Only the frozen planar +Z maximum-Z predicate/cardinality boundary is supported; candidates remain experimental and do not authorize generic selection or promotion."
+    }
+  ]
+}

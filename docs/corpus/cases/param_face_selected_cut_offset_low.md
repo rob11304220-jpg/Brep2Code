@@ -1,0 +1,16 @@
+# param_face_selected_cut_offset_low
+
+- Origin: self-authored deterministic-oracle case
+- Tier: P2
+- Family: `face_selected_cut_offset`
+- Split: `held_out`
+- Variant: `low`
+
+## Assets
+
+- Authoritative metadata: `case-library/self-authored/param_face_selected_cut_offset_low/case.json`
+- Target B-Rep: `case-library/self-authored/param_face_selected_cut_offset_low/input.step`
+- Deterministic reference: `case-library/self-authored/param_face_selected_cut_offset_low/reference_build_sequence.py`
+- Sequence pair: `candidate_sequence.json`, normalized under `face-selected-dependent-cut-v1`
+
+This active library case is a self-authored deterministic oracle, not native construction history or runtime face selection. It is not in an executable manifest.

@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "crosswalk_id": "development-evidence-crosswalk-v1",
+  "scope": "Development-side, source-linked navigation over reviewed metadata and documentary sources only; not a case registry, manifest, runtime resource, training dataset, or hosted authorization.",
+  "primary_node": "bounded_modeling_hypothesis",
+  "authorities": {
+    "current_state": "docs/workflow/status.md",
+    "case_identity_lifecycle_hash_split_baseline": "case.json and docs/corpus/registry/self-authored.json",
+    "knowledge_units": "docs/corpus/knowledge/{observables,operations,execution,patterns}",
+    "decision_packages": "docs/corpus/knowledge/decisions/index.json",
+    "coverage_gaps": "docs/corpus/knowledge/coverage-matrix.json",
+    "admission_evidence": "docs/corpus/knowledge/admissions/",
+    "runtime_adoption": "separately selected and reviewed proposal only"
+  },
+  "source_hashes": [
+    {"path": "docs/corpus/knowledge/decisions/index.json", "sha256": "a6c63cb9de897bf97044ca432d5d65924cf57834d441f009d0b78cb1715b3431"},
+    {"path": "docs/corpus/knowledge/coverage-matrix.json", "sha256": "e9b5b51b10048ff6c4bb1af5463ff96072d3c160efa325dfcadd16e1a0a26ea7"},
+    {"path": "docs/corpus/knowledge/evidence-disposition.json", "sha256": "1c383e51662f9798804a62ba72c1e1234bd416ab87f047ac390b427f10dadb03"},
+    {"path": "docs/corpus/knowledge/admissions/case-library-admission-profile-v1.json", "sha256": "a9255b26fa7595851876559438558908cd17018d01bf3873818d433e4d27bdfa"},
+    {"path": "docs/corpus/knowledge/admissions/selector-ambiguity-v1.json", "sha256": "efb990b147d164e351f4239b63243789d0ad9ddefe76d8afedf9ff84de0101ad"}
+  ],
+  "hypotheses": [
+    {
+      "id": "hm-q01-selector-cardinality-v1",
+      "label": "Unique planar-selector binding is permitted only at cardinality one",
+      "capability_question": "q01-selector-ambiguity-v1",
+      "stages": ["Q01", "Q02", "Q03", "Q04"],
+      "relations": {
+        "observable_units": ["planar-face-selector-cardinality-v1"],
+        "operation_units": ["face-selected-dependent-cut-v1"],
+        "execution_units": [],
+        "patterns": [],
+        "admission_ids": ["selector-ambiguity-v1-m142"],
+        "evidence_dispositions": ["m29-selector-ambiguity-controls"],
+        "coverage_dimensions": ["sequence_dependency"]
+      },
+      "difficulty": {"modeling_mechanism": "dependent face-selected cut", "entity_reference_stability": "exactly one declared planar +Z maximum-output-Z candidate", "sequence_dependency": "bind before dependent cut", "parameter_boundary": "frozen family split and declared predicate"},
+      "evidence": {"maturity": "reviewed hash-bound admission record", "roles": ["oracle", "discriminating", "negative_control"], "counterexample": "multiple eligible candidates must fail closed", "admission_risk": "bounded_unique_bind; ambiguity is terminal"},
+      "evaluation_boundary": "Offline/documentary evidence only; a future evaluation must preserve cardinality, negative controls, and stop disposition.",
+      "adoption_boundary": "development_only; no persistent IDs, generic selector helper, runtime retrieval, manifest, provider, training, IR, or SDK authority"
+    },
+    {
+      "id": "hm-q01-blind-through-observability-v1",
+      "label": "Frozen +Z single-cylinder facts can distinguish the reviewed blind/through observable",
+      "capability_question": "q01-blind-through-observability-v1",
+      "stages": ["Q01", "Q02"],
+      "relations": {
+        "observable_units": ["blind-through-cylindrical-extent-v1"],
+        "operation_units": ["prismatic-hole-v1"],
+        "execution_units": [],
+        "patterns": [],
+        "admission_ids": [],
+        "evidence_dispositions": ["m20-m27-sequence-paired-operation-families"],
+        "coverage_dimensions": ["feature_semantics", "sequence_dependency"]
+      },
+      "difficulty": {"modeling_mechanism": "single-cylinder prismatic cut", "entity_reference_stability": "no generic face or edge binding asserted", "sequence_dependency": "frozen family grammar", "parameter_boundary": "+Z single-cylinder observable only"},
+      "evidence": {"maturity": "reviewed observable plus family-scoped sequence evidence", "roles": ["oracle", "regression"], "counterexample": "other counts, directions, or counterbore conditions fail closed", "admission_risk": "needs_evidence outside the exact observable scope"},
+      "evaluation_boundary": "Do not convert the observable into a feature label or general history claim.",
+      "adoption_boundary": "development_only; no runtime reference or provider input"
+    },
+    {
+      "id": "hm-q04-verified-prefix-rollback-v1",
+      "label": "Only the suffix after a verified prefix may be regenerated for the reviewed defect class",
+      "capability_question": "q04-sequence-rollback-v1",
+      "stages": ["Q03", "Q04"],
+      "relations": {
+        "observable_units": [],
+        "operation_units": [],
+        "execution_units": ["sandbox-input-path-fixed-script-v1", "sequence-rollback-verified-prefix-v1"],
+        "patterns": [],
+        "admission_ids": [],
+        "evidence_dispositions": ["m10-sandbox-path-fixed-script-repair"],
+        "coverage_dimensions": ["sequence_dependency"]
+      },
+      "difficulty": {"modeling_mechanism": "localized mid-sequence defect", "entity_reference_stability": "not asserted", "sequence_dependency": "byte-identical verified prefix is retained", "parameter_boundary": "preregistered nominal rows and defect boundary only"},
+      "evidence": {"maturity": "reviewed fixed-script execution evidence", "roles": ["oracle", "negative_control", "regression"], "counterexample": "prefix-changing or non-localizable failures are unsupported", "admission_risk": "diagnose_only"},
+      "evaluation_boundary": "A future comparison must distinguish source repair from suffix rollback and retain existing gates.",
+      "adoption_boundary": "development_only; no automatic runtime rollback, helper, provider, IR, SDK, or manifest authority"
+    },
+    {
+      "id": "hm-q02-family-scoped-sequence-grammars-v1",
+      "label": "Reviewed operation units support only their frozen self-authored sequence grammars",
+      "capability_question": "family-scoped Q02 sequence hypotheses",
+      "stages": ["Q02", "Q03"],
+      "relations": {
+        "observable_units": [],
+        "operation_units": ["rounded-slot-v1", "multi-contour-pocket-v1", "additive-boss-dependent-cut-v1", "multi-inner-loop-pocket-v1", "oriented-rounded-slot-v1", "repeated-feature-pattern-v1"],
+        "execution_units": [],
+        "patterns": [],
+        "admission_ids": [],
+        "evidence_dispositions": ["m20-m27-sequence-paired-operation-families", "m90-repeated-feature-pattern-family"],
+        "coverage_dimensions": ["sketch_topology", "feature_semantics", "sequence_dependency", "parameter_robustness"]
+      },
+      "difficulty": {"modeling_mechanism": "bounded profile, dependency, orientation, loop-role, or fixed-grid grammar", "entity_reference_stability": "grammar-specific; not generic", "sequence_dependency": "declared within each unit", "parameter_boundary": "declared development/held-out family metadata only"},
+      "evidence": {"maturity": "reviewed family-scoped replay and gate evidence", "roles": ["oracle", "regression"], "counterexample": "unlisted profiles, frames, references, and topology remain unsupported", "admission_risk": "needs_evidence"},
+      "evaluation_boundary": "A new evaluation selects one mechanism-specific hypothesis, counterexample, and stopping rule; it may not use this grouping as a generic capability claim.",
+      "adoption_boundary": "development_only; no automatic admission, runtime projection, or training use"
+    },
+    {
+      "id": "hm-external-history-boundary-v1",
+      "label": "External B-Rep-only and restricted native-history records bound, rather than prove, reconstruction claims",
+      "capability_question": "external-history validation boundary",
+      "stages": ["Q01", "Q03"],
+      "relations": {
+        "observable_units": [],
+        "operation_units": [],
+        "execution_units": [],
+        "patterns": ["external-history-boundary"],
+        "admission_ids": [],
+        "evidence_dispositions": ["m8-m17-external-source-controls"],
+        "coverage_dimensions": ["external_history_validation"]
+      },
+      "difficulty": {"modeling_mechanism": "source-history and B-Rep-only comparison", "entity_reference_stability": "not asserted", "sequence_dependency": "not recoverable from present evidence", "parameter_boundary": "source/license/representation restricted"},
+      "evidence": {"maturity": "reviewed boundary", "roles": ["ood_robustness", "native_history_validation"], "counterexample": "no generic native-history compatibility or B-Rep-to-sequence recovery", "admission_risk": "unknown outside reviewed sources"},
+      "evaluation_boundary": "A later external-source route requires separate representation, license, and oracle review.",
+      "adoption_boundary": "no runtime, provider, training, or reconstruction authority"
+    }
+  ],
+  "non_projection": {
+    "evidence_only": true,
+    "prohibited": ["case lifecycle or promotion", "manifest", "runtime card", "reference pack", "retrieval", "SDK", "IR", "provider", "training", "hosted execution"]
+  },
+  "maintenance": {
+    "update_order": ["update the authoritative source", "update this crosswalk's relationships and declared hashes", "run tools/audit_development_evidence_crosswalk.py", "update the derived navigation when a reader-facing conclusion changes"],
+    "drift_disposition": "A missing path, changed declared hash, unknown ID, forbidden source path, or prohibited adoption claim fails the audit. Repair the authoritative source or crosswalk relationship; do not infer missing evidence or read fixtures/scripts to resolve drift.",
+    "migration_boundary": "M146 introduces derived development-side navigation only. Existing source schemas, IDs, manifests, runtime resources, and case-library layout are unchanged."
+  }
+}

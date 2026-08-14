@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "selection_id": "abc-v00-m8-001",
+  "dataset_id": "abc",
+  "upstream_release": "v00",
+  "selection_status": "completed",
+  "official_step_index": "https://deep-geometry.github.io/abc-dataset/data/step_v00.txt",
+  "source_chunk": {
+    "chunk_id": "abc_0000_step_v00.7z",
+    "url": "https://archive.nyu.edu/rest/bitstreams/88598/retrieve",
+    "local_archive": "data/datasets/abc/v00/archives/abc_0000_step_v00.7z"
+  },
+  "license_review": {
+    "status": "local_research_only",
+    "reviewed_on": "2026-08-02",
+    "source_url": "https://deep-geometry.github.io/abc-dataset/",
+    "redistribution_permitted": false,
+    "notes": "ABC states that CAD-model copyright remains with original creators. The repository records only source identities, hashes and non-sensitive baselines."
+  },
+  "normalization": {
+    "source_format": "STEP",
+    "source_unit": "unknown",
+    "coordinate_frame": "upstream as supplied",
+    "conversion_tool": null,
+    "conversion_version": null,
+    "transform_applied": null
+  },
+  "selection_policy": {
+    "scan_order": "archive STEP-member order",
+    "acceptance_rule": "existing input probe succeeds and reports exactly one solid",
+    "development_count": 8,
+    "held_out_count": 4,
+    "scan_cutoff_source_sample_id": "00000022"
+  },
+  "rejected_candidates": [
+    {"source_sample_id": "00000000", "reason": "solid_count_not_one", "solid_count": 6},
+    {"source_sample_id": "00000001", "reason": "solid_count_not_one", "solid_count": 2},
+    {"source_sample_id": "00000005", "reason": "solid_count_not_one", "solid_count": 10},
+    {"source_sample_id": "00000010", "reason": "solid_count_not_one", "solid_count": 3},
+    {"source_sample_id": "00000014", "reason": "solid_count_not_one", "solid_count": 7},
+    {"source_sample_id": "00000015", "reason": "solid_count_not_one", "solid_count": 3},
+    {"source_sample_id": "00000016", "reason": "solid_count_not_one", "solid_count": 3},
+    {"source_sample_id": "00000017", "reason": "solid_count_not_one", "solid_count": 64},
+    {"source_sample_id": "00000018", "reason": "solid_count_not_one", "solid_count": 16},
+    {"source_sample_id": "00000019", "reason": "solid_count_not_one", "solid_count": 16},
+    {"source_sample_id": "00000020", "reason": "solid_count_not_one", "solid_count": 2}
+  ],
+  "samples": [
+    {"case_id": "abc_v00_00000002", "source_sample_id": "00000002", "source_relative_path": "step/00000002/00000002_1ffb81a71e5b402e966b9341_step_001.step", "source_sha256": "c190144c83c811a48c1a7892c299fc60a85332ee21535c630518637d9f325688", "split": "development", "local_storage": "data/datasets/abc/v00/step/00000002/00000002_1ffb81a71e5b402e966b9341_step_001.step", "status": "accepted"},
+    {"case_id": "abc_v00_00000003", "source_sample_id": "00000003", "source_relative_path": "step/00000003/00000003_1ffb81a71e5b402e966b9341_step_002.step", "source_sha256": "532f0f0687407346f43f9a28e7934c9927df0d269dd4d097864be1e060368734", "split": "development", "local_storage": "data/datasets/abc/v00/step/00000003/00000003_1ffb81a71e5b402e966b9341_step_002.step", "status": "accepted"},
+    {"case_id": "abc_v00_00000004", "source_sample_id": "00000004", "source_relative_path": "step/00000004/00000004_1ffb81a71e5b402e966b9341_step_003.step", "source_sha256": "a7be17878aea45cc9a1aa0b68901756a8ad70d6988a9c42fb2ee6c8525a32195", "split": "development", "local_storage": "data/datasets/abc/v00/step/00000004/00000004_1ffb81a71e5b402e966b9341_step_003.step", "status": "accepted"},
+    {"case_id": "abc_v00_00000006", "source_sample_id": "00000006", "source_relative_path": "step/00000006/00000006_d4fe04f0f5f84b52bd4f10e4_step_001.step", "source_sha256": "5b0a309b468874e023681903bd6208479f6ea80064d9c17e08873e921732a0fe", "split": "development", "local_storage": "data/datasets/abc/v00/step/00000006/00000006_d4fe04f0f5f84b52bd4f10e4_step_001.step", "status": "accepted"},
+    {"case_id": "abc_v00_00000007", "source_sample_id": "00000007", "source_relative_path": "step/00000007/00000007_b33a147f86da49879455d286_step_000.step", "source_sha256": "02616fa80edaf4d8a1aa03619e3488fa42158da3874ccca3289b9af700fe07cf", "split": "development", "local_storage": "data/datasets/abc/v00/step/00000007/00000007_b33a147f86da49879455d286_step_000.step", "status": "accepted"},
+    {"case_id": "abc_v00_00000008", "source_sample_id": "00000008", "source_relative_path": "step/00000008/00000008_9b3d6a97e8de4aa193b81000_step_000.step", "source_sha256": "84c7687d1acf464c406a6648e379893f21f0c9ed358ea0dee92be7e10b882f47", "split": "development", "local_storage": "data/datasets/abc/v00/step/00000008/00000008_9b3d6a97e8de4aa193b81000_step_000.step", "status": "accepted"},
+    {"case_id": "abc_v00_00000009", "source_sample_id": "00000009", "source_relative_path": "step/00000009/00000009_9b3d6a97e8de4aa193b81000_step_001.step", "source_sha256": "34a7b399bef7d25ce7b85357d06210ec7c06fe6a39a6b20bc7369dc1abd40b77", "split": "development", "local_storage": "data/datasets/abc/v00/step/00000009/00000009_9b3d6a97e8de4aa193b81000_step_001.step", "status": "accepted"},
+    {"case_id": "abc_v00_00000011", "source_sample_id": "00000011", "source_relative_path": "step/00000011/00000011_e909f412cda24521865fac0f_step_000.step", "source_sha256": "490701d7fca1db71dc912bc6e1d7a3a1ef1792aeb030cfb1ead764abcf7e6920", "split": "development", "local_storage": "data/datasets/abc/v00/step/00000011/00000011_e909f412cda24521865fac0f_step_000.step", "status": "accepted"},
+    {"case_id": "abc_v00_00000012", "source_sample_id": "00000012", "source_relative_path": "step/00000012/00000012_f16882934f314832b639ffc0_step_000.step", "source_sha256": "29da96fd0b52e262036807b162b8c5d02cb74ab640dbef47d373433ad80ca046", "split": "held_out", "local_storage": "data/datasets/abc/v00/step/00000012/00000012_f16882934f314832b639ffc0_step_000.step", "status": "accepted"},
+    {"case_id": "abc_v00_00000013", "source_sample_id": "00000013", "source_relative_path": "step/00000013/00000013_c2f4d27f35ed4c138caf5c18_step_000.step", "source_sha256": "0af8f4f012b3355dd0f2232b9f04df45cdd2ee13c5d36368176b0a50e5c5a5e6", "split": "held_out", "local_storage": "data/datasets/abc/v00/step/00000013/00000013_c2f4d27f35ed4c138caf5c18_step_000.step", "status": "accepted"},
+    {"case_id": "abc_v00_00000021", "source_sample_id": "00000021", "source_relative_path": "step/00000021/00000021_ad34a3f60c4a4caa99646600_step_001.step", "source_sha256": "1ec4f3b2d9b1c5cfa9c0fed114d125ed53b85759134657a0f6ffa29078179ba2", "split": "held_out", "local_storage": "data/datasets/abc/v00/step/00000021/00000021_ad34a3f60c4a4caa99646600_step_001.step", "status": "accepted"},
+    {"case_id": "abc_v00_00000022", "source_sample_id": "00000022", "source_relative_path": "step/00000022/00000022_ad34a3f60c4a4caa99646600_step_002.step", "source_sha256": "9ed73f7963a68aec2121a1308385a8dc76041ff634870b28e9bc684c0ef3b4cc", "split": "held_out", "local_storage": "data/datasets/abc/v00/step/00000022/00000022_ad34a3f60c4a4caa99646600_step_002.step", "status": "accepted"}
+  ]
+}

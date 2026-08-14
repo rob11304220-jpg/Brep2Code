@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "decision_id": "q03-editability-oracle-v1",
+  "status": "deferred",
+  "stages": ["Q03"],
+  "question": "Can an independently sourced history/constraint oracle show that a reconstructed sequence preserves a stated edit relationship beyond static geometry?",
+  "decision_owner": "evidence",
+  "model_class": "shared-constraint or relational editability validation",
+  "observation": {
+    "required_facts": ["source history or constraint oracle", "declared edit mutation", "post-edit relational invariant", "kernel and export boundary"],
+    "ambiguity_or_fail_closed_conditions": ["only a deterministic reference script is available", "constraint truth is absent after export", "the post-edit relation is not independently observable"]
+  },
+  "constrained_hypothesis": "A static B-Rep match and directional script mutation are insufficient for editability; the claim requires an independent history/constraint oracle and a post-edit invariant.",
+  "execution_and_repair": {
+    "gate_or_diagnostic": ["history/constraint oracle check", "post-edit relation check", "existing execution and geometry gates"],
+    "repair_disposition": "stop",
+    "stopping_rule": ["do not relabel current deterministic mutations as native-history validation", "do not select external data without source/license/representation review"]
+  },
+  "evidence": {
+    "existing": ["Current self-authored families provide family-scoped directional editability mutations; the paper-vault synthesis requires a distinct history/constraint oracle."],
+    "required_roles": ["native_history_validation", "discriminating", "negative_control"],
+    "missing_counterexample": ["same static geometry with a mutation that violates the intended shared relation"],
+    "next_minimal_experiment": "Deferred pending a separately selected source/representation audit that can supply an admissible constraint oracle; no current case is promoted by this package."
+  },
+  "reference_and_adoption": {
+    "reference_maturity": "L0",
+    "adoption_disposition": "deferred",
+    "not_authorized": ["runtime editability gate", "external data admission", "manifest/provider use", "generic CAD-history claim"]
+  },
+  "links": {
+    "observable_units": [], "operation_units": [], "execution_units": [], "patterns": ["docs/corpus/knowledge/patterns/external-history-boundary.json"],
+    "coverage_dimensions": ["external_history_validation"], "workpacks": ["docs/workpacks/deferred/WP-TRG-004-deepcad-admission-audit.md"],
+    "adrs": ["docs/architecture/adr/0035-harness-oriented-knowledge-base-architecture.md"],
+    "paper_evidence": ["D:/paper/Projects/Brep2Code-research/outputs/literature-synthesis-and-validation-handoff.md", "D:/paper/Projects/Brep2Code-research/routes/model-taxonomy-and-dataset-evidence-map.md"]
+  }
+}

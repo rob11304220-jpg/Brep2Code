@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "admission_id": "fusion360_gallery-r1.0.1-m12-002",
+  "status": "m17_line3d_frame_evidence_audit_active",
+  "dataset_id": "fusion360_gallery",
+  "release": "r1.0.1",
+  "source": {
+    "official_url": "https://github.com/AutodeskAILab/Fusion360GalleryDataset",
+    "license_url": "https://raw.githubusercontent.com/AutodeskAILab/Fusion360GalleryDataset/master/LICENSE.md",
+    "license_review": "Official license permits access, use, reproduction and modification only for non-commercial research. The complete dataset may not be redistributed. The verified local cache remains ignored.",
+    "raw_asset_root": "data/datasets/fusion360_gallery/r1.0.1/",
+    "archive_url": "https://fusion-360-gallery-dataset.s3.us-west-2.amazonaws.com/reconstruction/r1.0.1/r1.0.1.zip",
+    "local_archive": "data/datasets/fusion360_gallery/r1.0.1/archives/r1.0.1.zip",
+    "local_extraction_root": "data/datasets/fusion360_gallery/r1.0.1/extracted/",
+    "cache_catalog": "data/datasets/fusion360_gallery/r1.0.1/cache-catalog.json"
+  },
+  "asset_inventory": {
+    "input_brep": {"available": true, "format": "SMT and STEP", "unit": "cm"},
+    "reference_sequence": {"available": true, "provenance": "native Fusion construction JSON", "format": "JSON"},
+    "intermediate_states": {"available": true, "format": "per-extrude SMT/STEP/OBJ references in ignored local cache"}
+  },
+  "planned_subset": {
+    "selection_rule": "Future work only: official r1.0.1 train/test membership; final STEP present; one final solid after STEP read; timeline restricted to Sketch and ExtrudeFeature; only NewBodyFeatureOperation, JoinFeatureOperation or CutFeatureOperation; centimetres converted to millimetres before local replay.",
+    "development_count": 2,
+    "held_out_count": 1,
+    "family_or_source_split_rule": "Preserve the official train/test split; do not derive both splits from one design family.",
+    "stopping_condition": "M14-001 fixed source SHA-256 and a 2 development/1 held-out subset, and proved replay and existing gates. M16-001 completed path/hash/split re-audit and separate local-only manifests. M17-001 stopped at its preregistered bound after a held-out mismatch; M17-002 rejected endpoint ordering; and M17-003 rejected coordinate-frame/extrude-direction mapping after its held-out candidate regressed Line3D controls. M17-004 nominated a profile-normal / STEP-projection / extent-boundary selector; M17-005 passed its fixed four-case matrix and M17-006 passed a preregistered independent 2 development/1 held-out matrix while strict replay remained default. Existing gates remain fixed."
+  },
+  "local_validation": {
+    "sha256_recorded": true,
+    "input_probe_passed": true,
+    "reference_replay_passed": true,
+    "existing_gates_passed": true,
+    "selection_record": "docs/corpus/external/fusion360-gallery-r1.0.1-m14-001-selection.json",
+    "validated_case_count": 3
+  },
+  "runtime_boundary": {
+    "default_fixture": false,
+    "provider_authorized": false,
+    "manifest_paths": ["docs/corpus/external/fusion360-gallery-r1.0.1-m16-001-development-manifest.json", "docs/corpus/external/fusion360-gallery-r1.0.1-m16-001-held-out-manifest.json"],
+    "notes": "M13-001 completed the ignored local archive/cache: SHA-256 485601de3d23e25a5d63a75588ca780fa7881d7a0bea1ab6c24dbcefa57ad5c9, ZIP CRC and safe extraction passed. M14-001 then established local replay evidence for three selected cases. M16-001 completed separate local-only manifests. M17-001 stopped after a held-out mismatch; M17-002 rejected endpoint ordering; and M17-003 rejected its fixed held-out ordering/direction candidate because Line3D controls regressed. M17-004 nominated a selector; M17-005 passed its fixed four-case treatment matrix and M17-006 passed a preregistered independent 2 development/1 held-out matrix without changing strict default replay. Existing manifests remain non-default; no corpus run, provider payload or hosted execution is authorized."
+  }
+}
