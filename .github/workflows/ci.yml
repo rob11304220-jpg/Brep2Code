@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: uv sync --dev
-      - run: uv run python tools/check_governance.py
-      - run: uv run python -m ruff check .
-      - run: uv run python -m pytest
+      - run: uv run ruff check src tests
+      - run: uv run pytest -q
+      - run: uv run brep2code cases validate
       - run: git diff --check

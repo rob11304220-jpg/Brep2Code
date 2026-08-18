@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brep2code.local/schemas/case-dossier.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "case_id", "mechanism_id", "capability_level", "geometry_assets", "modeling_assets", "harness_assets"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "case_id": {"type": "string", "minLength": 1},
+    "mechanism_id": {"type": "string", "minLength": 1},
+    "capability_level": {"type": "string", "pattern": "^L[0-6]$"},
+    "geometry_assets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input_step", "expected_geometry", "topology_oracle"],
+      "properties": {
+        "input_step": {"type": "string", "minLength": 1},
+        "expected_geometry": {"const": "case.json.expected"},
+        "topology_oracle": {"const": "case.json.expected.counts"}
+      }
+    },
+    "modeling_assets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kernel_operations", "sequence_dependencies", "parameter_dimensions", "failure_modes", "parser_notes"],
+      "properties": {
+        "kernel_operations": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "sequence_dependencies": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "parameter_dimensions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "failure_modes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "parser_notes": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "harness_assets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prompt_mode", "repair_policy", "required_gates", "gate_oracles", "development_cohort", "controls", "held_out_fixture", "positive_control", "negative_control", "reference_policy", "hosted_budget_policy"],
+      "properties": {
+        "prompt_mode": {"enum": ["observation-only", "mechanism-conditioned"]},
+        "repair_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["max_rounds", "initial_script_allowed"],
+          "properties": {"max_rounds": {"type": "integer", "minimum": 1}, "initial_script_allowed": {"type": "boolean"}}
+        },
+        "required_gates": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "gate_oracles": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "semantic": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["surface", "radius", "axis_direction"],
+              "properties": {
+                "surface": {"type": "string", "minLength": 1},
+                "radius": {"type": "number", "exclusiveMinimum": 0},
+                "axis_direction": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number"}}
+              }
+            },
+            "adjacency": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["surface", "axis", "extent_min", "extent_max"],
+              "properties": {
+                "surface": {"type": "string", "minLength": 1},
+                "axis": {"type": "integer", "minimum": 0, "maximum": 2},
+                "extent_min": {"type": "number"},
+                "extent_max": {"type": "number"}
+              }
+            }
+          }
+        },
+        "development_cohort": {"const": ["nominal", "parameter_variation", "failure_sensitive"]},
+        "controls": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["variant", "asset", "sha256", "expected_result", "failure_class"],
+            "properties": {
+              "variant": {"enum": ["nominal", "parameter_variation", "failure_sensitive"]},
+              "asset": {"type": "string", "minLength": 1},
+              "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+              "expected_result": {"enum": ["pass", "fail"]},
+              "failure_class": {"enum": ["pass", "geometry", "execution"]}
+            }
+          }
+        },
+        "held_out_fixture": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["asset", "sha256", "expected_result", "failure_class"],
+              "properties": {
+                "asset": {"type": "string", "minLength": 1},
+                "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "expected_result": {"enum": ["pass", "fail"]},
+                "failure_class": {"enum": ["pass", "geometry", "execution"]}
+              }
+            }
+          ]
+        },
+        "positive_control": {"type": "boolean"},
+        "negative_control": {"type": "boolean"},
+        "reference_policy": {"const": "harness_only"},
+        "hosted_budget_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["max_requests", "max_total_tokens", "max_cost_usd"],
+          "properties": {
+            "max_requests": {"type": "integer", "minimum": 1},
+            "max_total_tokens": {"type": "integer", "minimum": 1},
+            "max_cost_usd": {"type": "number", "exclusiveMinimum": 0}
+          }
+        }
+      }
+    }
+  }
+}

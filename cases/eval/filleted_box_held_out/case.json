@@ -1,0 +1,19 @@
+{
+  "case_id": "filleted_box_held_out",
+  "input_step": "input.step",
+  "sha256": "d3d2b9dcf1f9d1ff6aa688dd09a06c0a40df9bb5a5cac6176dab405fe4ee7bd9",
+  "unit": "mm",
+  "summary": "Held-out 24 x 14 x 10 mm box with a radius 1.5 mm fillet along its lower x-aligned edge.",
+  "tags": ["box", "fillet", "held-out", "parameter-generalization", "l2"],
+  "mechanism": "fillet",
+  "capability_level": "L2",
+  "compatibility_tier": "T2",
+  "kernel_properties": ["planar_faces", "cylindrical_fillet", "selected_edge"],
+  "sequence": ["make_box", "make_fillet"],
+  "difficulty": 2,
+  "expected": {
+    "bbox": {"min": [0.0, 0.0, 0.0], "max": [24.0, 14.0, 10.0]},
+    "volume": 3348.411500823467,
+    "counts": {"solid": 1, "shell": 1, "face": 7, "edge": 30}
+  }
+}

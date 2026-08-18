@@ -1,0 +1,19 @@
+{
+  "case_id": "filleted_box",
+  "input_step": "input.step",
+  "sha256": "e6d8f0ffd097cd24010165a0bcd030d89e5dce9cc5b43a07cb2eb8401f48fd1e",
+  "unit": "mm",
+  "summary": "20 x 16 x 12 mm box with a radius 2 mm fillet along its lower x-aligned edge.",
+  "tags": ["box", "fillet", "feature-sequence", "l2"],
+  "mechanism": "fillet",
+  "capability_level": "L2",
+  "compatibility_tier": "T2",
+  "kernel_properties": ["planar_faces", "cylindrical_fillet", "selected_edge"],
+  "sequence": ["make_box", "make_fillet"],
+  "difficulty": 2,
+  "expected": {
+    "bbox": {"min": [0.0, 0.0, 0.0], "max": [20.0, 16.0, 12.0]},
+    "volume": 3822.8318530718025,
+    "counts": {"solid": 1, "shell": 1, "face": 7, "edge": 30}
+  }
+}

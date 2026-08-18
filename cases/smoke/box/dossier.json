@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "case_id": "box",
+  "mechanism_id": "primitive",
+  "capability_level": "L0",
+  "geometry_assets": {
+    "input_step": "input.step",
+    "expected_geometry": "case.json.expected",
+    "topology_oracle": "case.json.expected.counts"
+  },
+  "modeling_assets": {
+    "kernel_operations": ["BRepPrimAPI_MakeBox"],
+    "sequence_dependencies": ["independent_solid"],
+    "parameter_dimensions": ["length", "width", "height", "origin"],
+    "failure_modes": ["wrong_dimensions", "wrong_origin", "invalid_step_write"],
+    "parser_notes": ["The axis-aligned box is the baseline primitive reconstruction target."]
+  },
+  "harness_assets": {
+    "prompt_mode": "observation-only",
+    "repair_policy": {"max_rounds": 2, "initial_script_allowed": true},
+    "required_gates": ["bbox", "volume", "topology"],
+    "gate_oracles": {},
+    "development_cohort": ["nominal", "parameter_variation", "failure_sensitive"],
+    "controls": [
+      {"variant": "nominal", "asset": "controls/nominal.py", "sha256": "8e7f0f78c4cf4307b22a00b603c223fe95708693df0796d7074897027b521bbf", "expected_result": "pass", "failure_class": "pass"},
+      {"variant": "parameter_variation", "asset": "controls/parameter_variation.py", "sha256": "cc30248b52ebac9d6a47b696d628c657f912496b72251a3c5135818a4244e459", "expected_result": "pass", "failure_class": "pass"},
+      {"variant": "failure_sensitive", "asset": "controls/failure_sensitive.py", "sha256": "1fcef410ea9dbfdba3bc6669b24066df0c757756434b5f21357fc446373ca501", "expected_result": "fail", "failure_class": "geometry"}
+    ],
+    "held_out_fixture": null,
+    "positive_control": true,
+    "negative_control": true,
+    "reference_policy": "harness_only",
+    "hosted_budget_policy": {"max_requests": 2, "max_total_tokens": 8192, "max_cost_usd": 0.1}
+  }
+}

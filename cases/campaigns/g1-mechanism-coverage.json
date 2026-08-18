@@ -1,0 +1,198 @@
+{
+  "schema_version": 1,
+  "campaign_id": "g1-mechanism-coverage",
+  "objective": "Measure bounded reconstruction and repair across primitive, analytic-surface, boolean-cut, and fillet mechanisms.",
+  "provider_policy": {
+    "provider": "deepseek",
+    "model": "deepseek-v4-pro",
+    "executor": "wsl-bwrap",
+    "max_rounds": 2,
+    "build_timeout_seconds": 30,
+    "max_requests": 8,
+    "case_max_requests": 2,
+    "provider_timeout_seconds": 120,
+    "max_retries": 0,
+    "max_output_tokens": 4096,
+    "max_total_tokens": 32768,
+    "case_max_total_tokens": 8192,
+    "max_cost_usd": 0.4,
+    "case_max_cost_usd": 0.1,
+    "input_cost_per_million": 1.0,
+    "output_cost_per_million": 2.0
+  },
+  "control_policy": {
+    "max_rounds": 1,
+    "build_timeout_seconds": 30,
+    "max_requests": 30,
+    "case_max_requests": 1,
+    "max_total_tokens": 30,
+    "case_max_total_tokens": 1,
+    "max_cost_usd": 0.3,
+    "case_max_cost_usd": 0.01
+  },
+  "held_out_policy": {
+    "max_rounds": 2,
+    "build_timeout_seconds": 30,
+    "max_requests": 12,
+    "case_max_requests": 2,
+    "max_total_tokens": 12,
+    "case_max_total_tokens": 2,
+    "max_cost_usd": 0.12,
+    "case_max_cost_usd": 0.01
+  },
+  "capability_ladder": [
+    {
+      "capability_level": "L0",
+      "label": "independent primitive and analytic-surface construction",
+      "case_ids": ["box", "cylinder", "box_held_out", "cylinder_held_out"],
+      "mechanisms": ["primitive", "analytic_surface"],
+      "minimum_cases": 2
+    },
+    {
+      "capability_level": "L1",
+      "label": "ordered boolean feature sequence",
+      "case_ids": ["block_with_hole", "blind_hole_block", "through_cut_held_out", "blind_cut_held_out"],
+      "mechanisms": ["boolean_cut"],
+      "minimum_cases": 2
+    },
+    {
+      "capability_level": "L2",
+      "label": "edge-selected feature construction",
+      "case_ids": ["filleted_box", "filleted_box_held_out"],
+      "mechanisms": ["fillet"],
+      "minimum_cases": 2
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "box",
+      "mode": "runtime",
+      "capability_level": "L0",
+      "mechanism": "primitive",
+      "kernel_properties": ["planar_faces", "analytic_plane"],
+      "sequence": ["make_box"],
+      "difficulty": 1
+    },
+    {
+      "case_id": "cylinder",
+      "mode": "held_out",
+      "capability_level": "L0",
+      "mechanism": "analytic_surface",
+      "kernel_properties": ["analytic_cylinder", "periodic_surface", "seam_edge"],
+      "sequence": ["make_cylinder"],
+      "difficulty": 1
+    },
+    {
+      "case_id": "block_with_hole",
+      "mode": "runtime",
+      "capability_level": "L1",
+      "mechanism": "boolean_cut",
+      "kernel_properties": ["planar_faces", "analytic_cylinder", "through_feature"],
+      "sequence": ["make_box", "make_cylinder", "cut"],
+      "difficulty": 2
+    },
+    {
+      "case_id": "blind_hole_block",
+      "mode": "runtime",
+      "capability_level": "L1",
+      "mechanism": "boolean_cut",
+      "kernel_properties": ["planar_faces", "analytic_cylinder", "blind_feature", "planar_bottom"],
+      "sequence": ["make_box", "make_blind_cylinder", "cut"],
+      "difficulty": 3
+    },
+    {
+      "case_id": "filleted_box",
+      "mode": "runtime",
+      "capability_level": "L2",
+      "mechanism": "fillet",
+      "kernel_properties": ["planar_faces", "cylindrical_fillet", "selected_edge"],
+      "sequence": ["make_box", "make_fillet"],
+      "difficulty": 2
+    },
+    {
+      "case_id": "box_held_out",
+      "mode": "held_out",
+      "capability_level": "L0",
+      "mechanism": "primitive",
+      "kernel_properties": ["planar_faces", "analytic_plane"],
+      "sequence": ["make_box"],
+      "difficulty": 1
+    },
+    {
+      "case_id": "cylinder_held_out",
+      "mode": "held_out",
+      "capability_level": "L0",
+      "mechanism": "analytic_surface",
+      "kernel_properties": ["analytic_cylinder", "periodic_surface", "seam_edge"],
+      "sequence": ["make_cylinder"],
+      "difficulty": 1
+    },
+    {
+      "case_id": "through_cut_held_out",
+      "mode": "held_out",
+      "capability_level": "L1",
+      "mechanism": "boolean_cut",
+      "kernel_properties": ["planar_faces", "analytic_cylinder", "through_feature"],
+      "sequence": ["make_box", "make_cylinder", "cut"],
+      "difficulty": 2
+    },
+    {
+      "case_id": "blind_cut_held_out",
+      "mode": "held_out",
+      "capability_level": "L1",
+      "mechanism": "boolean_cut",
+      "kernel_properties": ["planar_faces", "analytic_cylinder", "blind_feature", "planar_bottom"],
+      "sequence": ["make_box", "make_blind_cylinder", "cut"],
+      "difficulty": 3
+    },
+    {
+      "case_id": "filleted_box_held_out",
+      "mode": "held_out",
+      "capability_level": "L2",
+      "mechanism": "fillet",
+      "kernel_properties": ["planar_faces", "cylindrical_fillet", "selected_edge"],
+      "sequence": ["make_box", "make_fillet"],
+      "difficulty": 2
+    }
+  ],
+  "control_matrix": [
+    {"case_id": "box", "control_variant": "nominal", "expected_result": "pass", "failure_class": "pass"},
+    {"case_id": "box", "control_variant": "parameter_variation", "expected_result": "pass", "failure_class": "pass"},
+    {"case_id": "box", "control_variant": "failure_sensitive", "expected_result": "fail", "failure_class": "geometry"},
+    {"case_id": "cylinder", "control_variant": "nominal", "expected_result": "pass", "failure_class": "pass"},
+    {"case_id": "cylinder", "control_variant": "parameter_variation", "expected_result": "pass", "failure_class": "pass"},
+    {"case_id": "cylinder", "control_variant": "failure_sensitive", "expected_result": "fail", "failure_class": "geometry"},
+    {"case_id": "block_with_hole", "control_variant": "nominal", "expected_result": "pass", "failure_class": "pass"},
+    {"case_id": "block_with_hole", "control_variant": "parameter_variation", "expected_result": "pass", "failure_class": "pass"},
+    {"case_id": "block_with_hole", "control_variant": "failure_sensitive", "expected_result": "fail", "failure_class": "geometry"},
+    {"case_id": "blind_hole_block", "control_variant": "nominal", "expected_result": "pass", "failure_class": "pass"},
+    {"case_id": "blind_hole_block", "control_variant": "parameter_variation", "expected_result": "pass", "failure_class": "pass"},
+    {"case_id": "blind_hole_block", "control_variant": "failure_sensitive", "expected_result": "fail", "failure_class": "geometry"},
+    {"case_id": "box_held_out", "control_variant": "nominal", "expected_result": "pass", "failure_class": "pass"},
+    {"case_id": "box_held_out", "control_variant": "parameter_variation", "expected_result": "pass", "failure_class": "pass"},
+    {"case_id": "box_held_out", "control_variant": "failure_sensitive", "expected_result": "fail", "failure_class": "geometry"},
+    {"case_id": "cylinder_held_out", "control_variant": "nominal", "expected_result": "pass", "failure_class": "pass"},
+    {"case_id": "cylinder_held_out", "control_variant": "parameter_variation", "expected_result": "pass", "failure_class": "pass"},
+    {"case_id": "cylinder_held_out", "control_variant": "failure_sensitive", "expected_result": "fail", "failure_class": "geometry"},
+    {"case_id": "through_cut_held_out", "control_variant": "nominal", "expected_result": "pass", "failure_class": "pass"},
+    {"case_id": "through_cut_held_out", "control_variant": "parameter_variation", "expected_result": "pass", "failure_class": "pass"},
+    {"case_id": "through_cut_held_out", "control_variant": "failure_sensitive", "expected_result": "fail", "failure_class": "geometry"},
+    {"case_id": "blind_cut_held_out", "control_variant": "nominal", "expected_result": "pass", "failure_class": "pass"},
+    {"case_id": "blind_cut_held_out", "control_variant": "parameter_variation", "expected_result": "pass", "failure_class": "pass"},
+    {"case_id": "blind_cut_held_out", "control_variant": "failure_sensitive", "expected_result": "fail", "failure_class": "geometry"},
+    {"case_id": "filleted_box", "control_variant": "nominal", "expected_result": "pass", "failure_class": "pass"},
+    {"case_id": "filleted_box", "control_variant": "parameter_variation", "expected_result": "pass", "failure_class": "pass"},
+    {"case_id": "filleted_box", "control_variant": "failure_sensitive", "expected_result": "fail", "failure_class": "geometry"},
+    {"case_id": "filleted_box_held_out", "control_variant": "nominal", "expected_result": "pass", "failure_class": "pass"},
+    {"case_id": "filleted_box_held_out", "control_variant": "parameter_variation", "expected_result": "pass", "failure_class": "pass"},
+    {"case_id": "filleted_box_held_out", "control_variant": "failure_sensitive", "expected_result": "fail", "failure_class": "geometry"}
+  ],
+  "held_out_matrix": [
+    {"case_id": "cylinder", "expected_result": "pass", "failure_class": "pass", "fixture_sha256": "c24eae231e0ceff9b6a7536ff7df359a754fcd91205beade321813429110a5d3", "expected": {"bbox": {"min": [-5.0, -5.0, 0.0], "max": [5.0, 5.0, 12.0]}, "volume": 942.4777960769379, "counts": {"solid": 1, "shell": 1, "face": 3, "edge": 6}}, "gate_oracles": {"semantic": {"surface": "cylinder", "radius": 5.0, "axis_direction": [0.0, 0.0, 1.0]}}},
+    {"case_id": "box_held_out", "expected_result": "pass", "failure_class": "pass", "fixture_sha256": "4050994802436609253c0c726a48ac3fc27b2f36474764f7a5afba9496d20cf8", "expected": {"bbox": {"min": [0.0, 0.0, 0.0], "max": [14.0, 9.0, 22.0]}, "volume": 2772.0, "counts": {"solid": 1, "shell": 1, "face": 6, "edge": 24}}, "gate_oracles": {}},
+    {"case_id": "cylinder_held_out", "expected_result": "pass", "failure_class": "pass", "fixture_sha256": "0ea8be7dda1332b35f61afd5c6bd6e1513d9bc965b5f16af776ce02cf8bcd3ca", "expected": {"bbox": {"min": [-7.5, -7.5, 0.0], "max": [7.5, 7.5, 9.0]}, "volume": 1590.43128087983, "counts": {"solid": 1, "shell": 1, "face": 3, "edge": 6}}, "gate_oracles": {"semantic": {"surface": "cylinder", "radius": 7.5, "axis_direction": [0.0, 0.0, 1.0]}}},
+    {"case_id": "through_cut_held_out", "expected_result": "pass", "failure_class": "pass", "fixture_sha256": "24c59a31691ab5e0fa63116897cff3733418d21526b4aba5268170f1e9cf394a", "expected": {"bbox": {"min": [0.0, 0.0, 0.0], "max": [28.0, 16.0, 11.0]}, "volume": 4712.0155050657, "counts": {"solid": 1, "shell": 1, "face": 7, "edge": 30}}, "gate_oracles": {"adjacency": {"surface": "cylinder", "axis": 2, "extent_min": 0.0, "extent_max": 11.0}}},
+    {"case_id": "blind_cut_held_out", "expected_result": "pass", "failure_class": "pass", "fixture_sha256": "27d8be1e0e3488bb2bd4c3179aad8b7639f1e529978fe8dd788784b9e8569404", "expected": {"bbox": {"min": [0.0, 0.0, 0.0], "max": [18.0, 22.0, 13.0]}, "volume": 4896.67258771282, "counts": {"solid": 1, "shell": 1, "face": 8, "edge": 30}}, "gate_oracles": {"adjacency": {"surface": "cylinder", "axis": 2, "extent_min": 8.0, "extent_max": 13.0}}},
+    {"case_id": "filleted_box_held_out", "expected_result": "pass", "failure_class": "pass", "fixture_sha256": "8e91050823a01933cb3a2fd154c4ef229c6d9a39937b785aae38c5787875232c", "expected": {"bbox": {"min": [0.0, 0.0, 0.0], "max": [24.0, 14.0, 10.0]}, "volume": 3348.411500823467, "counts": {"solid": 1, "shell": 1, "face": 7, "edge": 30}}, "gate_oracles": {"semantic": {"surface": "cylinder", "radius": 1.5, "axis_direction": [1.0, 0.0, 0.0]}}}
+  ]
+}

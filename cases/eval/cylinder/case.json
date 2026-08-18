@@ -1,0 +1,19 @@
+{
+  "case_id": "cylinder",
+  "input_step": "input.step",
+  "sha256": "98f7bbdd9e3f24e3532f4adfe0837f5a0862e6f614bfb998f1520a297d607f4c",
+  "unit": "mm",
+  "summary": "Vertical cylinder with 10 mm diameter and 12 mm height.",
+  "tags": ["cylinder", "primitive", "held-out"],
+  "mechanism": "analytic_surface",
+  "capability_level": "L0",
+  "compatibility_tier": "T1",
+  "kernel_properties": ["analytic_cylinder", "periodic_surface", "seam_edge"],
+  "sequence": ["make_cylinder"],
+  "difficulty": 1,
+  "expected": {
+    "bbox": {"min": [-5.0, -5.0, 0.0], "max": [5.0, 5.0, 12.0]},
+    "volume": 942.4777960769379,
+    "counts": {"solid": 1, "shell": 1, "face": 3, "edge": 6}
+  }
+}

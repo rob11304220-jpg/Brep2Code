@@ -1,6 +1,0 @@
-{
-  "schema_version": 1,
-  "cases": [
-    {"case_id":"abc_v00_00000026","tier":"P2","input_step":"data/datasets/abc/v00/step/00000026/00000026_ad34a3f60c4a4caa99646600_step_006.step","expected_bbox":{"min":[-7.337846,-0.940323,-0.000601],"max":[7.337791,5.300737,94.600601]},"expected_counts":{"solid":1,"shell":1,"face":202,"edge":1166},"expected_volume":3152.034242992744,"difficulty_tags":["external","abc-v00","single-solid","202-face"],"notes":"Local-only ABC sample; split=held_out; source identity and SHA-256 are in abc-v00-m10-003-selection.json."}
-  ]
-}

@@ -1,0 +1,19 @@
+{
+  "case_id": "blind_cut_held_out",
+  "input_step": "input.step",
+  "sha256": "b30007ffc7d0f16fac496a4c5bc2e3ef02d90ada698cea1a8a8cc25c42146e3e",
+  "unit": "mm",
+  "summary": "Held-out 18 x 22 x 13 mm block with a centered 8 mm diameter, 5 mm deep blind hole.",
+  "tags": ["block", "blind-hole", "boolean-cut", "held-out", "parameter-generalization"],
+  "mechanism": "boolean_cut",
+  "capability_level": "L1",
+  "compatibility_tier": "T2",
+  "kernel_properties": ["planar_faces", "analytic_cylinder", "blind_feature", "planar_bottom"],
+  "sequence": ["make_box", "make_blind_cylinder", "cut"],
+  "difficulty": 3,
+  "expected": {
+    "bbox": {"min": [0.0, 0.0, 0.0], "max": [18.0, 22.0, 13.0]},
+    "volume": 4896.67258771282,
+    "counts": {"solid": 1, "shell": 1, "face": 8, "edge": 30}
+  }
+}

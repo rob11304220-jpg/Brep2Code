@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brep2code.local/schemas/case.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["case_id", "input_step", "sha256", "unit", "summary", "tags", "mechanism", "capability_level", "compatibility_tier", "kernel_properties", "sequence", "difficulty", "expected"],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "input_step": {"type": "string", "minLength": 1},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "unit": {"type": "string", "minLength": 1},
+    "summary": {"type": "string", "minLength": 1},
+    "tags": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "mechanism": {"enum": ["primitive", "analytic_surface", "boolean_cut"]},
+    "capability_level": {"type": "string", "pattern": "^L[0-6]$"},
+    "compatibility_tier": {"enum": ["T0", "T1", "T2"]},
+    "kernel_properties": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "sequence": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "difficulty": {"type": "integer", "minimum": 1, "maximum": 3},
+    "expected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bbox", "volume", "counts"],
+      "properties": {
+        "bbox": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["min", "max"],
+          "properties": {
+            "min": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number"}},
+            "max": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number"}}
+          }
+        },
+        "volume": {"type": "number", "exclusiveMinimum": 0},
+        "counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["solid", "shell", "face", "edge"],
+          "properties": {
+            "solid": {"type": "integer", "minimum": 0},
+            "shell": {"type": "integer", "minimum": 0},
+            "face": {"type": "integer", "minimum": 0},
+            "edge": {"type": "integer", "minimum": 0}
+          }
+        }
+      }
+    }
+  }
+}

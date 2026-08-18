@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "case_id": "cylinder_held_out",
+  "mechanism_id": "analytic_surface",
+  "capability_level": "L0",
+  "geometry_assets": {"input_step": "input.step", "expected_geometry": "case.json.expected", "topology_oracle": "case.json.expected.counts"},
+  "modeling_assets": {
+    "kernel_operations": ["BRepPrimAPI_MakeCylinder"],
+    "sequence_dependencies": ["independent_solid"],
+    "parameter_dimensions": ["radius", "height", "axis"],
+    "failure_modes": ["wrong_radius", "wrong_height", "wrong_axis"],
+    "parser_notes": ["The held-out radius and height differ from the development cylinder controls."]
+  },
+  "harness_assets": {
+    "prompt_mode": "observation-only",
+    "repair_policy": {"max_rounds": 2, "initial_script_allowed": true},
+    "required_gates": ["bbox", "volume", "topology", "semantic"],
+    "gate_oracles": {"semantic": {"surface": "cylinder", "radius": 7.5, "axis_direction": [0.0, 0.0, 1.0]}},
+    "development_cohort": ["nominal", "parameter_variation", "failure_sensitive"],
+    "controls": [
+      {"variant": "nominal", "asset": "controls/nominal.py", "sha256": "0ea8be7dda1332b35f61afd5c6bd6e1513d9bc965b5f16af776ce02cf8bcd3ca", "expected_result": "pass", "failure_class": "pass"},
+      {"variant": "parameter_variation", "asset": "controls/parameter_variation.py", "sha256": "d35cc546e9d84214460a24ab36ee7a46e4c61954b461f728cd318330c0397fea", "expected_result": "pass", "failure_class": "pass"},
+      {"variant": "failure_sensitive", "asset": "controls/failure_sensitive.py", "sha256": "6de893d88b93167ffaca5236e4b10894d4d99acf432ae5a215f55a904307cb44", "expected_result": "fail", "failure_class": "geometry"}
+    ],
+    "held_out_fixture": {"asset": "held_out/fixture.py", "sha256": "0ea8be7dda1332b35f61afd5c6bd6e1513d9bc965b5f16af776ce02cf8bcd3ca", "expected_result": "pass", "failure_class": "pass"},
+    "positive_control": true,
+    "negative_control": true,
+    "reference_policy": "harness_only",
+    "hosted_budget_policy": {"max_requests": 2, "max_total_tokens": 8192, "max_cost_usd": 0.1}
+  }
+}

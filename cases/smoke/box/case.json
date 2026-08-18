@@ -1,0 +1,19 @@
+{
+  "case_id": "box",
+  "input_step": "input.step",
+  "sha256": "c79a4f205ed7bf698a367832f855c716abfee1c9891848384d0e46ad026db927",
+  "unit": "mm",
+  "summary": "Axis-aligned 10 x 20 x 30 mm box with its bounding-box minimum at the origin.",
+  "tags": ["box", "primitive"],
+  "mechanism": "primitive",
+  "capability_level": "L0",
+  "compatibility_tier": "T0",
+  "kernel_properties": ["planar_faces", "analytic_plane"],
+  "sequence": ["make_box"],
+  "difficulty": 1,
+  "expected": {
+    "bbox": {"min": [0.0, 0.0, 0.0], "max": [10.0, 20.0, 30.0]},
+    "volume": 6000.0,
+    "counts": {"solid": 1, "shell": 1, "face": 6, "edge": 24}
+  }
+}

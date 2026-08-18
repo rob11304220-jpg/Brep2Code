@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "case_id": "cylinder",
+  "mechanism_id": "analytic_surface",
+  "capability_level": "L0",
+  "geometry_assets": {
+    "input_step": "input.step",
+    "expected_geometry": "case.json.expected",
+    "topology_oracle": "case.json.expected.counts"
+  },
+  "modeling_assets": {
+    "kernel_operations": ["BRepPrimAPI_MakeCylinder"],
+    "sequence_dependencies": ["independent_solid"],
+    "parameter_dimensions": ["radius", "height", "axis"],
+    "failure_modes": ["wrong_radius", "wrong_height", "wrong_axis"],
+    "parser_notes": ["The periodic cylindrical face and seam edge are Harness-only interpretation targets."]
+  },
+  "harness_assets": {
+    "prompt_mode": "observation-only",
+    "repair_policy": {"max_rounds": 2, "initial_script_allowed": true},
+    "required_gates": ["bbox", "volume", "topology", "semantic"],
+    "gate_oracles": {
+      "semantic": {"surface": "cylinder", "radius": 5.0, "axis_direction": [0.0, 0.0, 1.0]}
+    },
+    "development_cohort": ["nominal", "parameter_variation", "failure_sensitive"],
+    "controls": [
+      {"variant": "nominal", "asset": "controls/nominal.py", "sha256": "c24eae231e0ceff9b6a7536ff7df359a754fcd91205beade321813429110a5d3", "expected_result": "pass", "failure_class": "pass"},
+      {"variant": "parameter_variation", "asset": "controls/parameter_variation.py", "sha256": "9068762019f8e82c6f16530e5085227729671b870cb8de0a7af07dc2899eca49", "expected_result": "pass", "failure_class": "pass"},
+      {"variant": "failure_sensitive", "asset": "controls/failure_sensitive.py", "sha256": "84595d5d6a65f30ab83840768018e54288286608ffe5168f8894b54608f95edb", "expected_result": "fail", "failure_class": "geometry"}
+    ],
+    "held_out_fixture": {"asset": "held_out/fixture.py", "sha256": "c24eae231e0ceff9b6a7536ff7df359a754fcd91205beade321813429110a5d3", "expected_result": "pass", "failure_class": "pass"},
+    "positive_control": true,
+    "negative_control": true,
+    "reference_policy": "harness_only",
+    "hosted_budget_policy": {"max_requests": 2, "max_total_tokens": 8192, "max_cost_usd": 0.1}
+  }
+}

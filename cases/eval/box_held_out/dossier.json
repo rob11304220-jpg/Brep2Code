@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "case_id": "box_held_out",
+  "mechanism_id": "primitive",
+  "capability_level": "L0",
+  "geometry_assets": {"input_step": "input.step", "expected_geometry": "case.json.expected", "topology_oracle": "case.json.expected.counts"},
+  "modeling_assets": {
+    "kernel_operations": ["BRepPrimAPI_MakeBox"],
+    "sequence_dependencies": ["independent_solid"],
+    "parameter_dimensions": ["length", "width", "height", "origin"],
+    "failure_modes": ["wrong_dimensions", "wrong_origin", "invalid_step_write"],
+    "parser_notes": ["The held-out dimensions differ from the development box controls."]
+  },
+  "harness_assets": {
+    "prompt_mode": "observation-only",
+    "repair_policy": {"max_rounds": 2, "initial_script_allowed": true},
+    "required_gates": ["bbox", "volume", "topology"],
+    "gate_oracles": {},
+    "development_cohort": ["nominal", "parameter_variation", "failure_sensitive"],
+    "controls": [
+      {"variant": "nominal", "asset": "controls/nominal.py", "sha256": "4050994802436609253c0c726a48ac3fc27b2f36474764f7a5afba9496d20cf8", "expected_result": "pass", "failure_class": "pass"},
+      {"variant": "parameter_variation", "asset": "controls/parameter_variation.py", "sha256": "0cfeca04aefb5db47e04516058354ca56971944933de949ee4b2fe25767613d1", "expected_result": "pass", "failure_class": "pass"},
+      {"variant": "failure_sensitive", "asset": "controls/failure_sensitive.py", "sha256": "82cd1a8320d6d4f8a7f5371d95ff8539b0349de7a60208612e7b93db6343b984", "expected_result": "fail", "failure_class": "geometry"}
+    ],
+    "held_out_fixture": {"asset": "held_out/fixture.py", "sha256": "4050994802436609253c0c726a48ac3fc27b2f36474764f7a5afba9496d20cf8", "expected_result": "pass", "failure_class": "pass"},
+    "positive_control": true,
+    "negative_control": true,
+    "reference_policy": "harness_only",
+    "hosted_budget_policy": {"max_requests": 2, "max_total_tokens": 8192, "max_cost_usd": 0.1}
+  }
+}

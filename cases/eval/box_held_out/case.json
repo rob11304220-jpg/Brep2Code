@@ -1,0 +1,19 @@
+{
+  "case_id": "box_held_out",
+  "input_step": "input.step",
+  "sha256": "d41f288a26a789eb4beb18094fdcae7282d20592e40d791c0fa62e86fa49195b",
+  "unit": "mm",
+  "summary": "Held-out axis-aligned 14 x 9 x 22 mm box with its bounding-box minimum at the origin.",
+  "tags": ["box", "primitive", "held-out", "parameter-generalization"],
+  "mechanism": "primitive",
+  "capability_level": "L0",
+  "compatibility_tier": "T0",
+  "kernel_properties": ["planar_faces", "analytic_plane"],
+  "sequence": ["make_box"],
+  "difficulty": 1,
+  "expected": {
+    "bbox": {"min": [0.0, 0.0, 0.0], "max": [14.0, 9.0, 22.0]},
+    "volume": 2772.0,
+    "counts": {"solid": 1, "shell": 1, "face": 6, "edge": 24}
+  }
+}

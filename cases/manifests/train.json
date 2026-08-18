@@ -1,0 +1,5 @@
+{
+  "schema_version": 1,
+  "split": "train",
+  "cases": ["blind_hole_block", "filleted_box"]
+}

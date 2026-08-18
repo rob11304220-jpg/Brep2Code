@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "case_id": "through_cut_held_out",
+  "mechanism_id": "boolean_cut",
+  "capability_level": "L1",
+  "geometry_assets": {"input_step": "input.step", "expected_geometry": "case.json.expected", "topology_oracle": "case.json.expected.counts"},
+  "modeling_assets": {
+    "kernel_operations": ["BRepPrimAPI_MakeBox", "BRepPrimAPI_MakeCylinder", "BRepAlgoAPI_Cut"],
+    "sequence_dependencies": ["base_solid", "tool_solid", "ordered_cut"],
+    "parameter_dimensions": ["block_dimensions", "hole_radius", "hole_axis", "through_depth"],
+    "failure_modes": ["wrong_tool_depth", "wrong_feature_size", "wrong_boolean_order"],
+    "parser_notes": ["The held-out block and hole radius differ from the development through-cut controls."]
+  },
+  "harness_assets": {
+    "prompt_mode": "observation-only",
+    "repair_policy": {"max_rounds": 2, "initial_script_allowed": true},
+    "required_gates": ["bbox", "volume", "topology", "adjacency"],
+    "gate_oracles": {"adjacency": {"surface": "cylinder", "axis": 2, "extent_min": 0.0, "extent_max": 11.0}},
+    "development_cohort": ["nominal", "parameter_variation", "failure_sensitive"],
+    "controls": [
+      {"variant": "nominal", "asset": "controls/nominal.py", "sha256": "24c59a31691ab5e0fa63116897cff3733418d21526b4aba5268170f1e9cf394a", "expected_result": "pass", "failure_class": "pass"},
+      {"variant": "parameter_variation", "asset": "controls/parameter_variation.py", "sha256": "08c7f495cbff3535f90e713c19d67822101981385eb5124dfe1a8ff880403650", "expected_result": "pass", "failure_class": "pass"},
+      {"variant": "failure_sensitive", "asset": "controls/failure_sensitive.py", "sha256": "21b89ce38e212241552f7113132b73cec074a52209377c944bb68483f22982dc", "expected_result": "fail", "failure_class": "geometry"}
+    ],
+    "held_out_fixture": {"asset": "held_out/fixture.py", "sha256": "24c59a31691ab5e0fa63116897cff3733418d21526b4aba5268170f1e9cf394a", "expected_result": "pass", "failure_class": "pass"},
+    "positive_control": true,
+    "negative_control": true,
+    "reference_policy": "harness_only",
+    "hosted_budget_policy": {"max_requests": 2, "max_total_tokens": 8192, "max_cost_usd": 0.1}
+  }
+}

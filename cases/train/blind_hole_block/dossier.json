@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "case_id": "blind_hole_block",
+  "mechanism_id": "boolean_cut",
+  "capability_level": "L1",
+  "geometry_assets": {
+    "input_step": "input.step",
+    "expected_geometry": "case.json.expected",
+    "topology_oracle": "case.json.expected.counts"
+  },
+  "modeling_assets": {
+    "kernel_operations": ["BRepPrimAPI_MakeBox", "BRepPrimAPI_MakeCylinder", "BRepAlgoAPI_Cut"],
+    "sequence_dependencies": ["base_solid", "tool_solid", "ordered_cut"],
+    "parameter_dimensions": ["block_dimensions", "hole_radius", "hole_axis", "blind_depth"],
+    "failure_modes": ["wrong_tool_depth", "wrong_feature_size", "wrong_boolean_order"],
+    "parser_notes": ["The planar bottom distinguishes a blind cut from a through cut."]
+  },
+  "harness_assets": {
+    "prompt_mode": "observation-only",
+    "repair_policy": {"max_rounds": 2, "initial_script_allowed": true},
+    "required_gates": ["bbox", "volume", "topology", "adjacency"],
+    "gate_oracles": {
+      "adjacency": {"surface": "cylinder", "axis": 2, "extent_min": 4.0, "extent_max": 10.0}
+    },
+    "development_cohort": ["nominal", "parameter_variation", "failure_sensitive"],
+    "controls": [
+      {"variant": "nominal", "asset": "controls/nominal.py", "sha256": "5048ad88b06bef9b78f48604e0d6d1b9d50e906f2d1fa88f8ab81b39032bd094", "expected_result": "pass", "failure_class": "pass"},
+      {"variant": "parameter_variation", "asset": "controls/parameter_variation.py", "sha256": "279f99cc1a6d3cf86d0aae43f2851771d0518a81351a687be30634ee626206b5", "expected_result": "pass", "failure_class": "pass"},
+      {"variant": "failure_sensitive", "asset": "controls/failure_sensitive.py", "sha256": "880601efa606466b8ab8ca902af69f9ccb5537d5c2478d7753f2a9a12c27948a", "expected_result": "fail", "failure_class": "geometry"}
+    ],
+    "held_out_fixture": null,
+    "positive_control": true,
+    "negative_control": true,
+    "reference_policy": "harness_only",
+    "hosted_budget_policy": {"max_requests": 2, "max_total_tokens": 8192, "max_cost_usd": 0.1}
+  }
+}

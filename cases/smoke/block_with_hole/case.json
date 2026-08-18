@@ -1,0 +1,19 @@
+{
+  "case_id": "block_with_hole",
+  "input_step": "input.step",
+  "sha256": "ad0557d72beec842cbe1a5cbb5aef9b7267ea4632bd058106f61a67f2e12624c",
+  "unit": "mm",
+  "summary": "20 x 20 x 8 mm block with one centered 8 mm through hole.",
+  "tags": ["block", "through-hole", "boolean-cut"],
+  "mechanism": "boolean_cut",
+  "capability_level": "L1",
+  "compatibility_tier": "T2",
+  "kernel_properties": ["planar_faces", "analytic_cylinder", "through_feature"],
+  "sequence": ["make_box", "make_cylinder", "cut"],
+  "difficulty": 2,
+  "expected": {
+    "bbox": {"min": [0.0, 0.0, 0.0], "max": [20.0, 20.0, 8.0]},
+    "volume": 2797.876140340492,
+    "counts": {"solid": 1, "shell": 1, "face": 7, "edge": 30}
+  }
+}

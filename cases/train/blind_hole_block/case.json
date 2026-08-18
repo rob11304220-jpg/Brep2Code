@@ -1,0 +1,19 @@
+{
+  "case_id": "blind_hole_block",
+  "input_step": "input.step",
+  "sha256": "aa0c9d023caef2cfb19f1c3f21f4fe130d5b19be7a1554fd82603399c091f656",
+  "unit": "mm",
+  "summary": "24 x 18 x 10 mm block with a centered 6 mm diameter, 6 mm deep blind hole.",
+  "tags": ["block", "blind-hole", "boolean-cut", "repair"],
+  "mechanism": "boolean_cut",
+  "capability_level": "L1",
+  "compatibility_tier": "T2",
+  "kernel_properties": ["planar_faces", "analytic_cylinder", "blind_feature", "planar_bottom"],
+  "sequence": ["make_box", "make_blind_cylinder", "cut"],
+  "difficulty": 3,
+  "expected": {
+    "bbox": {"min": [0.0, 0.0, 0.0], "max": [24.0, 18.0, 10.0]},
+    "volume": 4150.353996706145,
+    "counts": {"solid": 1, "shell": 1, "face": 8, "edge": 30}
+  }
+}

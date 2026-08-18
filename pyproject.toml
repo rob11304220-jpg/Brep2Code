@@ -22,16 +22,22 @@ requires = ["setuptools>=69"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
+where = ["src"]
 include = ["brep2code*"]
+
+[tool.setuptools.package-data]
+brep2code = ["schemas/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/unit", "tests/integration", "tests/e2e"]
+pythonpath = ["src"]
+addopts = "-p no:cacheprovider"
+markers = [
+  "standard: credential-free tests that do not execute generated code",
+  "integration: tests crossing package or filesystem boundaries",
+  "e2e: complete offline user workflows",
+]
 
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-markers = [
-  "fast: deterministic unit and metadata checks; intended for rapid developer feedback",
-  "standard: credential-free checks that do not execute the Harness/corpus process boundary",
-  "sandbox: Harness, executor, or corpus integration checks that spawn local CAD/Python processes",
-]

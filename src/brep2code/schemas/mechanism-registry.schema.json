@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brep2code.local/schemas/mechanism-registry.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "mechanisms"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "mechanisms": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["mechanism_id", "label", "capability_level", "compatibility_tier", "kernel_operations", "sequence_dependencies", "difficulty_dimensions", "required_gates", "failure_modes", "parser_notes"],
+        "properties": {
+          "mechanism_id": {"type": "string", "minLength": 1},
+          "label": {"type": "string", "minLength": 1},
+          "capability_level": {"type": "string", "pattern": "^L[0-6]$"},
+          "compatibility_tier": {"enum": ["T0", "T1", "T2"]},
+          "kernel_operations": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+          "sequence_dependencies": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+          "difficulty_dimensions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+          "required_gates": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+          "failure_modes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+          "parser_notes": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+        }
+      }
+    }
+  }
+}

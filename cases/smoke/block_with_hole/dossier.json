@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "case_id": "block_with_hole",
+  "mechanism_id": "boolean_cut",
+  "capability_level": "L1",
+  "geometry_assets": {
+    "input_step": "input.step",
+    "expected_geometry": "case.json.expected",
+    "topology_oracle": "case.json.expected.counts"
+  },
+  "modeling_assets": {
+    "kernel_operations": ["BRepPrimAPI_MakeBox", "BRepPrimAPI_MakeCylinder", "BRepAlgoAPI_Cut"],
+    "sequence_dependencies": ["base_solid", "tool_solid", "ordered_cut"],
+    "parameter_dimensions": ["block_dimensions", "hole_radius", "hole_axis", "through_depth"],
+    "failure_modes": ["wrong_tool_depth", "wrong_feature_size", "wrong_boolean_order"],
+    "parser_notes": ["The through-hole requires a tool that crosses the complete base solid."]
+  },
+  "harness_assets": {
+    "prompt_mode": "observation-only",
+    "repair_policy": {"max_rounds": 2, "initial_script_allowed": true},
+    "required_gates": ["bbox", "volume", "topology", "adjacency"],
+    "gate_oracles": {
+      "adjacency": {"surface": "cylinder", "axis": 2, "extent_min": 0.0, "extent_max": 8.0}
+    },
+    "development_cohort": ["nominal", "parameter_variation", "failure_sensitive"],
+    "controls": [
+      {"variant": "nominal", "asset": "controls/nominal.py", "sha256": "e489ae10a6179bceed09dc999e47738dd185254a3b313b800fde0d28748b99aa", "expected_result": "pass", "failure_class": "pass"},
+      {"variant": "parameter_variation", "asset": "controls/parameter_variation.py", "sha256": "5dbe46c3a46411fd8e6d2a3fd28d19b1c39daf7e1429f47c3da0cd9567e18903", "expected_result": "pass", "failure_class": "pass"},
+      {"variant": "failure_sensitive", "asset": "controls/failure_sensitive.py", "sha256": "db4540cc08098173d7c15c6d9e4384f92fb72002f58c7abdc58b1bae435ce85b", "expected_result": "fail", "failure_class": "geometry"}
+    ],
+    "held_out_fixture": null,
+    "positive_control": true,
+    "negative_control": true,
+    "reference_policy": "harness_only",
+    "hosted_budget_policy": {"max_requests": 2, "max_total_tokens": 8192, "max_cost_usd": 0.1}
+  }
+}

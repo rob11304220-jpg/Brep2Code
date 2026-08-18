@@ -1,0 +1,19 @@
+{
+  "case_id": "through_cut_held_out",
+  "input_step": "input.step",
+  "sha256": "0abef779812f5f55b610bb4ad40766a43b671a3b86328dc079bdf55429a1f62f",
+  "unit": "mm",
+  "summary": "Held-out 28 x 16 x 11 mm block with a centered 5 mm diameter through hole.",
+  "tags": ["block", "through-hole", "boolean-cut", "held-out", "parameter-generalization"],
+  "mechanism": "boolean_cut",
+  "capability_level": "L1",
+  "compatibility_tier": "T2",
+  "kernel_properties": ["planar_faces", "analytic_cylinder", "through_feature"],
+  "sequence": ["make_box", "make_cylinder", "cut"],
+  "difficulty": 2,
+  "expected": {
+    "bbox": {"min": [0.0, 0.0, 0.0], "max": [28.0, 16.0, 11.0]},
+    "volume": 4712.0155050657,
+    "counts": {"solid": 1, "shell": 1, "face": 7, "edge": 30}
+  }
+}

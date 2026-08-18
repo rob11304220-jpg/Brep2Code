@@ -1,0 +1,19 @@
+{
+  "case_id": "cylinder_held_out",
+  "input_step": "input.step",
+  "sha256": "7855afb6e59f82460facff646da83122fc71122dc16cf8e7e0a2d861855a72e0",
+  "unit": "mm",
+  "summary": "Held-out vertical cylinder with 15 mm diameter and 9 mm height.",
+  "tags": ["cylinder", "primitive", "held-out", "parameter-generalization"],
+  "mechanism": "analytic_surface",
+  "capability_level": "L0",
+  "compatibility_tier": "T1",
+  "kernel_properties": ["analytic_cylinder", "periodic_surface", "seam_edge"],
+  "sequence": ["make_cylinder"],
+  "difficulty": 1,
+  "expected": {
+    "bbox": {"min": [-7.5, -7.5, 0.0], "max": [7.5, 7.5, 9.0]},
+    "volume": 1590.43128087983,
+    "counts": {"solid": 1, "shell": 1, "face": 3, "edge": 6}
+  }
+}

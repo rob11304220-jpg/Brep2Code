@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "mechanisms": [
+    {
+      "mechanism_id": "primitive",
+      "label": "Primitive solid construction",
+      "capability_level": "L0",
+      "compatibility_tier": "T0",
+      "kernel_operations": ["BRepPrimAPI_MakeBox"],
+      "sequence_dependencies": ["independent_solid"],
+      "difficulty_dimensions": ["dimension_reasoning", "origin_alignment"],
+      "required_gates": ["bbox", "volume", "topology"],
+      "failure_modes": ["wrong_dimensions", "wrong_origin", "invalid_step_write"],
+      "parser_notes": ["Planar faces expose axis-aligned extents."]
+    },
+    {
+      "mechanism_id": "analytic_surface",
+      "label": "Analytic surface primitive construction",
+      "capability_level": "L0",
+      "compatibility_tier": "T1",
+      "kernel_operations": ["BRepPrimAPI_MakeCylinder"],
+      "sequence_dependencies": ["independent_solid"],
+      "difficulty_dimensions": ["radius_height_reasoning", "axis_alignment", "seam_interpretation"],
+      "required_gates": ["bbox", "volume", "topology", "semantic"],
+      "failure_modes": ["wrong_radius", "wrong_height", "wrong_axis"],
+      "parser_notes": ["Cylinder observations include radius and axis direction."]
+    },
+    {
+      "mechanism_id": "boolean_cut",
+      "label": "Ordered boolean cut feature",
+      "capability_level": "L1",
+      "compatibility_tier": "T2",
+      "kernel_operations": ["BRepPrimAPI_MakeBox", "BRepPrimAPI_MakeCylinder", "BRepAlgoAPI_Cut"],
+      "sequence_dependencies": ["base_solid", "tool_solid", "ordered_cut"],
+      "difficulty_dimensions": ["feature_depth_reasoning", "coaxial_alignment", "boolean_order"],
+      "required_gates": ["bbox", "volume", "topology", "adjacency"],
+      "failure_modes": ["wrong_tool_depth", "wrong_feature_size", "wrong_boolean_order"],
+      "parser_notes": ["A valid result depends on preserving the base/tool/cut order."]
+    },
+    {
+      "mechanism_id": "fillet",
+      "label": "Edge-selected fillet feature",
+      "capability_level": "L2",
+      "compatibility_tier": "T2",
+      "kernel_operations": ["BRepPrimAPI_MakeBox", "BRepFilletAPI_MakeFillet"],
+      "sequence_dependencies": ["base_solid", "selected_edge", "fillet_feature"],
+      "difficulty_dimensions": ["edge_selection", "radius_reasoning", "feature_sequence"],
+      "required_gates": ["bbox", "volume", "topology", "semantic"],
+      "failure_modes": ["wrong_edge", "wrong_radius", "wrong_feature_order"],
+      "parser_notes": ["The fillet is identified by one cylindrical face and its axis-aligned radius oracle."]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "case_id": "filleted_box_held_out",
+  "mechanism_id": "fillet",
+  "capability_level": "L2",
+  "geometry_assets": {"input_step": "input.step", "expected_geometry": "case.json.expected", "topology_oracle": "case.json.expected.counts"},
+  "modeling_assets": {
+    "kernel_operations": ["BRepPrimAPI_MakeBox", "BRepFilletAPI_MakeFillet"],
+    "sequence_dependencies": ["base_solid", "selected_edge", "fillet_feature"],
+    "parameter_dimensions": ["block_dimensions", "edge_selection", "fillet_radius"],
+    "failure_modes": ["wrong_edge", "wrong_radius", "wrong_feature_order"],
+    "parser_notes": ["The held-out dimensions and radius differ from the runtime fillet case."]
+  },
+  "harness_assets": {
+    "prompt_mode": "observation-only",
+    "repair_policy": {"max_rounds": 2, "initial_script_allowed": true},
+    "required_gates": ["bbox", "volume", "topology", "semantic"],
+    "gate_oracles": {"semantic": {"surface": "cylinder", "radius": 1.5, "axis_direction": [1.0, 0.0, 0.0]}},
+    "development_cohort": ["nominal", "parameter_variation", "failure_sensitive"],
+    "controls": [
+      {"variant": "nominal", "asset": "controls/nominal.py", "sha256": "cafca443d2357216e187bd56915901098e427d1d7d424c269037d336e3667cca", "expected_result": "pass", "failure_class": "pass"},
+      {"variant": "parameter_variation", "asset": "controls/parameter_variation.py", "sha256": "8f0674f7d1fd8682a0e5897d5073e5077a2e36bfe9d90db584cb4452a52fbf45", "expected_result": "pass", "failure_class": "pass"},
+      {"variant": "failure_sensitive", "asset": "controls/failure_sensitive.py", "sha256": "46017c74a1194ceb4e398e121cf668a0b80b322f5084181ea09a008959a04763", "expected_result": "fail", "failure_class": "geometry"}
+    ],
+    "held_out_fixture": {"asset": "held_out/fixture.py", "sha256": "8e91050823a01933cb3a2fd154c4ef229c6d9a39937b785aae38c5787875232c", "expected_result": "pass", "failure_class": "pass"},
+    "positive_control": true,
+    "negative_control": true,
+    "reference_policy": "harness_only",
+    "hosted_budget_policy": {"max_requests": 2, "max_total_tokens": 8192, "max_cost_usd": 0.1}
+  }
+}

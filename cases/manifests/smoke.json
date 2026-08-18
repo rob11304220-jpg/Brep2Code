@@ -1,0 +1,5 @@
+{
+  "schema_version": 1,
+  "split": "smoke",
+  "cases": ["box", "block_with_hole"]
+}

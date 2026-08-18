@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "case_id": "filleted_box",
+  "mechanism_id": "fillet",
+  "capability_level": "L2",
+  "geometry_assets": {"input_step": "input.step", "expected_geometry": "case.json.expected", "topology_oracle": "case.json.expected.counts"},
+  "modeling_assets": {
+    "kernel_operations": ["BRepPrimAPI_MakeBox", "BRepFilletAPI_MakeFillet"],
+    "sequence_dependencies": ["base_solid", "selected_edge", "fillet_feature"],
+    "parameter_dimensions": ["block_dimensions", "edge_selection", "fillet_radius"],
+    "failure_modes": ["wrong_edge", "wrong_radius", "wrong_feature_order"],
+    "parser_notes": ["The feature is a radius-2 fillet on the lower x-aligned box edge."]
+  },
+  "harness_assets": {
+    "prompt_mode": "observation-only",
+    "repair_policy": {"max_rounds": 2, "initial_script_allowed": true},
+    "required_gates": ["bbox", "volume", "topology", "semantic"],
+    "gate_oracles": {"semantic": {"surface": "cylinder", "radius": 2.0, "axis_direction": [1.0, 0.0, 0.0]}},
+    "development_cohort": ["nominal", "parameter_variation", "failure_sensitive"],
+    "controls": [
+      {"variant": "nominal", "asset": "controls/nominal.py", "sha256": "b1ade9067211c585d42d10a21006982ac6b635cd233f77b751fb9a5e4f1bb98f", "expected_result": "pass", "failure_class": "pass"},
+      {"variant": "parameter_variation", "asset": "controls/parameter_variation.py", "sha256": "19d57922c19df109bc25a4052cc85c4799ffdf160f6c8697b2c448ce6bc8d4ca", "expected_result": "pass", "failure_class": "pass"},
+      {"variant": "failure_sensitive", "asset": "controls/failure_sensitive.py", "sha256": "c8d55b9a5d169cc188f563d5a1cc55d8df4118c669bf7a75a201af50b48d4be3", "expected_result": "fail", "failure_class": "geometry"}
+    ],
+    "held_out_fixture": null,
+    "positive_control": true,
+    "negative_control": true,
+    "reference_policy": "harness_only",
+    "hosted_budget_policy": {"max_requests": 2, "max_total_tokens": 8192, "max_cost_usd": 0.1}
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "schema_version": 1,
+  "split": "eval",
+  "cases": ["cylinder", "box_held_out", "cylinder_held_out", "through_cut_held_out", "blind_cut_held_out", "filleted_box_held_out"]
+}
