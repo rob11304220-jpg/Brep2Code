@@ -110,6 +110,22 @@ def test_openai_compatible_active_action_contract_and_prompt() -> None:
     assert provider.total_tokens == 30
 
 
+def test_active_no_retrieval_prompt_removes_retrieval_action() -> None:
+    from brep2code.providers.active_prompt import build_action_messages
+
+    messages = build_action_messages(
+        ActionRequest(
+            case_id="box",
+            turn_index=0,
+            session={"retrieval_policy": "disabled", "available_tools": ["edge_candidates"]},
+        )
+    )
+
+    assert '"action":"retrieve"' not in messages[0]["content"]
+    assert "SDK" not in messages[0]["content"]
+    assert "recipe" not in messages[0]["content"]
+
+
 def test_provider_exchange_records_bounded_payloads_without_credentials() -> None:
     events = []
     provider = OpenAICompatibleProvider(

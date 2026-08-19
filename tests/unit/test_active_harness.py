@@ -9,6 +9,7 @@ from brep2code.harness import (
     ActiveHarnessController,
     ActiveState,
     HarnessAction,
+    RetrievalPolicy,
     SubmissionResult,
 )
 from brep2code.providers import ActionResponse, FakeActionProvider
@@ -96,6 +97,33 @@ def test_active_harness_runs_deterministic_probe_retrieve_repair_sequence() -> N
     assert str(case.case.root) not in serialized
 
 
+def test_active_harness_can_retrieve_a_general_recipe_projection() -> None:
+    case = validate_case(Path("cases/smoke/box"), Path("cases"))
+    provider = FakeActionProvider(
+        [
+            {
+                "action": "retrieve",
+                "retrieve": {
+                    "query": "deterministic STEP export",
+                    "scope": ["recipe"],
+                    "limit": 1,
+                },
+            },
+            {"action": "submit", "submit": {"script": "candidate"}},
+        ]
+    )
+
+    result = ActiveHarnessController(provider).run(
+        case,
+        _budgets(model_requests=2, retrievals=1, script_submissions=1, executions=1, repairs=0),
+        lambda _, **__: SubmissionResult(True, executed=True),
+    )
+
+    assert result.state is ActiveState.SUCCEEDED
+    retrieved = provider.requests[1].session["tool_results"][0]
+    assert retrieved["result"]["matches"][0]["id"] == "recipe.step_export"
+
+
 def test_active_harness_stops_at_each_independent_budget() -> None:
     case = validate_case(Path("cases/smoke/box"), Path("cases"))
     provider = FakeActionProvider(
@@ -110,6 +138,26 @@ def test_active_harness_stops_at_each_independent_budget() -> None:
     assert result.stop_reason == "probe_budget"
     assert result.usage["model_requests"] == 1
     assert result.usage["probes"] == 0
+
+
+def test_disabled_retrieval_policy_removes_tools_and_fails_closed() -> None:
+    case = validate_case(Path("cases/smoke/box"), Path("cases"))
+    provider = FakeActionProvider(
+        [{"action": "retrieve", "retrieve": {"topic": "TopoDS.Edge_s"}}]
+    )
+
+    result = ActiveHarnessController(provider).run(
+        case,
+        _budgets(model_requests=1, retrievals=0),
+        lambda _, **__: SubmissionResult(True, executed=True),
+        retrieval_policy=RetrievalPolicy.DISABLED,
+    )
+
+    assert result.state is ActiveState.FAILED
+    assert result.stop_reason == "harness_policy"
+    assert result.usage["retrievals"] == 0
+    assert provider.requests[0].session["available_tools"] == ["edge_candidates"]
+    assert provider.requests[0].session["retrieval_policy"] == "disabled"
 
 
 def test_finish_cannot_bypass_verifier() -> None:

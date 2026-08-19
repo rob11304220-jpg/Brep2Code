@@ -33,8 +33,10 @@ still counts toward request, token, and cost ceilings.
 
 The adapter transports a provider-neutral Harness action envelope; it does not
 supply OCP API knowledge, modeling recipes, probes, or case-specific hints.
-Those belong respectively to the approved reference projection, Harness tools,
-and session controller described in `architecture.md`.
+Those belong respectively to the bounded SDK/recipe projection, Harness tools,
+and session controller described in `architecture.md`. A retrieve action may
+use the legacy exact OCP topic or a bounded query over approved SDK/recipe
+records; neither form may return target-specific solutions or private oracles.
 
 Active hosted readiness has two offline gates. `active-hosted-preflight` does
 not read provider configuration; `active-hosted-config-check` reads it but
@@ -61,20 +63,21 @@ backend read-only, and reads provider configuration only with
 `--check-provider-config`. It never sends requests, runs generated code, or
 creates run artifacts.
 
-Hosted active checkpoint schema version 4 adds a separate
-`provider_accounting` object. It records HTTP attempts, an in-flight request
-marker, aggregate prompt/completion/total tokens, aggregate cost, the selected
-token prices, and provider ceilings. Malformed responses with valid usage are
-still charged. A terminal provider-budget failure may therefore record actual
-tokens or cost above its declared ceiling, while nonterminal continuation state
-may not. Continuation must restore the saved accounting with unchanged prices
-and ceilings; an in-flight attempt remains consumed while its marker is cleared.
+Hosted active checkpoint schema version 5 records the retrieval policy identity
+and a separate `provider_accounting` object. It records HTTP attempts, an
+in-flight request marker, aggregate prompt/completion/total tokens, aggregate
+cost, the selected token prices, and provider ceilings. Malformed responses
+with valid usage are still charged. A terminal provider-budget failure may
+therefore record actual tokens or cost above its declared ceiling, while
+nonterminal continuation state may not. Continuation must restore the saved
+accounting with unchanged prices and ceilings; an in-flight attempt remains
+consumed while its marker is cleared.
 The checkpoint contract alone does not expose a hosted execution command.
 
 The initial `active-hosted-run` slice is deliberately HTTP-stub-only. A local
 stub response is mandatory, unified readiness must pass first, and generated
 code still runs through the secure executor. The command validates the final
-schema version 4 artifact and remains network-free.
+schema version 5 artifact and remains network-free.
 
 The separate `active-hosted-live-run` command provides the narrowly scoped real
 HTTPS path for one fresh runtime case and one explicitly selected DeepSeek

@@ -45,3 +45,13 @@ script and validated output.
     backend by running generated code through the trusted local executor.
 20. If approval is unavailable or denied, stop the secure run, report the exact
     blocker, and provide the corresponding PowerShell command for manual execution.
+
+## Research route
+
+21. Before changing research stages, cases, knowledge retrieval, SDK projections,
+    experiment conditions, or dataset ingestion, read `README.md` section
+    `Research progression` and `docs/development.md` section
+    `Research stages and candidate routes`. Preserve the Stage 1--4 order and
+    the A--E decision criteria unless the task explicitly changes them; record
+    an approved change in those same permanent sections, not in a new roadmap,
+    handoff, workpack, or status ledger.

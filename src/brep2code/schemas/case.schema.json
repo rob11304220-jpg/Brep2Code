@@ -3,7 +3,7 @@
   "$id": "https://brep2code.local/schemas/case.schema.json",
   "type": "object",
   "additionalProperties": false,
-  "required": ["case_id", "input_step", "sha256", "unit", "summary", "tags", "mechanism", "capability_level", "compatibility_tier", "kernel_properties", "sequence", "difficulty", "expected"],
+  "required": ["case_id", "input_step", "sha256", "unit", "summary", "tags", "expected"],
   "properties": {
     "case_id": {"type": "string", "minLength": 1},
     "input_step": {"type": "string", "minLength": 1},

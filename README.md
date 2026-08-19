@@ -3,10 +3,9 @@
 中文说明：[README.zh-CN.md](README.zh-CN.md)
 
 Brep2Code turns a STEP/B-Rep case into an executable CAD build script and a
-validated output model. The fixed runner provides a bounded repair loop: it
-assembles one observation context, requests one complete script per revision,
-executes it, verifies it, and returns structured feedback for the next
-revision.
+validated output model. The Active Harness is the primary research protocol.
+The fixed runner remains an explicit legacy control for ablation and historical
+comparison; Active failures never fall back to it.
 
 The implemented active Harness adds a provider-neutral action loop through
 `active-run`. A deterministic fake action provider can request bounded edge
@@ -25,6 +24,7 @@ commands below.
 
 ```powershell
 uv sync --dev
+uv run brep2code env doctor
 uv run brep2code --help
 uv run brep2code cases validate
 uv run pytest -q
@@ -45,12 +45,17 @@ Cases are stored under `cases/<split>/<case_id>`. `case.json` and the STEP
 SHA-256 are validated together; manifests under `cases/manifests` declare the
 complete catalog. Runtime loading permits only the `smoke` and `train` splits.
 
-The shared mechanism registry is cases/registry/mechanisms.json. Each case
-also has a Harness-only dossier.json that binds geometry assets, modeling
-knowledge, applicable gates, repair policy, and hosted budget without adding
-any of those private fields to runtime observations. `capability_level` is the
-sole L0-L6 semantic field used by cases, campaigns, and reports. The legacy
-T0/T1/T2 values are retained only as an explicit `compatibility_tier` mapping.
+The shared mechanism registry is cases/registry/mechanisms.json for the legacy
+L0-L2 evaluation cohort. Those labels are optional research metadata, not a
+runtime script contract. An open-ended task may omit mechanism, capability, and
+sequence fields and provide a case-local `verifier.json` containing only its
+target references, gates, repair policy, and reference projection policy.
+The verifier pack keeps acceptance independent from the modeling sequence, so
+multiple valid construction strategies can pass the same task.
+
+`capability_level` remains useful for offline reports and campaign grouping. The
+legacy T0/T1/T2 values are retained only as an explicit `compatibility_tier`
+mapping.
 
 The G1 mechanism campaign is validated without contacting a provider:
 
@@ -104,6 +109,12 @@ uv run brep2code active-hosted-continue --help
 uv run brep2code active-pilot-report --help
 ```
 
+Use `--retrieval-policy disabled --max-retrievals 0` for the strict
+no-knowledge baseline. This selects a separate prompt, removes retrieval tools
+from the action space, rejects retrieve actions as a Harness-policy failure, and
+records a schema-v5 policy identity. Use `bounded_seed` only as an explicit
+knowledge condition.
+
 Each `--fake-action` file contains one JSON action envelope. The number of
 files must equal `--max-model-requests`; probe, retrieval, submission,
 execution, repair, token, and cost ceilings are declared independently. This
@@ -145,11 +156,11 @@ configuration and reports only the endpoint host and bounded plan; it makes no
 network request and creates no artifact. Neither command authorizes or exposes
 hosted active execution.
 
-Hosted active checkpoints use schema version 4 to keep HTTP attempts,
-prompt/completion/total tokens, cost, prices, and provider ceilings separate
-from controller usage. Continuation restores that accounting and retains an
-interrupted request attempt as consumed. The checkpoint contract alone does not
-add a hosted execution command.
+Hosted active checkpoints use schema version 5 to keep retrieval policy
+identity, HTTP attempts, prompt/completion/total tokens, cost, prices, and
+provider ceilings separate from controller usage. Continuation restores that
+accounting and retains an interrupted request attempt as consumed. The
+checkpoint contract alone does not add a hosted execution command.
 
 `active-hosted-run` is currently an HTTP-stub-only vertical slice. It requires
 unified readiness, a successful fake baseline, fresh itemized authorization, a
@@ -179,19 +190,75 @@ active-loop comparison. A passing decision gate only makes the run eligible to
 request one fresh hosted pilot authorization; it never grants authorization or
 makes a network request.
 
+The secure backend defaults to the `Ubuntu-24.04` distro and
+`/opt/brep2code/runtime`. Override these portable host settings with
+`BREP2CODE_WSL_DISTRO` and `BREP2CODE_RUNTIME_ROOT`; no host username is
+compiled into the project. `brep2code env doctor` checks the configured backend
+without network requests or artifacts. If the user-level uv cache has broken
+ACLs, set a temporary `UV_CACHE_DIR` for diagnosis and repair its ACL separately
+rather than weakening the secure executor.
+
+For a per-shell override on an existing machine:
+
+```powershell
+$env:BREP2CODE_WSL_DISTRO = "Ubuntu-24.04"
+$env:BREP2CODE_RUNTIME_ROOT = "/home/<wsl-user>/.brep2code-runtime"
+uv run brep2code env doctor
+```
+
+These host variables come from the process environment, not the provider `.env`
+file. Set them persistently through the operating system when appropriate.
+
 The command writes immutable revision directories and an atomically updated
 `result.json`. Provider-generated scripts execute through the required
 `Ubuntu-24.04` WSL2/bubblewrap backend. That backend uses the dedicated
-`/home/liaol/.brep2code-runtime` Python environment, clears ambient variables,
+configured secure-runtime Python environment, clears ambient variables,
 disables networking, exposes only `build.py` plus one writable `output.step`,
 and bounds time, memory, processes, logs, and output size. The local executor
 remains available only for trusted developer-authored scripts.
+
+## Research progression
+
+The implementation has completed a narrowly bounded hosted pilot and is in
+post-pilot diagnostic refinement. That implementation milestone is not a
+completed research baseline: the evidence program remains at Stage 1, measuring
+the real provider's low-difficulty baseline without a knowledge base. Stage 2
+then uses hosted Active reruns of the same cases to replicate that baseline and
+validate the hosted transport and accounting path. These runs require
+secure-backend readiness, explicit budgets, and fresh authorization.
+
+The planned order is:
+
+1. low-difficulty no-knowledge baseline;
+2. hosted Active reruns of existing cases;
+3. a small local SDK/recipe knowledge-base prototype;
+4. mature modeling-dataset import, indexing, and semantic retrieval.
+
+These are mandatory research stages, not a loose feature list. Stage 1 freezes
+the Active no-knowledge baseline and a small diagnostic case family. Stage 2
+measures the same cases through the real hosted Active path without changing the
+knowledge condition. Stage 3 introduces versioned SDK and general recipe
+projections through explicit ablations. Stage 4 studies mature datasets only
+after provenance, normalization, duplication, leakage, and non-unique sequence
+policies are in place. Detailed entry/exit criteria and the scored alternatives
+A--E are authoritative in `docs/development.md` under **Research stages and
+candidate routes**. A later agent must update those criteria when changing the
+research order rather than silently starting a later route.
+
+Do not enter stages 3 or 4 before stage 1 has produced interpretable results.
+Stage 3 must first freeze the record format, safe projection boundary,
+retrieval metrics, and ablation design. Stage 4 additionally requires
+provenance, version normalization, near-duplicate control, target-solution
+leakage checks, and treatment of non-unique modeling sequences.
 
 Permanent design and workflow details live in `docs/architecture.md`,
 `docs/development.md`, and `docs/providers.md`.
 
 Active Harness development remains fake-first: extend actions or tools only
 with deterministic action-sequence tests and secure verifier artifacts. The
+`retrieve` action supports both the legacy exact OCP topic and a bounded
+general SDK/recipe query. Its projection is answer-free and excludes target
+solutions, repository files, private oracles, host paths, and secrets. The
 single-case live path remains authorization-gated; any broader hosted execution
 scope stays closed until its secure-backend readiness and exact authorization
 boundary have focused tests. Readiness checks do not grant execution permission.

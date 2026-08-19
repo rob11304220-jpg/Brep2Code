@@ -45,6 +45,11 @@ def geometry_feedback(
 
 
 def required_gates(case: ValidatedCase) -> tuple[str, ...]:
+    if case.verifier is not None:
+        gates = case.verifier.get("gates", {}).get("required")
+        if not isinstance(gates, list):
+            raise GateDispatchError("verifier pack gates.required must be an array")
+        return tuple(gates)
     if case.dossier is None:
         return ("bbox", "volume", "topology")
     harness_assets = case.dossier.get("harness_assets")
@@ -57,6 +62,11 @@ def required_gates(case: ValidatedCase) -> tuple[str, ...]:
 
 
 def gate_oracles(case: ValidatedCase) -> dict[str, Any]:
+    if case.verifier is not None:
+        gates = case.verifier.get("gates", {}).get("oracles")
+        if not isinstance(gates, dict):
+            raise GateDispatchError("verifier pack gates.oracles must be an object")
+        return gates
     if case.dossier is None:
         return {}
     harness_assets = case.dossier.get("harness_assets")

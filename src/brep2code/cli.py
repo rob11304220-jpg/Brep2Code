@@ -24,10 +24,11 @@ from brep2code.harness import (
     CampaignRunner,
     HarnessAction,
     RepairLoopRunner,
+    RetrievalPolicy,
     preflight_active_hosted,
     validate_active_result,
 )
-from brep2code.execution import secure_backend_status
+from brep2code.execution import secure_backend_config, secure_backend_status
 from brep2code.evaluation import ACTIVE_COHORT_LABELS, build_active_pilot_report
 from brep2code.providers import (
     FakeActionProvider,
@@ -42,6 +43,8 @@ from brep2code.providers import (
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
+    if args.command == "env" and args.env_command == "doctor":
+        return _environment_doctor()
     if args.command == "cases" and args.cases_command == "validate":
         return _validate_cases(args.root)
     if args.command == "campaign" and args.campaign_command == "validate":
@@ -100,6 +103,11 @@ def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="brep2code")
     parser.add_argument("--version", action="version", version="brep2code 0.1.0")
     commands = parser.add_subparsers(dest="command")
+    environment = commands.add_parser("env", help="Inspect local execution prerequisites.")
+    environment_commands = environment.add_subparsers(dest="env_command", required=True)
+    environment_commands.add_parser(
+        "doctor", help="Run read-only checks for the configured secure backend."
+    )
     cases = commands.add_parser("cases", help="Inspect and validate case assets.")
     cases_commands = cases.add_subparsers(dest="cases_command", required=True)
     validate = cases_commands.add_parser("validate", help="Validate every discovered case.")
@@ -176,7 +184,7 @@ def _build_parser() -> argparse.ArgumentParser:
     _add_hosted_pilot_arguments(hosted_readiness)
     hosted_readiness.add_argument("--baseline-result", type=Path, required=True)
     hosted_readiness.add_argument("--check-provider-config", action="store_true")
-    run = commands.add_parser("run", help="Run one bounded provider loop.")
+    run = commands.add_parser("run", help="Run the legacy fixed-loop control protocol.")
     run.add_argument("--provider", choices=("fake", "deepseek"), default="fake")
     run.add_argument("--case-id", required=True)
     run.add_argument("--cases-root", type=Path, default=Path("cases"))
@@ -197,7 +205,7 @@ def _build_parser() -> argparse.ArgumentParser:
     run.add_argument("--input-cost-per-million", type=float)
     run.add_argument("--output-cost-per-million", type=float)
     active_run = commands.add_parser(
-        "active-run", help="Run one bounded offline tool-using action session."
+        "active-run", help="Run the primary bounded offline action protocol."
     )
     _add_active_arguments(active_run)
     active_preflight = commands.add_parser(
@@ -256,13 +264,34 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     active_pilot_report.add_argument("--contract", type=Path, required=True)
     active_pilot_report.add_argument("--cases-root", type=Path, default=Path("cases"))
-    active_pilot_report.add_argument("--fixed-pilot-result", type=Path, required=True)
+    active_pilot_report.add_argument("--fixed-pilot-result", type=Path)
     for label in ACTIVE_COHORT_LABELS:
         active_pilot_report.add_argument(
             f"--{label.replace('_', '-')}-result", type=Path, required=True
         )
     active_pilot_report.add_argument("--output", type=Path, required=True)
     return parser
+
+
+def _environment_doctor() -> int:
+    try:
+        config = secure_backend_config()
+        ready, message = secure_backend_status(config)
+    except ValueError as exc:
+        print(json.dumps({"status": "invalid_configuration", "error": str(exc)}))
+        return 2
+    payload = {
+        "status": "ready" if ready else "not_ready",
+        "secure_backend": message,
+        "configuration": {
+            "wsl_distro": config.distro,
+            "runtime_layout": "<runtime-root>/bin/python",
+        },
+        "network_requests": 0,
+        "artifacts_created": False,
+    }
+    print(json.dumps(payload, indent=2))
+    return 0 if ready else 1
 
 
 def _validate_cases(root: Path) -> int:
@@ -822,6 +851,7 @@ def _active_run(args: argparse.Namespace) -> int:
             args.run_root,
             budgets=budgets,
             timeout_seconds=args.timeout,
+            retrieval_policy=RetrievalPolicy(args.retrieval_policy),
         )
     except (CaseValidationError, OSError, ValueError) as exc:
         print(json.dumps({"status": "configuration_error", "error": str(exc)}))
@@ -916,6 +946,7 @@ def _active_continue(args: argparse.Namespace) -> int:
             args.run_root,
             budgets=budgets,
             timeout_seconds=args.timeout,
+            retrieval_policy=RetrievalPolicy(args.retrieval_policy),
         )
     except (
         ActiveResultValidationError,
@@ -1188,6 +1219,7 @@ def _active_hosted_run(args: argparse.Namespace) -> int:
             args.run_root,
             budgets=ActiveBudgets(**plan["controller_budget"]),
             timeout_seconds=args.build_timeout,
+            retrieval_policy=RetrievalPolicy(args.retrieval_policy),
         )
         payload = _read_json_object(args.run_root / "result.json")
         validate_active_result(payload, case, args.run_root)
@@ -1260,6 +1292,7 @@ def _active_hosted_live_run(args: argparse.Namespace) -> int:
             args.run_root,
             budgets=ActiveBudgets(**plan["controller_budget"]),
             timeout_seconds=args.build_timeout,
+            retrieval_policy=RetrievalPolicy(args.retrieval_policy),
         )
         payload = _read_json_object(args.run_root / "result.json")
         validate_active_result(payload, case, args.run_root)
@@ -1354,6 +1387,7 @@ def _active_hosted_continue(args: argparse.Namespace) -> int:
             args.run_root,
             budgets=ActiveBudgets(**plan["controller_budget"]),
             timeout_seconds=args.build_timeout,
+            retrieval_policy=RetrievalPolicy(args.retrieval_policy),
         )
         payload = _read_json_object(args.run_root / "result.json")
         validate_active_result(payload, case, args.run_root)
@@ -1397,8 +1431,10 @@ def _active_pilot_report(args: argparse.Namespace) -> int:
         if args.output.exists():
             raise ActiveResultValidationError("active pilot report output must be fresh")
         contract = load_campaign_contract(args.contract, args.cases_root)
-        _validate_saved_fake_pilot(args.fixed_pilot_result, contract)
-        fixed_pilot = _read_json_object(args.fixed_pilot_result)
+        fixed_pilot = None
+        if args.fixed_pilot_result is not None:
+            _validate_saved_fake_pilot(args.fixed_pilot_result, contract)
+            fixed_pilot = _read_json_object(args.fixed_pilot_result)
         catalog = validate_catalog(args.cases_root)
         results = {}
         for label in ACTIVE_COHORT_LABELS:
@@ -1502,6 +1538,7 @@ def _active_hosted_plan(
             revision_source=args.authorize_revision_source,
             feedback=args.authorize_feedback,
         ),
+        retrieval_policy=RetrievalPolicy(args.retrieval_policy),
         continuation_payload=continuation_payload,
         continuation_result=args.continuation_result,
     )
@@ -1520,6 +1557,8 @@ def _active_configuration(
     for action in actions:
         HarnessAction.parse(action)
     budgets = _active_budgets(args)
+    if args.retrieval_policy == "disabled" and budgets.retrievals != 0:
+        raise CaseValidationError("disabled retrieval policy requires --max-retrievals 0")
     _validate_action_capacity(actions, budgets)
     if args.timeout < 1:
         raise CaseValidationError("--timeout must be positive")
@@ -1560,6 +1599,9 @@ def _add_active_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--cases-root", type=Path, default=Path("cases"))
     parser.add_argument("--run-root", type=Path, required=True)
     parser.add_argument("--fake-action", type=Path, action="append", required=True)
+    parser.add_argument(
+        "--retrieval-policy", choices=("disabled", "bounded_seed"), default="bounded_seed"
+    )
     parser.add_argument("--max-model-requests", type=int, required=True)
     parser.add_argument("--max-probes", type=int, required=True)
     parser.add_argument("--max-retrievals", type=int, required=True)
@@ -1579,6 +1621,9 @@ def _add_active_hosted_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--provider", choices=("deepseek",), required=True)
     parser.add_argument("--model", required=True)
     parser.add_argument("--thinking-mode", choices=("disabled",), required=True)
+    parser.add_argument(
+        "--retrieval-policy", choices=("disabled", "bounded_seed"), default="bounded_seed"
+    )
     parser.add_argument("--authorize-hosted", action="store_true")
     parser.add_argument("--authorize-observations", action="store_true")
     parser.add_argument("--authorize-tool-results", action="store_true")

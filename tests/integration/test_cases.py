@@ -15,6 +15,7 @@ from brep2code.cases import (
     validate_catalog,
 )
 from brep2code.mechanisms import load_mechanism_registry
+from brep2code.harness.verification import gate_oracles, required_gates
 
 
 EXPECTED_CASES = {
@@ -112,6 +113,51 @@ def test_case_rejects_hash_mismatch(tmp_path: Path) -> None:
 
     with pytest.raises(CaseValidationError, match="sha256 mismatch"):
         validate_case(case_root, root)
+
+
+def test_generic_case_uses_verifier_pack_without_mechanism_or_sequence(tmp_path: Path) -> None:
+    root = tmp_path / "cases"
+    case_root = root / "smoke" / "open_task"
+    case_root.mkdir(parents=True)
+    step = b"generic-step"
+    (case_root / "input.step").write_bytes(step)
+    metadata = {
+        "case_id": "open_task",
+        "input_step": "input.step",
+        "sha256": hashlib.sha256(step).hexdigest(),
+        "unit": "mm",
+        "summary": "An open-ended construction task.",
+        "tags": ["open-ended"],
+        "expected": {
+            "bbox": {"min": [0, 0, 0], "max": [1, 1, 1]},
+            "volume": 1,
+            "counts": {"solid": 1, "shell": 1, "face": 6, "edge": 24},
+        },
+    }
+    (case_root / "case.json").write_text(json.dumps(metadata), encoding="utf-8")
+    (case_root / "verifier.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "case_id": "open_task",
+                "target": {
+                    "expected_geometry": "case.json.expected",
+                    "topology_oracle": "case.json.expected.counts",
+                },
+                "gates": {"required": ["bbox", "volume", "topology"], "oracles": {}},
+                "repair_policy": {"max_rounds": 3, "initial_script_allowed": True},
+                "reference_policy": "projected_only",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    case = validate_case(case_root, root)
+
+    assert "mechanism" not in case.metadata
+    assert case.verifier is not None
+    assert required_gates(case) == ("bbox", "volume", "topology")
+    assert gate_oracles(case) == {}
 
 
 def test_catalog_rejects_dossier_drift(tmp_path: Path) -> None:

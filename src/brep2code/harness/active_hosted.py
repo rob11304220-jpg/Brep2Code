@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from brep2code.cases import ValidatedCase
-from brep2code.harness.active import ActiveBudgets
+from brep2code.harness.active import ActiveBudgets, RetrievalPolicy
 from brep2code.harness.active_results import (
     ActiveResultValidationError,
     validate_active_result,
@@ -42,10 +42,15 @@ def preflight_active_hosted(
     build_timeout_seconds: int,
     provider_limits: ProviderLimits,
     authorization: ActiveHostedAuthorization,
+    retrieval_policy: RetrievalPolicy = RetrievalPolicy.BOUNDED_SEED,
     continuation_payload: dict[str, Any] | None = None,
     continuation_result: Path | None = None,
 ) -> dict[str, Any]:
     authorization.validate()
+    if retrieval_policy is RetrievalPolicy.DISABLED and budgets.retrievals != 0:
+        raise ActiveResultValidationError(
+            "disabled retrieval policy requires zero retrieval budget"
+        )
     if provider != "deepseek" or not model:
         raise ActiveResultValidationError("active hosted provider/model is invalid")
     if thinking_mode != "disabled":
@@ -85,6 +90,10 @@ def preflight_active_hosted(
             raise ActiveResultValidationError("active hosted continuation budget drift")
         if continuation_payload["timeout_seconds"] != build_timeout_seconds:
             raise ActiveResultValidationError("active hosted continuation timeout drift")
+        if continuation_payload.get(
+            "retrieval_policy", RetrievalPolicy.BOUNDED_SEED
+        ) != retrieval_policy:
+            raise ActiveResultValidationError("active hosted continuation retrieval policy drift")
         used_requests = int(continuation_payload["usage"]["model_requests"])
     elif run_root.exists():
         raise ActiveResultValidationError("active hosted run root must be fresh")
@@ -97,6 +106,7 @@ def preflight_active_hosted(
         "provider": provider,
         "model": model,
         "thinking_mode": thinking_mode,
+        "retrieval_policy": retrieval_policy,
         "continuation": continuation,
         "continuation_requires_fresh_authorization": continuation,
         "remaining_model_requests": remaining_requests,

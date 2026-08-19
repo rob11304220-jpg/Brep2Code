@@ -75,3 +75,18 @@ def test_active_pilot_report_closes_gate_on_held_out_failure() -> None:
     assert report["hosted_pilot_decision_gate"][
         "eligible_to_request_single_pilot_authorization"
     ] is False
+
+
+def test_active_pilot_report_does_not_require_fixed_control() -> None:
+    results = {
+        label: _result(label, passed=label != "failure_sensitive")
+        for label in ACTIVE_COHORT_LABELS
+    }
+
+    report = build_active_pilot_report(results)
+
+    assert report["status"] == "succeeded"
+    assert report["harness_protocol"] == "active-v1"
+    assert report["baseline_role"] == "primary"
+    assert report["comparison"]["fixed_loop"]["role"] == "optional_control"
+    assert report["comparison"]["model_request_delta"] is None

@@ -323,6 +323,12 @@ def _validate_cases(value: Any, catalog: dict[str, ValidatedCase]) -> list[Campa
         expected_mode = "held_out" if validated.case.split == "eval" else "runtime"
         if mode != expected_mode:
             raise CampaignValidationError(f"campaign mode for {case_id!r} must be {expected_mode!r}")
+        taxonomy_keys = ("capability_level", "mechanism", "kernel_properties", "sequence", "difficulty")
+        if any(key not in validated.metadata for key in taxonomy_keys):
+            raise CampaignValidationError(
+                f"campaign case {case_id!r} requires mechanism taxonomy metadata; "
+                "use a verifier-pack evaluation contract for open-ended tasks"
+            )
         for key in ("capability_level", "mechanism"):
             if raw[key] != validated.metadata[key]:
                 raise CampaignValidationError(f"campaign {key} drift for {case_id!r}")

@@ -18,6 +18,7 @@ from brep2code.harness.active import (
     ActiveHarnessResult,
     ActiveResumeState,
     ActiveState,
+    RetrievalPolicy,
     SubmissionAborted,
     SubmissionResult,
 )
@@ -88,7 +89,7 @@ class ActiveSubmissionVerifier:
                     "message": (
                         "The repair submission is identical to the failed revision; "
                         "change the complete script to address typed feedback or retrieve "
-                        "an allowlisted OCP reference before resubmitting."
+                        "an approved SDK or recipe projection before resubmitting."
                     ),
                 }
                 artifact.update(status="failed", feedback=feedback)
@@ -178,6 +179,7 @@ class ActiveHarnessRunner:
         *,
         budgets: ActiveBudgets,
         timeout_seconds: int = 30,
+        retrieval_policy: RetrievalPolicy = RetrievalPolicy.BOUNDED_SEED,
     ) -> ActiveHarnessResult:
         run_root.mkdir(parents=True, exist_ok=False)
         submit = self.submission_factory(case, run_root, timeout_seconds)
@@ -188,6 +190,7 @@ class ActiveHarnessRunner:
             timeout_seconds,
             submit,
             checkpoint_index=0,
+            retrieval_policy=retrieval_policy,
         )
 
     def continue_run(
@@ -197,6 +200,7 @@ class ActiveHarnessRunner:
         *,
         budgets: ActiveBudgets,
         timeout_seconds: int,
+        retrieval_policy: RetrievalPolicy = RetrievalPolicy.BOUNDED_SEED,
     ) -> ActiveHarnessResult:
         result_path = run_root / "result.json"
         payload = _read_json(result_path)
@@ -209,8 +213,10 @@ class ActiveHarnessRunner:
             raise ActiveResultValidationError("active continuation budget drift")
         if payload["timeout_seconds"] != timeout_seconds:
             raise ActiveResultValidationError("active continuation timeout drift")
+        if payload.get("retrieval_policy", RetrievalPolicy.BOUNDED_SEED) != retrieval_policy:
+            raise ActiveResultValidationError("active continuation retrieval policy drift")
         restore_accounting = getattr(self.provider, "restore_accounting", None)
-        if payload["schema_version"] == 4:
+        if payload["schema_version"] in {4, 5} and "provider_accounting" in payload:
             if not callable(restore_accounting):
                 raise ActiveResultValidationError(
                     "active continuation provider cannot restore accounting"
@@ -233,6 +239,7 @@ class ActiveHarnessRunner:
             submit,
             checkpoint_index=payload["checkpoint_index"] + 1,
             resume=resume,
+            retrieval_policy=retrieval_policy,
         )
 
     def _run_controller(
@@ -245,6 +252,7 @@ class ActiveHarnessRunner:
         *,
         checkpoint_index: int,
         resume: ActiveResumeState | None = None,
+        retrieval_policy: RetrievalPolicy = RetrievalPolicy.BOUNDED_SEED,
     ) -> ActiveHarnessResult:
         accounting_snapshot = getattr(self.provider, "accounting_snapshot", None)
         set_accounting_checkpoint = getattr(
@@ -265,8 +273,11 @@ class ActiveHarnessRunner:
                 checkpoint_usage["tokens"] = provider_accounting["tokens"]["total"]
                 checkpoint_usage["cost_usd"] = provider_accounting["cost_usd"]
             payload = {
-                "schema_version": 4 if hosted_accounting else 3,
+                "schema_version": 5,
                 "mode": "active",
+                "retrieval_policy": retrieval_policy,
+                "catalog_id": "bounded-seed-v1" if retrieval_policy is RetrievalPolicy.BOUNDED_SEED else None,
+                "prompt_version": "active-v2-retrieval" if retrieval_policy is RetrievalPolicy.BOUNDED_SEED else "active-v2-no-retrieval",
                 "case_id": case.case.case_id,
                 "provider": self.provider.name,
                 "model": self.provider.model,
@@ -280,6 +291,7 @@ class ActiveHarnessRunner:
                     "requirements": [
                         "same_case",
                         "same_budgets",
+                        "same_retrieval_policy",
                         "remaining_model_requests",
                         "existing_revision_root",
                     ],
@@ -314,7 +326,12 @@ class ActiveHarnessRunner:
             set_accounting_checkpoint(provider_checkpoint)
         try:
             return ActiveHarnessController(self.provider).run(
-                case, budgets, submit, checkpoint=checkpoint, resume=resume
+                case,
+                budgets,
+                submit,
+                checkpoint=checkpoint,
+                resume=resume,
+                retrieval_policy=retrieval_policy,
             )
         finally:
             if hosted_accounting:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from dataclasses import dataclass
 from pathlib import Path
 import shutil
 import subprocess
@@ -14,23 +15,55 @@ class SandboxUnavailable(RuntimeError):
     pass
 
 
-def secure_backend_status() -> tuple[bool, str]:
+@dataclass(frozen=True)
+class SecureBackendConfig:
+    distro: str = "Ubuntu-24.04"
+    runtime_root: str = "/opt/brep2code/runtime"
+
+    def __post_init__(self) -> None:
+        safe_distro = self.distro.replace("-", "").replace("_", "").replace(".", "")
+        if not self.distro or not safe_distro.isalnum():
+            raise ValueError("WSL distro contains unsupported characters")
+        parts = self.runtime_root.split("/")
+        if not self.runtime_root.startswith("/") or any(
+            not part.replace("-", "").replace("_", "").replace(".", "").isalnum()
+            for part in parts[1:]
+        ):
+            raise ValueError("secure runtime root must be a simple absolute WSL path")
+
+
+def secure_backend_config(environment: dict[str, str] | None = None) -> SecureBackendConfig:
+    values = os.environ if environment is None else environment
+    return SecureBackendConfig(
+        distro=values.get("BREP2CODE_WSL_DISTRO", "Ubuntu-24.04"),
+        runtime_root=values.get("BREP2CODE_RUNTIME_ROOT", "/opt/brep2code/runtime"),
+    )
+
+
+def secure_backend_status(config: SecureBackendConfig | None = None) -> tuple[bool, str]:
     """Return a read-only readiness result for the configured WSL backend."""
     if shutil.which("wsl.exe") is None and shutil.which("wsl") is None:
         return False, "secure execution backend unavailable: wsl.exe not found"
+    config = config or secure_backend_config()
     command = [
         "wsl.exe",
         "-d",
-        "Ubuntu-24.04",
+        config.distro,
         "--",
         "sh",
-        "-lc",
-        "command -v bwrap >/dev/null && command -v prlimit >/dev/null && "
-        "command -v timeout >/dev/null && test -x /home/liaol/.brep2code-runtime/bin/python",
+        "-s",
+        "--",
+        config.runtime_root,
     ]
+    preflight = (
+        "runtime_root=\"$1\"\n"
+        "command -v bwrap >/dev/null && command -v prlimit >/dev/null && "
+        "command -v timeout >/dev/null && test -x \"$runtime_root/bin/python\"\n"
+    )
     try:
         completed = subprocess.run(
             command,
+            input=preflight.encode("utf-8"),
             capture_output=True,
             timeout=10,
             check=False,
@@ -74,17 +107,18 @@ def run_untrusted_build(
         file_limit_blocks=file_limit_blocks,
         output_limit_bytes=output_limit_bytes,
     )
+    config = secure_backend_config()
     command = [
         "wsl.exe",
         "-d",
-        "Ubuntu-24.04",
+        config.distro,
         "--",
         "sh",
         "-s",
         "--",
         host_workspace,
         stage,
-        "/home/liaol/.brep2code-runtime",
+        config.runtime_root,
     ]
     started = perf_counter()
     try:

@@ -5,6 +5,7 @@ from typing import Any
 
 from brep2code.cases import ValidatedCase
 from brep2code.geometry.observe import observe_edges, observe_step
+from brep2code.knowledge import search_knowledge
 
 
 class ToolError(ValueError):
@@ -93,4 +94,15 @@ def dispatch_tool(
             return deepcopy(OCP_SYMBOL_REFERENCES[arguments["topic"]])
         except KeyError as exc:
             raise ToolError("ocp_symbol topic is not allowlisted") from exc
+    if name == "knowledge_search":
+        if set(arguments) - {"query", "scope", "limit"}:
+            raise ToolError("knowledge_search received unknown arguments")
+        try:
+            return search_knowledge(
+                arguments.get("query"),
+                scopes=arguments.get("scope"),
+                limit=arguments.get("limit", 3),
+            )
+        except ValueError as exc:
+            raise ToolError(str(exc)) from exc
     raise ToolError(f"unknown tool: {name}")

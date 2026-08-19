@@ -130,9 +130,13 @@ def validate_active_result(
     schema_version = payload.get("schema_version") if isinstance(payload, dict) else None
     if schema_version == 4:
         required.add("provider_accounting")
+    if schema_version == 5:
+        required.update({"retrieval_policy", "catalog_id", "prompt_version"})
+        if payload.get("provider") != "fake":
+            required.add("provider_accounting")
     if not isinstance(payload, dict) or set(payload) != required:
         raise ActiveResultValidationError("active result fields are invalid")
-    if schema_version not in {3, 4} or payload["mode"] != "active":
+    if schema_version not in {3, 4, 5} or payload["mode"] != "active":
         raise ActiveResultValidationError("active result identity is invalid")
     if schema_version == 3 and payload["provider"] != "fake":
         raise ActiveResultValidationError("hosted active result requires provider accounting")
@@ -149,10 +153,12 @@ def validate_active_result(
     terminal = payload["terminal"]
     if not isinstance(terminal, bool):
         raise ActiveResultValidationError("active result terminal marker is invalid")
-    _validate_continuation_policy(payload["continuation_policy"], terminal)
+    _validate_continuation_policy(
+        payload["continuation_policy"], terminal, schema_version=schema_version
+    )
     budgets = _validated_budgets(payload["budgets"])
     allow_terminal_overrun = (
-        schema_version == 4
+        schema_version in {4, 5}
         and terminal
         and payload["state"] == "failed"
         and payload["stop_reason"] == "provider_error"
@@ -160,7 +166,9 @@ def validate_active_result(
     usage = _validated_usage(
         payload["usage"], budgets, allow_provider_overrun=allow_terminal_overrun
     )
-    if schema_version == 4:
+    if schema_version == 5:
+        _validate_retrieval_identity(payload)
+    if schema_version in {4, 5} and "provider_accounting" in payload:
         accounting = payload["provider_accounting"]
         if not isinstance(accounting, dict):
             raise ActiveResultValidationError("provider accounting fields are invalid")
@@ -186,6 +194,22 @@ def validate_active_result(
     _validate_trace(trace, usage, payload["state"], payload["stop_reason"], terminal)
     _validate_revisions(result_root, usage, payload["state"], terminal)
     _validate_terminal(payload["state"], payload["stop_reason"], trace, terminal)
+
+
+def _validate_retrieval_identity(payload: dict[str, Any]) -> None:
+    policy = payload["retrieval_policy"]
+    if policy == "disabled":
+        if payload["catalog_id"] is not None or payload["prompt_version"] != "active-v2-no-retrieval":
+            raise ActiveResultValidationError("disabled retrieval identity is invalid")
+        if payload["budgets"].get("retrievals") != 0 or payload["usage"].get("retrievals") != 0:
+            raise ActiveResultValidationError("disabled retrieval policy requires zero retrievals")
+        if any(item.get("action") == "retrieve" for item in payload["trace"]):
+            raise ActiveResultValidationError("disabled retrieval result contains retrieval trace")
+    elif policy == "bounded_seed":
+        if payload["catalog_id"] != "bounded-seed-v1" or payload["prompt_version"] != "active-v2-retrieval":
+            raise ActiveResultValidationError("bounded retrieval identity is invalid")
+    else:
+        raise ActiveResultValidationError("active retrieval policy is invalid")
 
 
 def _validated_budgets(value: Any) -> ActiveBudgets:
@@ -331,7 +355,7 @@ def _validate_terminal(
         raise ActiveResultValidationError("active result failure terminal drift")
 
 
-def _validate_continuation_policy(value: Any, terminal: bool) -> None:
+def _validate_continuation_policy(value: Any, terminal: bool, *, schema_version: int) -> None:
     if not isinstance(value, dict) or set(value) != {
         "eligible",
         "implemented",
@@ -341,9 +365,10 @@ def _validate_continuation_policy(value: Any, terminal: bool) -> None:
     expected_requirements = [
         "same_case",
         "same_budgets",
-        "remaining_model_requests",
-        "existing_revision_root",
     ]
+    if schema_version == 5:
+        expected_requirements.append("same_retrieval_policy")
+    expected_requirements.extend(["remaining_model_requests", "existing_revision_root"])
     if (
         value["eligible"] is not (not terminal)
         or value["implemented"] is not True

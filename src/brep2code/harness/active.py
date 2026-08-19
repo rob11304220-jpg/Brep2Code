@@ -34,6 +34,11 @@ class ActiveState(StrEnum):
     FAILED = "failed"
 
 
+class RetrievalPolicy(StrEnum):
+    DISABLED = "disabled"
+    BOUNDED_SEED = "bounded_seed"
+
+
 @dataclass(frozen=True)
 class ActiveBudgets:
     model_requests: int
@@ -143,7 +148,10 @@ class ActiveHarnessController:
         submit: Callable[..., SubmissionResult],
         checkpoint: Callable[[ActiveCheckpoint], None] | None = None,
         resume: ActiveResumeState | None = None,
+        retrieval_policy: RetrievalPolicy = RetrievalPolicy.BOUNDED_SEED,
     ) -> ActiveHarnessResult:
+        if retrieval_policy is RetrievalPolicy.DISABLED and budgets.retrievals != 0:
+            raise ValueError("disabled retrieval policy requires zero retrieval budget")
         initial = dispatch_tool("brep_observations", case)
         usage: dict[str, int | float] = (
             dict(resume.usage)
@@ -173,7 +181,12 @@ class ActiveHarnessController:
                     "case_id": case.case.case_id,
                     "unit": case.metadata["unit"],
                     "initial_observations": initial["brep"],
-                    "available_tools": ["edge_candidates", "ocp_symbol"],
+                    "available_tools": (
+                        ["edge_candidates"]
+                        if retrieval_policy is RetrievalPolicy.DISABLED
+                        else ["edge_candidates", "knowledge_search", "ocp_symbol"]
+                    ),
+                    "retrieval_policy": retrieval_policy,
                     "budgets": _budget_snapshot(budgets, usage),
                     "current_revision": current_revision,
                     "feedback": feedback,
@@ -226,13 +239,29 @@ class ActiveHarnessController:
                 continue
 
             if action.name == "retrieve":
+                if retrieval_policy is RetrievalPolicy.DISABLED:
+                    trace.append(
+                        {
+                            "action": "provider",
+                            "error": "retrieve action is disabled by harness policy",
+                        }
+                    )
+                    return finish(ActiveState.FAILED, "harness_policy")
                 if not _consume("retrievals", budgets, usage):
                     return finish(ActiveState.EXHAUSTED, "retrieval_budget")
                 notify(ActiveState.RETRIEVING)
                 try:
-                    result = dispatch_tool(
-                        "ocp_symbol", case, {"topic": action.payload["topic"]}
+                    tool_name = "ocp_symbol" if "topic" in action.payload else "knowledge_search"
+                    tool_arguments = (
+                        {"topic": action.payload["topic"]}
+                        if tool_name == "ocp_symbol"
+                        else {
+                            key: action.payload[key]
+                            for key in ("query", "scope", "limit")
+                            if key in action.payload
+                        }
                     )
+                    result = dispatch_tool(tool_name, case, tool_arguments)
                 except ToolError as exc:
                     trace.append({"action": "retrieve", "error": str(exc)})
                     return finish(ActiveState.FAILED, "tool_error")
@@ -306,8 +335,23 @@ def _validate_probe(payload: dict[str, Any]) -> None:
 
 
 def _validate_retrieve(payload: dict[str, Any]) -> None:
-    if set(payload) != {"topic"} or not isinstance(payload["topic"], str):
-        raise ActionContractError("retrieve requires one string topic")
+    if set(payload) == {"topic"} and isinstance(payload["topic"], str) and payload["topic"]:
+        return
+    allowed = {"query", "scope", "limit"}
+    if "query" not in payload or set(payload) - allowed:
+        raise ActionContractError("retrieve requires a topic or query projection")
+    if not isinstance(payload["query"], str) or not payload["query"]:
+        raise ActionContractError("retrieve query must be a non-empty string")
+    if "scope" in payload and (
+        not isinstance(payload["scope"], list)
+        or any(not isinstance(scope, str) or not scope for scope in payload["scope"])
+    ):
+        raise ActionContractError("retrieve scope must be a string array")
+    if "limit" in payload and (
+        not isinstance(payload["limit"], int) or isinstance(payload["limit"], bool)
+        or not 1 <= payload["limit"] <= 5
+    ):
+        raise ActionContractError("retrieve limit must be between 1 and 5")
 
 
 def _validate_submit(payload: dict[str, Any]) -> None:

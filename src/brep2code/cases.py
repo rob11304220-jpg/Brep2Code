@@ -13,11 +13,12 @@ from brep2code.capabilities import (
 from brep2code.dossiers import validate_case_dossier
 from brep2code.domain import Case
 from brep2code.mechanisms import MechanismRegistry, load_mechanism_registry
+from brep2code.verifier import load_verifier_pack
 
 
 SUPPORTED_SPLITS = frozenset({"smoke", "train", "eval"})
 RUNTIME_SPLITS = frozenset({"smoke", "train"})
-CASE_KEYS = frozenset(
+CORE_CASE_KEYS = frozenset(
     {
         "case_id",
         "input_step",
@@ -25,15 +26,13 @@ CASE_KEYS = frozenset(
         "unit",
         "summary",
         "tags",
-        "mechanism",
-        "capability_level",
-        "compatibility_tier",
-        "kernel_properties",
-        "sequence",
-        "difficulty",
         "expected",
     }
 )
+TAXONOMY_CASE_KEYS = frozenset(
+    {"mechanism", "capability_level", "compatibility_tier", "sequence", "difficulty"}
+)
+CASE_KEYS = CORE_CASE_KEYS | TAXONOMY_CASE_KEYS | {"kernel_properties"}
 EXPECTED_KEYS = frozenset({"bbox", "volume", "counts"})
 COUNT_KEYS = frozenset({"solid", "shell", "face", "edge"})
 MECHANISMS = frozenset({"primitive", "analytic_surface", "boolean_cut"})
@@ -49,6 +48,7 @@ class ValidatedCase:
     sha256: str
     metadata: dict[str, Any]
     dossier: dict[str, Any] | None = None
+    verifier: dict[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -89,7 +89,8 @@ def validate_case(
         raise CaseValidationError(f"unsupported split {split!r}")
 
     metadata = _load_json_object(resolved_root / "case.json", "case metadata")
-    _require_exact_keys(metadata, CASE_KEYS, "case metadata")
+    _require_required_keys(metadata, CORE_CASE_KEYS, "case metadata")
+    _require_allowed_keys(metadata, CASE_KEYS, "case metadata")
     case_id = _required_string(metadata, "case_id")
     if case_id != directory_id:
         raise CaseValidationError(
@@ -109,11 +110,15 @@ def validate_case(
     _validate_mechanism_metadata(metadata, registry)
     _validate_expected(metadata.get("expected"))
     dossier = None
-    if registry is not None:
+    if registry is not None and metadata.get("mechanism") is not None:
         try:
             dossier = validate_case_dossier(resolved_root, metadata, registry)
         except ValueError as exc:
             raise CaseValidationError(str(exc)) from exc
+    try:
+        verifier = load_verifier_pack(resolved_root, metadata)
+    except ValueError as exc:
+        raise CaseValidationError(str(exc)) from exc
     expected_hash = _required_sha256(metadata, "sha256")
     actual_hash = hashlib.sha256(input_step.read_bytes()).hexdigest()
     if actual_hash != expected_hash:
@@ -125,6 +130,7 @@ def validate_case(
         sha256=actual_hash,
         metadata=metadata,
         dossier=dossier,
+        verifier=verifier,
     )
 
 
@@ -207,6 +213,22 @@ def _require_exact_keys(payload: dict[str, Any], expected: frozenset[str], label
         )
 
 
+def _require_required_keys(
+    payload: dict[str, Any], required: frozenset[str], label: str
+) -> None:
+    missing = sorted(required - frozenset(payload))
+    if missing:
+        raise CaseValidationError(f"{label} is missing required keys: {missing}")
+
+
+def _require_allowed_keys(
+    payload: dict[str, Any], allowed: frozenset[str], label: str
+) -> None:
+    unknown = sorted(frozenset(payload) - allowed)
+    if unknown:
+        raise CaseValidationError(f"{label} contains unknown keys: {unknown}")
+
+
 def _required_string(metadata: dict[str, Any], key: str) -> str:
     value = metadata.get(key)
     if not isinstance(value, str) or not value:
@@ -232,6 +254,13 @@ def _validate_mechanism_metadata(
     metadata: dict[str, Any], registry: MechanismRegistry | None = None
 ) -> None:
     mechanism = metadata.get("mechanism")
+    if mechanism is None:
+        if any(key in metadata for key in TAXONOMY_CASE_KEYS - {"mechanism"}) or "kernel_properties" in metadata:
+            raise CaseValidationError(
+                "taxonomy metadata must include mechanism, capability_level, "
+                "compatibility_tier, sequence, and difficulty together"
+            )
+        return
     if registry is None:
         if mechanism not in MECHANISMS:
             raise CaseValidationError(f"mechanism must be one of {sorted(MECHANISMS)}")

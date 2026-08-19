@@ -124,3 +124,18 @@ def test_validate_active_result_rejects_non_relative_output_artifact(tmp_path: P
 
     with pytest.raises(ActiveResultValidationError, match="output path"):
         validate_active_result(payload, _case(), root)
+
+
+def test_schema_v5_retrieval_identity_is_validated(tmp_path: Path) -> None:
+    root = tmp_path / "active"
+    payload = _write_active_result(root)
+    payload.update(
+        schema_version=5,
+        retrieval_policy="disabled",
+        catalog_id=None,
+        prompt_version="active-v2-no-retrieval",
+    )
+    payload["continuation_policy"]["requirements"].insert(2, "same_retrieval_policy")
+
+    with pytest.raises(ActiveResultValidationError, match="requires zero retrievals"):
+        validate_active_result(payload, _case(), root)

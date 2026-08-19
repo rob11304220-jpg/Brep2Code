@@ -25,20 +25,173 @@ each verified slice before starting the next one. Commit messages should name
 the behavior delivered rather than the work period or checkpoint.
 
 The contract-first L2 entry slice is implemented: one unified action envelope,
-one `edge_candidates` probe, one allowlisted `ocp_symbol` reference tool, and a
-controller for `probe`, `retrieve`, `submit`, and advisory `finish`. Model
+one `edge_candidates` probe, bounded SDK/recipe retrieval plus the legacy
+allowlisted `ocp_symbol` reference tool, and a controller for `probe`,
+`retrieve`, `submit`, and advisory `finish`. Model
 request, probe, retrieval, script submission, execution, repair, token, and cost
 budgets remain independent. The active loop has deterministic fake coverage, a
 validated five-cohort decision gate, unified hosted readiness, and a narrowly
 bounded fresh-root live path for one runtime case.
 
-The current phase is post-pilot diagnostic refinement. Classify stable hosted
-failures and reproduce them offline before changing behavior. Prefer bounded
-compatibility diagnostics for unambiguous Python/OCP binding mistakes, preserve
-execution budget when rejecting them before the sandbox, and attach a
-`reference_topic` only when the exact topic is already allowlisted. Do not make
-prompt tuning, larger request/repair budgets, or broader hosted cohorts the
-default response to a failed pilot.
+The research refactor separates the generic Harness from the legacy taxonomy.
+An open-ended case may omit mechanism, capability level, and construction
+sequence, and use a case-local `verifier.json` for target references, gates,
+repair policy, and reference projection policy. Existing registry/dossier cases
+remain valid as a compatibility cohort. L0-L6 is now an optional reporting
+taxonomy rather than a required runtime modeling contract.
+
+## Research phase order
+
+The immediate research objective is a controlled provider baseline, not a broad
+knowledge-base expansion. First run low-difficulty cases with the Active Harness
+and no SDK/recipe retrieval, measuring whether observations, feedback, secure
+execution, and geometry/topology gates are sufficient for a real provider to
+produce a passing B-Rep. Hosted reruns of the existing cases support this
+baseline and validate the hosted Active path; they require secure-backend
+readiness, exact budgets, fresh roots, and fresh authorization.
+
+The baseline command must select `retrieval_policy=disabled` with a zero
+retrieval budget. That policy uses a retrieval-free prompt and action surface;
+setting only a zero budget is not a valid no-knowledge condition. Active is the
+primary protocol. Fixed remains optional comparison data and is never an
+automatic fallback or an Active readiness dependency.
+
+The phase order is fixed for interpretability:
+
+1. low-difficulty no-knowledge baseline;
+2. hosted Active reruns of existing cases;
+3. local SDK/recipe knowledge-base prototype;
+4. mature modeling-dataset import, indexing, and semantic retrieval.
+
+Stages 3 and 4 are deferred until stage 1 has a reproducible, interpretable
+result. The local prototype must freeze record schema, provenance, safe runtime
+projection, retrieval metrics, and no-retrieval/seed-retrieval ablations before
+any mature dataset is imported. Mature data additionally requires version and
+unit normalization, near-duplicate and target-solution leakage checks, and an
+explicit policy for multiple valid modeling sequences.
+
+### Research stages and candidate routes
+
+The four stages below are the durable research order. They describe experiment
+boundaries, not Harness implementation layers. A stage is complete only when
+its exit evidence is represented by code, tests, case metadata, and validated
+run artifacts. A passing fake fixture alone is not research evidence.
+
+#### Stage 1: Active no-knowledge baseline
+
+Objective: measure whether a real provider can reconstruct low-difficulty
+B-Reps using only bounded observations, optional geometry probes, typed repair
+feedback, compatibility checks, secure execution, and verifier gates.
+
+- Use Active as the primary protocol and Fixed only as an optional ablation.
+- Require `retrieval_policy=disabled`, `max_retrievals=0`, the retrieval-free
+  prompt, no retrieval tools, and no retrieval trace.
+- Start with `box`, `block_with_hole`, and `filleted_box`; keep
+  `blind_hole_block` as a secondary diagnostic stress case.
+- Use parameter variation and topology-sensitive variants to separate primitive,
+  boolean, selection, compatibility, geometry, and topology failures.
+- Freeze provider/model, prompt version, case SHA-256, runtime fingerprint,
+  verifier identity, budgets, replicate identity, and failure classification
+  for each cohort.
+
+Exit only when secure execution is stable, the no-knowledge policy is fully
+compliant, at least 90% of runs are valid and interpretable model attempts, and
+infrastructure/provider/Harness failures are below the declared cohort
+threshold. Remaining failures should predominantly be CAD, geometry, topology,
+or budget failures that can be explained from recorded actions and gates.
+
+#### Stage 2: hosted Active replication
+
+Objective: validate that Stage 1 conclusions survive the real hosted Active
+transport and accounting path without changing the task or knowledge condition.
+
+- Reuse the Stage 1 cases, verifier contracts, prompt version, retrieval policy,
+  and controller budgets wherever possible.
+- Require a fresh run root, secure-backend readiness, explicit provider/model,
+  bounded retries/time/tokens/cost, and fresh itemized authorization per run.
+- Run a small protocol pilot before expanding replicates; do not silently omit
+  provider/network errors or combine runs across changed provider, endpoint,
+  model, runtime, or prompt cohorts.
+- Compare success, gate failures, actions, requests, submissions, repairs,
+  probes, tokens, cost, and stop reasons. Fixed results may be attached as
+  optional control data but never gate Active validity.
+
+Exit only when hosted artifacts validate, accounting is complete, failures are
+classifiable, and repeated runs provide an interpretable baseline. A hosted
+failure must be reproduced or isolated before changing prompts, budgets, tools,
+or cases.
+
+#### Stage 3: local SDK and recipe knowledge prototype
+
+Objective: estimate the causal value of bounded modeling knowledge without
+turning retrieval into target-solution lookup.
+
+- Freeze a versioned record schema, catalog ID, provenance, applicable OCP
+  version, safe projection, query/result bounds, and leakage rules first.
+- Keep SDK symbol knowledge and general modeling recipes as separable sources.
+- Run matched ablations: `active_no_knowledge`, `active_sdk_only`,
+  `active_recipe_only`, and `active_sdk_plus_recipe`.
+- Record retrieval precision, retrieved-but-unused results, post-retrieval first
+  submission success, incorrect SDK guidance, success delta, and token/cost
+  delta in addition to final gates.
+- Records may describe signatures, binding-specific usage, types, common errors,
+  general construction strategies, topology-aware selection, and deterministic
+  export. They must not contain case scripts, target parameters, private oracles,
+  repository paths, or eval references.
+
+Exit only when the ablation protocol and metrics are stable and the prototype
+shows an interpretable benefit or an interpretable negative result. Do not grow
+the catalog merely because retrieval is available.
+
+#### Stage 4: mature modeling datasets
+
+Objective: study scalable indexing, semantic retrieval, and strategy transfer
+from external or internally curated modeling corpora.
+
+- Establish source, license, provenance, kernel/CAD version, units, and format
+  normalization before ingestion.
+- Detect exact and near duplicates across train/eval boundaries and prevent
+  target-solution, parameter, script, and derived-geometry leakage.
+- Represent multiple valid construction sequences without treating one sequence
+  as the unique answer; the verifier remains the acceptance authority.
+- Evaluate retrieval by mechanism family and case difficulty, with matched
+  no-knowledge and Stage 3 controls.
+- Treat dataset retrieval as a research condition, never as an implicit default
+  or a replacement for SDK knowledge.
+
+Exit criteria must be declared in a campaign or experiment contract before a
+large import. Stage 4 must not begin solely because a dataset is available.
+
+The candidate routes are orthogonal experiment choices that map onto those
+stages. Scores are a current prioritization on a ten-point scale, balancing
+scientific value, interpretability, leakage risk, implementation cost, and
+extensibility. They are decision guidance rather than capability claims.
+
+| Route | Candidate | Score | Decision and stage mapping |
+|---|---|---:|---|
+| A | Small parameterized case families with Active no-knowledge | 9.2 | Execute first; primary Stage 1 baseline and diagnostic foundation. |
+| B | Small case families with versioned SDK symbol projections | 8.7 | Preferred first Stage 3 knowledge condition after Stages 1--2. |
+| C | Human-curated general modeling recipe catalog | 8.1 | Run independently from B, then combine only in a matched ablation. |
+| D | Automatically extract knowledge from installed SDK documentation/API metadata | 7.5 | Start only after the Stage 3 schema, provenance, version, and projection contracts are frozen. |
+| E | Import mature CAD/modeling datasets with semantic retrieval | 6.3 | Defer to Stage 4 because governance, normalization, duplication, and leakage risks dominate early value. |
+
+Default decision: pursue A, then the Stage 2 hosted replication, then B and C as
+separate ablations. Consider D as a scaling mechanism only after B is stable.
+Do not pursue E before Stages 1--3 have produced interpretable results. If new
+evidence changes this ranking, update this table and the relevant entry/exit
+criteria in the same tested slice; do not create a separate roadmap or status
+ledger.
+
+The implementation path is in post-pilot diagnostic refinement: a narrowly
+bounded hosted pilot exists, but it does not satisfy the Stage 1 research exit
+criteria above. The evidence program therefore remains in Stage 1 preparation
+and execution until the no-knowledge cohort is reproducible and interpretable.
+Classify stable hosted failures and reproduce them offline before changing
+behavior. Prefer bounded compatibility diagnostics for unambiguous Python/OCP
+binding mistakes, preserve execution budget when rejecting them before the
+sandbox, and attach a `reference_topic` only when the exact topic is already
+allowlisted. Do not make prompt tuning, larger request/repair budgets, or
+broader hosted cohorts the default response to a failed pilot.
 
 L2 edge observations use unique indexed subshapes and bounded, path-free
 geometry keys. Each edge can expose analytic curve parameters, parameter range,
@@ -55,10 +208,10 @@ check permits only a later request for one fresh hosted authorization; it does
 not carry authorization state and does not run a provider.
 
 The controller proof required before hosted expansion is a deterministic fake
-provider sequence: probe edge candidates, retrieve `TopoDS.Edge_s`, submit a
-candidate, receive typed geometry feedback, submit one repair, and pass. Keep
-that proof passing as an entry gate for any future hosted expansion; do not
-replace it with a general-purpose agent or an additional hosted pilot.
+provider sequence: probe edge candidates or retrieve an approved SDK/recipe,
+submit a candidate, receive typed geometry feedback, submit one repair, and
+pass. Keep that proof passing as an entry gate for any future hosted expansion;
+do not replace it with an unbounded agent or an additional hosted pilot.
 
 Keep active hosted readiness separate from execution. Preflight must remain
 credential-free; config-check may read provider configuration but must remain
@@ -218,16 +371,18 @@ memory, stdout/output size, and an OCP-to-STEP positive control.
 
 The secure integration and end-to-end tests need the same backend as a real
 provider run. The host must have WSL2, an `Ubuntu-24.04` distro, and the
-project runtime installed at `/home/liaol/.brep2code-runtime`. That runtime
-must contain Python, OCP, `bwrap`, `prlimit`, and `timeout`. Generated scripts
-must never run through the trusted local executor.
+project runtime installed at `/opt/brep2code/runtime` by default. Override the
+distro and runtime root with `BREP2CODE_WSL_DISTRO` and
+`BREP2CODE_RUNTIME_ROOT`; these host settings are never projected to the model.
+That runtime must contain Python, OCP, `bwrap`, `prlimit`, and `timeout`.
+Generated scripts must never run through the trusted local executor.
 
 Use these read-only checks before debugging a failing test:
 
 ```powershell
 wsl.exe --status
 wsl.exe -l -v
-wsl.exe -d Ubuntu-24.04 -- sh -lc "command -v bwrap; command -v prlimit; command -v timeout; test -x /home/liaol/.brep2code-runtime/bin/python"
+uv run brep2code env doctor
 ```
 
 The distro must be running as version 2. If `wsl.exe` reports
@@ -256,6 +411,7 @@ The expected validation order is:
 
 ```powershell
 uv sync --dev
+uv run brep2code env doctor
 uv run brep2code cases validate
 uv run pytest -q
 uv run pytest --run-secure -q

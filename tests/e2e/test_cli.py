@@ -1170,11 +1170,12 @@ def test_active_run_binds_fake_actions_and_typed_budgets(
                 ActionRequest("box", 0, {"case_id": "box"})
             ).action
 
-        def run(self, case, run_root, *, budgets, timeout_seconds):
+        def run(self, case, run_root, *, budgets, timeout_seconds, retrieval_policy):
             observed["case_id"] = case.case.case_id
             observed["run_root"] = run_root
             observed["budgets"] = budgets
             observed["timeout_seconds"] = timeout_seconds
+            observed["retrieval_policy"] = retrieval_policy
             return ActiveHarnessResult(
                 ActiveState.SUCCEEDED,
                 "passed",
@@ -1439,11 +1440,12 @@ def test_active_continue_binds_only_remaining_fake_actions(
                 ActionRequest("box", 1, {"case_id": "box"})
             ).action
 
-        def continue_run(self, case, root, *, budgets, timeout_seconds):
+        def continue_run(self, case, root, *, budgets, timeout_seconds, retrieval_policy):
             observed["case_id"] = case.case.case_id
             observed["root"] = root
             observed["budgets"] = budgets
             observed["timeout"] = timeout_seconds
+            observed["retrieval_policy"] = retrieval_policy
             return ActiveHarnessResult(
                 ActiveState.SUCCEEDED,
                 "passed",
@@ -2077,7 +2079,7 @@ def test_active_hosted_run_executes_stubbed_vertical_slice(
     artifact = json.loads(
         (tmp_path / "active-hosted/result.json").read_text(encoding="utf-8")
     )
-    assert artifact["schema_version"] == 4
+    assert artifact["schema_version"] == 5
     assert artifact["state"] == "succeeded"
 
 
@@ -2396,6 +2398,22 @@ def test_run_refuses_held_out_eval_case(tmp_path: Path, capsys) -> None:
     assert exit_code == 2
     assert "runtime case" in json.loads(capsys.readouterr().out)["error"]
     assert not (tmp_path / "run").exists()
+
+
+def test_environment_doctor_is_read_only_and_redacts_runtime_root(capsys, monkeypatch) -> None:
+    monkeypatch.setenv("BREP2CODE_WSL_DISTRO", "Research-Ubuntu")
+    monkeypatch.setenv("BREP2CODE_RUNTIME_ROOT", "/private/research/runtime")
+    monkeypatch.setattr(cli_module, "secure_backend_status", lambda config: (True, "ready"))
+
+    assert main(["env", "doctor"]) == 0
+    output = capsys.readouterr().out
+    payload = json.loads(output)
+    assert payload["status"] == "ready"
+    assert payload["configuration"]["wsl_distro"] == "Research-Ubuntu"
+    assert payload["configuration"]["runtime_layout"] == "<runtime-root>/bin/python"
+    assert payload["network_requests"] == 0
+    assert payload["artifacts_created"] is False
+    assert "/private/research/runtime" not in output
 
 
 @pytest.mark.secure

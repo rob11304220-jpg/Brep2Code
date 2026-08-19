@@ -1,9 +1,9 @@
 # Architecture
 
-The implemented pipeline is case loading, Harness-selected path-free geometry
+The implemented pipeline is task loading, Harness-selected path-free geometry
 observation, model generation, workspace execution, geometry gates, and
 structured repair feedback. The fixed runner uses one observation context; the
-active runner adds model-directed bounded probes and approved reference
+active runner adds model-directed bounded probes and approved SDK/recipe
 retrieval behind a provider-neutral action contract. A run contains sessions;
 a session contains immutable revisions. Each revision keeps the model exchange,
 generated script, execution output, geometry signals, and terminal status.
@@ -23,6 +23,11 @@ feedback for the next revision; prior revision files are never modified.
 
 ## Fixed and active Harness loops
 
+Active is the primary research protocol. Fixed is an explicit control protocol,
+not a runtime fallback or a prerequisite for Active validity. A Fixed result may
+be attached to an Active pilot report for comparison, but its absence or failure
+does not change the Active decision gate.
+
 The fixed runner constructs one model context and permits only a full script
 response. Its revision loop is a small form of counterexample-guided
 inductive synthesis (CEGIS): propose a CAD program, execute and verify it, then
@@ -40,11 +45,14 @@ A model turn selects exactly one action with the corresponding payload:
 {
   "action": "probe | retrieve | submit | finish",
   "probe": {"tool": "edge_candidates", "arguments": {}},
-  "retrieve": {"topic": "TopoDS.Edge_s"},
+  "retrieve": {"query": "topology-aware edge selection", "scope": ["sdk", "recipe"], "limit": 2},
   "submit": {"script": "complete build.py"},
   "finish": {"reason": "required gates are expected to pass"}
 }
 ```
+
+The legacy exact `{"topic": "TopoDS.Edge_s"}` retrieval form remains valid
+for compatibility and deterministic binding diagnostics.
 
 The controller owns a bounded state machine: `OBSERVING`, `PROBING`,
 `RETRIEVING`, `SYNTHESIZING`, `EXECUTING`, `VERIFYING`, `REPAIRING`, and a
@@ -61,8 +69,9 @@ and only then enters the secure backend. Stable Python/OCP binding mistakes are
 therefore generation counterexamples rather than sandbox attempts and do not
 consume execution budget. Compatibility feedback may recommend a
 `reference_topic` only when that exact topic exists in the `ocp_symbol`
-allowlist; binding knowledge stays in retrieval rather than growing the system
-prompt.
+allowlist; general SDK/recipe retrieval is also bounded and projected without
+target-specific answers. Binding knowledge stays in retrieval rather than
+growing the system prompt.
 
 The active loop is implemented offline with deterministic providers and for one
 fresh hosted runtime case with explicit HTTPS selection and authorization.
@@ -94,22 +103,28 @@ budget failures. Untrusted execution is a separate secure boundary: if its
 verified backend is unavailable, execution fails closed and never falls back
 to the trusted local adapter.
 
-## Case-program contract
+## Task and verifier contract
 
-The project grows through a mechanism-organized hosted case program. A
-mechanism definition is shared by cases through
-cases/registry/mechanisms.json; a case-local dossier.json binds that
-definition to its Harness assets. The dossier is Harness-only metadata. It may
-name expected geometry, topology oracles, kernel operations, failure modes,
-applicable gates, repair policy, controls, and hosted budgets, but none of
-those private fields are assembled into runtime observations.
+The project separates the task contract from the modeling taxonomy. A task
+always declares its input asset, unit, runtime summary, and expected geometry;
+it may optionally provide a case-local `verifier.json` with required gates,
+gate oracles, repair policy, and reference projection policy. The verifier pack
+does not require a mechanism or construction sequence. It is the preferred
+contract for open-ended tasks where multiple modeling strategies are valid.
 
-`capability_level` is the only semantic ladder and is valid for L0 through L6.
+The existing mechanism registry and `dossier.json` remain a compatibility
+adapter for the L0-L2 evaluation cohort. They may name expected geometry,
+topology oracles, kernel operations, failure modes, applicable gates, repair
+policy, controls, and hosted budgets, but none of those private fields are
+assembled into runtime observations.
+
+`capability_level` is an optional semantic ladder and is valid for L0 through L6.
 The current primitive and analytic-surface cases map to L0, while the ordered
 boolean-cut cases map to L1. T0/T1/T2 remain only as an explicit
 `compatibility_tier` mapping for the first campaign and must not be used for
 capability aggregation or report grouping. This is an initial slice of the
-planned L0-L6 ladder, not a claim that all levels are implemented.
+planned L0-L6 reporting ladder, not a claim that all levels are implemented or
+that runtime scripts must follow it.
 
 The initial L0/L1 development cohort is declared in each dossier as the
 ordered coverage tuple `nominal`, `parameter_variation`, and
@@ -134,11 +149,12 @@ workpacks.
 ## Asset and visibility boundary
 
 The geometry asset layer contains input.step, its hash, expected geometry, and
-topology counts. The modeling layer contains the registry and dossier fields
-for mechanism, operations, dependencies, parameter dimensions, parser notes,
-and failure modes. The Harness layer contains gates, repair policy, controls,
-split membership, and hosted budget policy. Runtime providers receive only
-path-free observations, the declared tool contract, and bounded feedback;
+topology counts. The optional taxonomy layer contains registry and dossier
+fields for mechanism, operations, dependencies, parameter dimensions, parser
+notes, and failure modes. The verifier layer contains gates, repair policy,
+reference projection policy, controls, split membership, and hosted budget
+policy. Runtime providers receive only path-free observations, the declared
+tool contract, bounded SDK/recipe projections, and bounded feedback;
 reference, oracle, dossier, registry, repository, and host-path data remain
 outside the runtime prompt.
 

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brep2code.local/schemas/verifier-pack.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "case_id", "target", "gates", "repair_policy", "reference_policy"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "case_id": {"type": "string", "minLength": 1},
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["expected_geometry", "topology_oracle"],
+      "properties": {
+        "expected_geometry": {"const": "case.json.expected"},
+        "topology_oracle": {"const": "case.json.expected.counts"}
+      }
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "oracles"],
+      "properties": {
+        "required": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "oracles": {"type": "object"}
+      }
+    },
+    "repair_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_rounds", "initial_script_allowed"],
+      "properties": {
+        "max_rounds": {"type": "integer", "minimum": 1},
+        "initial_script_allowed": {"type": "boolean"}
+      }
+    },
+    "reference_policy": {"enum": ["projected_only", "harness_only"]}
+  }
+}
