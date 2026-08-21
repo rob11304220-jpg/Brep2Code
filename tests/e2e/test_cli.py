@@ -31,10 +31,11 @@ def test_cases_validate_command(capsys) -> None:
     assert main(["cases", "validate"]) == 0
     payload = json.loads(capsys.readouterr().out)
     assert payload["status"] == "valid"
-    assert payload["count"] == 10
+    assert payload["count"] == 11
     assert {item["case_id"] for item in payload["cases"]} == {
         "box",
         "block_with_hole",
+        "stage1_cylinder",
         "blind_hole_block",
         "cylinder",
         "box_held_out",
@@ -44,6 +45,103 @@ def test_cases_validate_command(capsys) -> None:
         "filleted_box",
         "filleted_box_held_out",
     }
+
+
+def test_stage1_validate_command_is_offline(capsys) -> None:
+    assert (
+        main(
+            [
+                "stage1",
+                "validate",
+                "--contract",
+                "cases/campaigns/stage1-backend-baseline.json",
+            ]
+        )
+        == 0
+    )
+
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["status"] == "valid"
+    assert payload["backend_profiles"] == ["cadquery_v1", "ocp_v1"]
+    assert payload["network_requests"] == 0
+
+
+def test_stabilization_report_can_persist_one_fresh_aggregate(tmp_path: Path, capsys) -> None:
+    output = tmp_path / "stabilization-report.json"
+    argv = [
+        "stage1",
+        "stabilization-report",
+        "--contract",
+        "cases/campaigns/stage1-active-v4-stabilization.json",
+        "--runs-root",
+        str(tmp_path / "runs"),
+        "--output",
+        str(output),
+    ]
+
+    assert main(argv) == 1
+    assert json.loads(output.read_text(encoding="utf-8"))["expected_runs"] == 12
+    capsys.readouterr()
+
+    assert main(argv) == 1
+    assert json.loads(capsys.readouterr().out) == {
+        "status": "invalid",
+        "error": "stabilization report output must be fresh",
+    }
+
+
+def test_stage1_v2_preflight_is_read_only_and_requires_later_authorization(
+    tmp_path: Path, capsys, monkeypatch
+) -> None:
+    prerequisite = tmp_path / "stabilization-report.json"
+    prerequisite.write_text(
+        json.dumps(
+            {
+                "experiment_id": "stage1-active-v4-stabilization-v1",
+                "expected_runs": 12,
+                "observed_runs": 12,
+                "missing_runs": [],
+                "artifact_validation_failures": [],
+                "projection_validation_failures": [],
+                "judgment": {
+                    "protocol_stable": True,
+                    "stage1_exit_changed": False,
+                    "stage2_authorized": False,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "secure_backend_profile_status",
+        lambda profile: (True, "ready", "version"),
+    )
+
+    assert (
+        main(
+            [
+                "stage1",
+                "v2-preflight",
+                "--contract",
+                "cases/campaigns/stage1-no-knowledge-v2.json",
+                "--stabilization-report",
+                str(prerequisite),
+                "--run-root",
+                str(tmp_path / "fresh"),
+            ]
+        )
+        == 0
+    )
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["status"] == "ready_for_authorization_review"
+    assert payload["expected_runs"] == 80
+    assert payload["maximum_scope"]["cost_usd"] == 1.6
+    assert payload["network_requests"] == 0
+    assert payload["provider_configuration_read"] is False
+    assert payload["artifacts_created"] is False
+    assert payload["authorization_granted"] is False
+    assert payload["stage2_authorized"] is False
 
 
 def test_campaign_validate_command(capsys) -> None:
@@ -1170,12 +1268,13 @@ def test_active_run_binds_fake_actions_and_typed_budgets(
                 ActionRequest("box", 0, {"case_id": "box"})
             ).action
 
-        def run(self, case, run_root, *, budgets, timeout_seconds, retrieval_policy):
+        def run(self, case, run_root, *, budgets, timeout_seconds, retrieval_policy, backend):
             observed["case_id"] = case.case.case_id
             observed["run_root"] = run_root
             observed["budgets"] = budgets
             observed["timeout_seconds"] = timeout_seconds
             observed["retrieval_policy"] = retrieval_policy
+            observed["backend"] = backend
             return ActiveHarnessResult(
                 ActiveState.SUCCEEDED,
                 "passed",
@@ -1274,9 +1373,7 @@ def test_active_preflight_is_local_and_creates_no_artifacts(
     assert not run_root.exists()
 
 
-def test_active_preflight_accepts_held_out_case_for_fake_cohort(
-    tmp_path: Path, capsys
-) -> None:
+def test_active_preflight_accepts_held_out_case_for_fake_cohort(tmp_path: Path, capsys) -> None:
     action_path = tmp_path / "action.json"
     action_path.write_text(
         json.dumps({"action": "finish", "finish": {"reason": "expected control"}}),
@@ -1318,14 +1415,10 @@ def test_active_preflight_accepts_held_out_case_for_fake_cohort(
     assert payload["provider"] == "fake"
 
 
-def test_active_preflight_rejects_action_sequence_over_tool_budget(
-    tmp_path: Path, capsys
-) -> None:
+def test_active_preflight_rejects_action_sequence_over_tool_budget(tmp_path: Path, capsys) -> None:
     action_path = tmp_path / "action.json"
     action_path.write_text(
-        json.dumps(
-            {"action": "probe", "probe": {"tool": "edge_candidates", "arguments": {}}}
-        ),
+        json.dumps({"action": "probe", "probe": {"tool": "edge_candidates", "arguments": {}}}),
         encoding="utf-8",
     )
     exit_code = main(
@@ -1440,12 +1533,13 @@ def test_active_continue_binds_only_remaining_fake_actions(
                 ActionRequest("box", 1, {"case_id": "box"})
             ).action
 
-        def continue_run(self, case, root, *, budgets, timeout_seconds, retrieval_policy):
+        def continue_run(self, case, root, *, budgets, timeout_seconds, retrieval_policy, backend):
             observed["case_id"] = case.case.case_id
             observed["root"] = root
             observed["budgets"] = budgets
             observed["timeout"] = timeout_seconds
             observed["retrieval_policy"] = retrieval_policy
+            observed["backend"] = backend
             return ActiveHarnessResult(
                 ActiveState.SUCCEEDED,
                 "passed",
@@ -1594,9 +1688,7 @@ def _write_fake_active_baseline(tmp_path: Path) -> Path:
                     "tokens": 0,
                     "cost_usd": 0.0,
                 },
-                "trace": [
-                    {"action": "finish", "passed": True, "result": {"reason": "done"}}
-                ],
+                "trace": [{"action": "finish", "passed": True, "result": {"reason": "done"}}],
             }
         ),
         encoding="utf-8",
@@ -1748,9 +1840,7 @@ def _active_hosted_readiness_argv(tmp_path: Path, baseline: Path) -> list[str]:
     return argv
 
 
-def _active_hosted_run_argv(
-    tmp_path: Path, baseline: Path, stub_response: Path
-) -> list[str]:
+def _active_hosted_run_argv(tmp_path: Path, baseline: Path, stub_response: Path) -> list[str]:
     argv = _active_hosted_argv(tmp_path, "active-hosted-run")
     argv.extend(
         [
@@ -1890,7 +1980,9 @@ def test_active_hosted_continue_restores_accounting_and_uses_remaining_turn(
         ),
         encoding="utf-8",
     )
-    monkeypatch.setattr(cli_module, "secure_backend_status", lambda: (True, "ready"))
+    monkeypatch.setattr(
+        cli_module, "secure_backend_profile_status", lambda backend: (True, "ready", "7.9.3.1.1")
+    )
     monkeypatch.setattr(
         cli_module,
         "deepseek_config_from_env",
@@ -1929,19 +2021,10 @@ def test_active_hosted_continue_restores_accounting_and_uses_remaining_turn(
     monkeypatch.setattr(
         cli_module,
         "ActiveHarnessRunner",
-        lambda provider: ActiveHarnessRunner(
-            provider, submission_factory=submission_factory
-        ),
+        lambda provider: ActiveHarnessRunner(provider, submission_factory=submission_factory),
     )
 
-    assert (
-        main(
-            _active_hosted_continue_argv(
-                tmp_path, baseline, checkpoint, stub_response
-            )
-        )
-        == 0
-    )
+    assert main(_active_hosted_continue_argv(tmp_path, baseline, checkpoint, stub_response)) == 0
     output = capsys.readouterr().out
     payload = json.loads(output)
     assert payload["status"] == "succeeded"
@@ -1964,7 +2047,9 @@ def test_active_hosted_continue_requires_new_authorization_and_stable_pricing(
     checkpoint = _write_hosted_active_checkpoint(tmp_path)
     original = checkpoint.read_bytes()
     stub_response = tmp_path / "unused-response.json"
-    monkeypatch.setattr(cli_module, "secure_backend_status", lambda: (True, "ready"))
+    monkeypatch.setattr(
+        cli_module, "secure_backend_profile_status", lambda backend: (True, "ready", "7.9.3.1.1")
+    )
     monkeypatch.setattr(
         cli_module,
         "deepseek_config_from_env",
@@ -1972,9 +2057,7 @@ def test_active_hosted_continue_requires_new_authorization_and_stable_pricing(
             AssertionError("rejected continuation must not read provider configuration")
         ),
     )
-    argv = _active_hosted_continue_argv(
-        tmp_path, baseline, checkpoint, stub_response
-    )
+    argv = _active_hosted_continue_argv(tmp_path, baseline, checkpoint, stub_response)
     argv.remove("--authorize-feedback")
 
     assert main(argv) == 1
@@ -1982,9 +2065,7 @@ def test_active_hosted_continue_requires_new_authorization_and_stable_pricing(
     assert payload["failed_gate"] == "outbound_projection_authorization"
     assert checkpoint.read_bytes() == original
 
-    argv = _active_hosted_continue_argv(
-        tmp_path, baseline, checkpoint, stub_response
-    )
+    argv = _active_hosted_continue_argv(tmp_path, baseline, checkpoint, stub_response)
     argv[argv.index("--input-cost-per-million") + 1] = "1.5"
     assert main(argv) == 1
     payload = json.loads(capsys.readouterr().out)
@@ -2023,7 +2104,9 @@ def test_active_hosted_run_executes_stubbed_vertical_slice(
         ),
         encoding="utf-8",
     )
-    monkeypatch.setattr(cli_module, "secure_backend_status", lambda: (True, "ready"))
+    monkeypatch.setattr(
+        cli_module, "secure_backend_profile_status", lambda backend: (True, "ready", "7.9.3.1.1")
+    )
     monkeypatch.setattr(
         cli_module,
         "deepseek_config_from_env",
@@ -2062,9 +2145,7 @@ def test_active_hosted_run_executes_stubbed_vertical_slice(
     monkeypatch.setattr(
         cli_module,
         "ActiveHarnessRunner",
-        lambda provider: ActiveHarnessRunner(
-            provider, submission_factory=submission_factory
-        ),
+        lambda provider: ActiveHarnessRunner(provider, submission_factory=submission_factory),
     )
 
     assert main(_active_hosted_run_argv(tmp_path, baseline, stub_response)) == 0
@@ -2076,10 +2157,8 @@ def test_active_hosted_run_executes_stubbed_vertical_slice(
     assert payload["provider_accounting"]["http_attempts"] == 1
     assert payload["provider_accounting"]["tokens"]["total"] == 15
     assert "stub-secret" not in output
-    artifact = json.loads(
-        (tmp_path / "active-hosted/result.json").read_text(encoding="utf-8")
-    )
-    assert artifact["schema_version"] == 5
+    artifact = json.loads((tmp_path / "active-hosted/result.json").read_text(encoding="utf-8"))
+    assert artifact["schema_version"] == 7
     assert artifact["state"] == "succeeded"
 
 
@@ -2115,7 +2194,9 @@ def test_active_hosted_live_run_uses_bounded_https_and_redacted_exchange_artifac
     def provider_factory(config, limits, **kwargs):
         return real_provider(config, limits, opener=opener, **kwargs)
 
-    monkeypatch.setattr(cli_module, "secure_backend_status", lambda: (True, "ready"))
+    monkeypatch.setattr(
+        cli_module, "secure_backend_profile_status", lambda backend: (True, "ready", "7.9.3.1.1")
+    )
     monkeypatch.setattr(cli_module, "OpenAICompatibleProvider", provider_factory)
     monkeypatch.setattr(
         cli_module,
@@ -2155,9 +2236,7 @@ def test_active_hosted_live_run_uses_bounded_https_and_redacted_exchange_artifac
     monkeypatch.setattr(
         cli_module,
         "ActiveHarnessRunner",
-        lambda provider: ActiveHarnessRunner(
-            provider, submission_factory=submission_factory
-        ),
+        lambda provider: ActiveHarnessRunner(provider, submission_factory=submission_factory),
     )
 
     assert main(_active_hosted_live_run_argv(tmp_path, baseline)) == 0
@@ -2184,8 +2263,12 @@ def test_active_hosted_run_stops_before_stub_when_readiness_fails(
     missing_stub = tmp_path / "missing-stub.json"
     monkeypatch.setattr(
         cli_module,
-        "secure_backend_status",
-        lambda: (False, "secure execution backend unavailable: WSL2 probe failed"),
+        "secure_backend_profile_status",
+        lambda backend: (
+            False,
+            "secure execution backend unavailable: WSL2 probe failed",
+            None,
+        ),
     )
     monkeypatch.setattr(
         cli_module,
@@ -2205,7 +2288,9 @@ def test_active_hosted_readiness_is_provider_free_and_read_only(
     tmp_path: Path, capsys, monkeypatch
 ) -> None:
     baseline = _write_fake_active_baseline(tmp_path)
-    monkeypatch.setattr(cli_module, "secure_backend_status", lambda: (True, "ready"))
+    monkeypatch.setattr(
+        cli_module, "secure_backend_profile_status", lambda backend: (True, "ready", "7.9.3.1.1")
+    )
     monkeypatch.setattr(
         cli_module,
         "deepseek_config_from_env",
@@ -2224,14 +2309,16 @@ def test_active_hosted_readiness_is_provider_free_and_read_only(
     assert not (tmp_path / "active-hosted").exists()
 
 
-def test_active_hosted_readiness_reports_gate_failures(
-    tmp_path: Path, capsys, monkeypatch
-) -> None:
+def test_active_hosted_readiness_reports_gate_failures(tmp_path: Path, capsys, monkeypatch) -> None:
     baseline = _write_fake_active_baseline(tmp_path)
     monkeypatch.setattr(
         cli_module,
-        "secure_backend_status",
-        lambda: (False, "secure execution backend unavailable: WSL2 probe failed"),
+        "secure_backend_profile_status",
+        lambda backend: (
+            False,
+            "secure execution backend unavailable: WSL2 probe failed",
+            None,
+        ),
     )
 
     assert main(_active_hosted_readiness_argv(tmp_path, baseline)) == 1
@@ -2245,7 +2332,9 @@ def test_active_hosted_readiness_config_check_is_offline_and_redacted(
     tmp_path: Path, capsys, monkeypatch
 ) -> None:
     baseline = _write_fake_active_baseline(tmp_path)
-    monkeypatch.setattr(cli_module, "secure_backend_status", lambda: (True, "ready"))
+    monkeypatch.setattr(
+        cli_module, "secure_backend_profile_status", lambda backend: (True, "ready", "7.9.3.1.1")
+    )
     monkeypatch.setattr(
         cli_module,
         "deepseek_config_from_env",
@@ -2273,7 +2362,9 @@ def test_active_hosted_readiness_config_check_is_offline_and_redacted(
 def test_active_hosted_readiness_requires_baseline_and_fresh_authorization(
     tmp_path: Path, capsys, monkeypatch
 ) -> None:
-    monkeypatch.setattr(cli_module, "secure_backend_status", lambda: (True, "ready"))
+    monkeypatch.setattr(
+        cli_module, "secure_backend_profile_status", lambda backend: (True, "ready", "7.9.3.1.1")
+    )
     missing = tmp_path / "missing" / "result.json"
     assert main(_active_hosted_readiness_argv(tmp_path, missing)) == 1
     payload = json.loads(capsys.readouterr().out)
@@ -2291,7 +2382,9 @@ def test_active_hosted_readiness_requires_baseline_and_fresh_authorization(
 def test_active_hosted_readiness_rejects_invalid_baseline_and_existing_initial_root(
     tmp_path: Path, capsys, monkeypatch
 ) -> None:
-    monkeypatch.setattr(cli_module, "secure_backend_status", lambda: (True, "ready"))
+    monkeypatch.setattr(
+        cli_module, "secure_backend_profile_status", lambda backend: (True, "ready", "7.9.3.1.1")
+    )
     baseline = _write_fake_active_baseline(tmp_path)
     payload = json.loads(baseline.read_text(encoding="utf-8"))
     payload["usage"]["model_requests"] = 0
@@ -2314,7 +2407,9 @@ def test_active_hosted_readiness_classifies_budget_binding_drift(
     tmp_path: Path, capsys, monkeypatch
 ) -> None:
     baseline = _write_fake_active_baseline(tmp_path)
-    monkeypatch.setattr(cli_module, "secure_backend_status", lambda: (True, "ready"))
+    monkeypatch.setattr(
+        cli_module, "secure_backend_profile_status", lambda backend: (True, "ready", "7.9.3.1.1")
+    )
     argv = _active_hosted_readiness_argv(tmp_path, baseline)
     argv[argv.index("--provider-max-total-tokens") + 1] = "50"
 
@@ -2358,13 +2453,25 @@ def test_active_hosted_config_check_is_offline_and_redacted(
         ),
     )
 
-    assert main(_active_hosted_argv(tmp_path, "active-hosted-config-check")) == 0
+    argv = _active_hosted_argv(tmp_path, "active-hosted-config-check")
+    for flag in (
+        "--authorize-hosted",
+        "--authorize-observations",
+        "--authorize-tool-results",
+        "--authorize-revision-source",
+        "--authorize-feedback",
+    ):
+        argv.remove(flag)
+
+    assert main(argv) == 0
     output = capsys.readouterr().out
     payload = json.loads(output)
     assert payload["status"] == "ready"
     assert payload["endpoint_host"] == "api.deepseek.com"
     assert payload["network_requests"] == 0
     assert payload["provider_configuration_read"] is True
+    assert payload["authorization_required"] is False
+    assert not any(payload["authorization"].values())
     assert "top-secret" not in output
 
 

@@ -5,6 +5,7 @@ from brep2code.execution.secure import (
     run_untrusted_build,
     secure_backend_config,
     secure_backend_status,
+    secure_backend_profile_status,
 )
 
 __all__ = [
@@ -15,4 +16,5 @@ __all__ = [
     "run_untrusted_build",
     "secure_backend_config",
     "secure_backend_status",
+    "secure_backend_profile_status",
 ]

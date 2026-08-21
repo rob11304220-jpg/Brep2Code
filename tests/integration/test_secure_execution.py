@@ -94,3 +94,16 @@ def test_ocp_build_produces_readable_step(tmp_path: Path) -> None:
     assert result.output_step is not None
     metrics = inspect_step(result.output_step)
     assert metrics.volume == pytest.approx(6000.0)
+
+
+def test_cadquery_build_produces_readable_step(tmp_path: Path) -> None:
+    workspace = tmp_path / "cadquery"
+    workspace.mkdir()
+    source = Path("tests/fixtures/fixed_cadquery_box.py").read_text(encoding="utf-8")
+    (workspace / "build.py").write_text(source, encoding="utf-8")
+
+    result = run_untrusted_build(workspace)
+    assert result.exit_code == 0, result.stderr
+    assert result.output_step is not None
+    metrics = inspect_step(result.output_step)
+    assert metrics.volume == pytest.approx(6000.0)

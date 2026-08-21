@@ -781,7 +781,7 @@ def test_active_runner_checkpoints_hosted_malformed_usage_separately(
 
     assert result.state is ActiveState.FAILED
     artifact = json.loads((run_root / "result.json").read_text(encoding="utf-8"))
-    assert artifact["schema_version"] == 5
+    assert artifact["schema_version"] == 7
     assert artifact["usage"]["tokens"] == 15
     assert artifact["provider_accounting"]["http_attempts"] == 1
     assert artifact["provider_accounting"]["tokens"] == {

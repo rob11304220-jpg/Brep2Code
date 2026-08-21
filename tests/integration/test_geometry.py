@@ -66,6 +66,25 @@ def test_fillet_observation_exposes_selected_edge_radius_and_axis() -> None:
     assert fillet["axis_direction"] == [1.0, 0.0, 0.0]
 
 
+def test_semantic_gate_accepts_equivalent_reversed_cylinder_axis() -> None:
+    validated = validate_case(Path("cases/smoke/stage1_cylinder"), Path("cases"))
+    metrics = inspect_step(validated.case.input_step)
+    observations = observe_step(validated.case.input_step)
+    cylinder = next(face for face in observations["faces"] if face["surface"] == "cylinder")
+    cylinder["axis_direction"] = [0.0, 0.0, -1.0]
+    harness = validated.dossier["harness_assets"]
+
+    report = dispatch_gates(
+        metrics,
+        validated.metadata["expected"],
+        harness["required_gates"],
+        observations=observations,
+        gate_oracles=harness["gate_oracles"],
+    )
+
+    assert report.passed is True
+
+
 def test_gate_dispatcher_rejects_undeclared_implementation() -> None:
     validated = validate_case(Path("cases/smoke/box"), Path("cases"))
     metrics = inspect_step(validated.case.input_step)

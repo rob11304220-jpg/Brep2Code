@@ -3,8 +3,9 @@ from __future__ import annotations
 import ast
 from typing import Any
 
+from brep2code.backends import BackendProfileId, backend_profile
 
-_UNSUPPORTED_IMPORT_ROOTS = frozenset({"OCC", "Part", "FreeCAD", "cadquery"})
+_UNSUPPORTED_IMPORT_ROOTS = frozenset({"OCC", "Part", "FreeCAD"})
 _COMPATIBILITY_MESSAGE = (
     "Use imports from the installed OCP package only; do not use OCC.Core, Part, FreeCAD, "
     "or cadquery."
@@ -15,7 +16,9 @@ _TOPEXP_STATIC_METHODS = frozenset(
 _MAX_COMPATIBILITY_ISSUES = 4
 
 
-def validate_script_compatibility(script: str) -> dict[str, Any] | None:
+def validate_script_compatibility(
+    script: str, backend: BackendProfileId | str = BackendProfileId.OCP_V1
+) -> dict[str, Any] | None:
     """Return bounded generation feedback for runtime compatibility errors."""
     try:
         tree = ast.parse(script)
@@ -26,10 +29,26 @@ def validate_script_compatibility(script: str) -> dict[str, Any] | None:
             "message": "Generated script is not valid Python.",
         }
 
+    profile = backend_profile(backend)
     issues: list[dict[str, Any]] = []
     for node in ast.walk(tree):
         for module in _imported_modules(node):
             root = module.split(".", 1)[0]
+            if root in {"OCP", "cadquery"} and root not in profile.import_roots:
+                _append_issue(
+                    issues,
+                    {
+                        "stage": "generation",
+                        "reason": "backend_policy_violation",
+                        "backend_profile": profile.profile_id,
+                        "module": root,
+                        "message": (
+                            f"Backend profile {profile.profile_id} permits CAD imports only from "
+                            f"{', '.join(profile.import_roots)}."
+                        ),
+                    },
+                )
+                continue
             if root not in _UNSUPPORTED_IMPORT_ROOTS:
                 continue
             _append_issue(
@@ -42,8 +61,10 @@ def validate_script_compatibility(script: str) -> dict[str, Any] | None:
                 },
             )
     for node in ast.walk(tree):
-        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef) and _has_local_ocp_import(
-            node
+        if (
+            profile.profile_id is BackendProfileId.OCP_V1
+            and isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+            and _has_local_ocp_import(node)
         ):
             _append_issue(
                 issues,
@@ -58,7 +79,7 @@ def validate_script_compatibility(script: str) -> dict[str, Any] | None:
                     ),
                 },
             )
-        if _unsupported_topexp_static_call(node):
+        if profile.profile_id is BackendProfileId.OCP_V1 and _unsupported_topexp_static_call(node):
             method = node.func.attr
             feedback = {
                 "stage": "generation",
@@ -70,7 +91,11 @@ def validate_script_compatibility(script: str) -> dict[str, Any] | None:
             if method == "MapShapes":
                 feedback["reference_topic"] = "TopExp.MapShapes_s"
             _append_issue(issues, feedback)
-        invalid_downcast = _invalid_topods_edge_downcast(node)
+        invalid_downcast = (
+            _invalid_topods_edge_downcast(node)
+            if profile.profile_id is BackendProfileId.OCP_V1
+            else None
+        )
         if invalid_downcast is not None:
             _append_issue(
                 issues,
@@ -83,7 +108,11 @@ def validate_script_compatibility(script: str) -> dict[str, Any] | None:
                     "message": "Use the OCP Python downcast binding with its _s suffix.",
                 },
             )
-        pnt_argument_count = _invalid_brep_tool_pnt_call(node)
+        pnt_argument_count = (
+            _invalid_brep_tool_pnt_call(node)
+            if profile.profile_id is BackendProfileId.OCP_V1
+            else None
+        )
         if pnt_argument_count is not None:
             _append_issue(
                 issues,
@@ -100,8 +129,10 @@ def validate_script_compatibility(script: str) -> dict[str, Any] | None:
                     ),
                 },
             )
-    if _has_legacy_topods_import(tree) and not any(
-        issue.get("symbol") == "topods.Edge" for issue in issues
+    if (
+        profile.profile_id is BackendProfileId.OCP_V1
+        and _has_legacy_topods_import(tree)
+        and not any(issue.get("symbol") == "topods.Edge" for issue in issues)
     ):
         _append_issue(
             issues,
@@ -114,7 +145,11 @@ def validate_script_compatibility(script: str) -> dict[str, Any] | None:
                 "message": "Import and use the supported OCP TopoDS binding.",
             },
         )
-    invalid_instance_call = _invalid_topexp_instance_static_call(tree)
+    invalid_instance_call = (
+        _invalid_topexp_instance_static_call(tree)
+        if profile.profile_id is BackendProfileId.OCP_V1
+        else None
+    )
     if invalid_instance_call is not None:
         instance, method = invalid_instance_call
         feedback = {
@@ -184,8 +219,7 @@ def _invalid_topexp_instance_static_call(tree: ast.AST) -> tuple[str, str] | Non
         instances = {
             target.id
             for node in nodes
-            if isinstance(node, ast.Assign)
-            and _constructs_topexp(node.value)
+            if isinstance(node, ast.Assign) and _constructs_topexp(node.value)
             for target in node.targets
             if isinstance(target, ast.Name)
         }
@@ -218,9 +252,7 @@ def _is_nested_scope(node: ast.AST) -> bool:
 
 def _constructs_topexp(node: ast.AST) -> bool:
     return (
-        isinstance(node, ast.Call)
-        and isinstance(node.func, ast.Name)
-        and node.func.id == "TopExp"
+        isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "TopExp"
     )
 
 

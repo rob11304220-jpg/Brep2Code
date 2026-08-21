@@ -5,6 +5,7 @@ from brep2code.execution.secure import (
     _decode,
     _is_wsl_backend_failure,
     secure_backend_config,
+    secure_backend_profile_status,
 )
 
 
@@ -34,8 +35,48 @@ def test_secure_backend_configuration_is_portable_and_explicit() -> None:
     ("distro", "runtime_root"),
     [("", "/runtime"), ("Ubuntu;other", "/runtime"), ("Ubuntu", "relative/runtime")],
 )
-def test_secure_backend_configuration_rejects_unsafe_values(
-    distro: str, runtime_root: str
-) -> None:
+def test_secure_backend_configuration_rejects_unsafe_values(distro: str, runtime_root: str) -> None:
     with pytest.raises(ValueError):
         SecureBackendConfig(distro, runtime_root)
+
+
+def test_secure_backend_profile_reports_installed_version(monkeypatch) -> None:
+    class Completed:
+        returncode = 0
+        stdout = b"2.8.0\n"
+        stderr = b""
+
+    monkeypatch.setattr(
+        "brep2code.execution.secure.secure_backend_status",
+        lambda unused_config=None: (True, "ready"),
+    )
+    monkeypatch.setattr(
+        "brep2code.execution.secure.subprocess.run", lambda *args, **kwargs: Completed()
+    )
+
+    assert secure_backend_profile_status("cadquery_v1") == (
+        True,
+        "secure backend profile cadquery_v1 ready",
+        "2.8.0",
+    )
+
+
+def test_secure_backend_profile_fails_closed_when_package_is_missing(monkeypatch) -> None:
+    class Completed:
+        returncode = 1
+        stdout = b""
+        stderr = b"PackageNotFoundError"
+
+    monkeypatch.setattr(
+        "brep2code.execution.secure.secure_backend_status",
+        lambda unused_config=None: (True, "ready"),
+    )
+    monkeypatch.setattr(
+        "brep2code.execution.secure.subprocess.run", lambda *args, **kwargs: Completed()
+    )
+
+    assert secure_backend_profile_status("cadquery_v1") == (
+        False,
+        "secure backend profile cadquery_v1 package is unavailable",
+        None,
+    )

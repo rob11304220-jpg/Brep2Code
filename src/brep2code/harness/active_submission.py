@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from brep2code.backends import BackendProfileId, backend_profile
 from brep2code.cases import ValidatedCase
 from brep2code.execution import ExecutionResult, SandboxUnavailable, run_untrusted_build
 from brep2code.geometry.gates import GateDispatchError, GateReport, dispatch_gates
@@ -26,6 +27,7 @@ from brep2code.harness.compatibility import validate_script_compatibility
 from brep2code.harness.active_results import ActiveResultValidationError, validate_active_result
 from brep2code.harness.verification import gate_oracles, geometry_feedback, required_gates
 from brep2code.providers.action_protocol import ActionProvider
+from brep2code.providers.task_contract import build_provider_task_contract
 
 
 Executor = Callable[..., ExecutionResult]
@@ -49,6 +51,7 @@ class ActiveSubmissionVerifier:
         observer: Observer = observe_step,
         gate_dispatcher: GateDispatcher = dispatch_gates,
         starting_submission: int = 0,
+        backend: BackendProfileId | str = BackendProfileId.OCP_V1,
     ) -> None:
         if timeout_seconds < 1:
             raise ValueError("timeout_seconds must be positive")
@@ -61,6 +64,7 @@ class ActiveSubmissionVerifier:
         self.inspector = inspector
         self.observer = observer
         self.gate_dispatcher = gate_dispatcher
+        self.backend = backend_profile(backend).profile_id
         self.target_observations = observe_step(case.case.input_step)
         if starting_submission < 0:
             raise ValueError("starting_submission must be non-negative")
@@ -96,7 +100,7 @@ class ActiveSubmissionVerifier:
                 _write_json(workspace / "result.json", artifact)
                 return SubmissionResult(False, feedback)
 
-        feedback = validate_script_compatibility(script)
+        feedback = validate_script_compatibility(script, self.backend)
         if feedback is not None:
             artifact.update(status="failed", feedback=feedback)
             _write_json(workspace / "result.json", artifact)
@@ -180,9 +184,14 @@ class ActiveHarnessRunner:
         budgets: ActiveBudgets,
         timeout_seconds: int = 30,
         retrieval_policy: RetrievalPolicy = RetrievalPolicy.BOUNDED_SEED,
+        backend: BackendProfileId | str = BackendProfileId.OCP_V1,
+        stage1_identity: dict[str, Any] | None = None,
     ) -> ActiveHarnessResult:
+        profile = backend_profile(backend)
         run_root.mkdir(parents=True, exist_ok=False)
         submit = self.submission_factory(case, run_root, timeout_seconds)
+        if isinstance(submit, ActiveSubmissionVerifier):
+            submit.backend = profile.profile_id
         return self._run_controller(
             case,
             run_root,
@@ -191,6 +200,8 @@ class ActiveHarnessRunner:
             submit,
             checkpoint_index=0,
             retrieval_policy=retrieval_policy,
+            backend=profile.profile_id,
+            stage1_identity=stage1_identity,
         )
 
     def continue_run(
@@ -201,7 +212,9 @@ class ActiveHarnessRunner:
         budgets: ActiveBudgets,
         timeout_seconds: int,
         retrieval_policy: RetrievalPolicy = RetrievalPolicy.BOUNDED_SEED,
+        backend: BackendProfileId | str = BackendProfileId.OCP_V1,
     ) -> ActiveHarnessResult:
+        profile = backend_profile(backend)
         result_path = run_root / "result.json"
         payload = _read_json(result_path)
         validate_active_result(payload, case, run_root)
@@ -215,8 +228,10 @@ class ActiveHarnessRunner:
             raise ActiveResultValidationError("active continuation timeout drift")
         if payload.get("retrieval_policy", RetrievalPolicy.BOUNDED_SEED) != retrieval_policy:
             raise ActiveResultValidationError("active continuation retrieval policy drift")
+        if payload.get("backend_profile", BackendProfileId.OCP_V1) != profile.profile_id:
+            raise ActiveResultValidationError("active continuation backend profile drift")
         restore_accounting = getattr(self.provider, "restore_accounting", None)
-        if payload["schema_version"] in {4, 5} and "provider_accounting" in payload:
+        if payload["schema_version"] in {4, 5, 6, 7} and "provider_accounting" in payload:
             if not callable(restore_accounting):
                 raise ActiveResultValidationError(
                     "active continuation provider cannot restore accounting"
@@ -227,6 +242,7 @@ class ActiveHarnessRunner:
         submit = self.submission_factory(case, run_root, timeout_seconds)
         if isinstance(submit, ActiveSubmissionVerifier):
             submit.submissions = starting_submission
+            submit.backend = profile.profile_id
         elif starting_submission:
             raise ActiveResultValidationError(
                 "active continuation submission factory cannot restore revision index"
@@ -240,6 +256,8 @@ class ActiveHarnessRunner:
             checkpoint_index=payload["checkpoint_index"] + 1,
             resume=resume,
             retrieval_policy=retrieval_policy,
+            backend=profile.profile_id,
+            stage1_identity=payload.get("stage1_identity"),
         )
 
     def _run_controller(
@@ -253,11 +271,13 @@ class ActiveHarnessRunner:
         checkpoint_index: int,
         resume: ActiveResumeState | None = None,
         retrieval_policy: RetrievalPolicy = RetrievalPolicy.BOUNDED_SEED,
+        backend: BackendProfileId | str = BackendProfileId.OCP_V1,
+        stage1_identity: dict[str, Any] | None = None,
     ) -> ActiveHarnessResult:
+        profile = backend_profile(backend)
+        task_contract = build_provider_task_contract(profile.profile_id, retrieval_policy)
         accounting_snapshot = getattr(self.provider, "accounting_snapshot", None)
-        set_accounting_checkpoint = getattr(
-            self.provider, "set_accounting_checkpoint", None
-        )
+        set_accounting_checkpoint = getattr(self.provider, "set_accounting_checkpoint", None)
         hosted_accounting = callable(accounting_snapshot)
         latest_snapshot: ActiveCheckpoint | None = None
 
@@ -273,11 +293,15 @@ class ActiveHarnessRunner:
                 checkpoint_usage["tokens"] = provider_accounting["tokens"]["total"]
                 checkpoint_usage["cost_usd"] = provider_accounting["cost_usd"]
             payload = {
-                "schema_version": 5,
+                "schema_version": 7,
                 "mode": "active",
                 "retrieval_policy": retrieval_policy,
-                "catalog_id": "bounded-seed-v1" if retrieval_policy is RetrievalPolicy.BOUNDED_SEED else None,
-                "prompt_version": "active-v2-retrieval" if retrieval_policy is RetrievalPolicy.BOUNDED_SEED else "active-v2-no-retrieval",
+                "catalog_id": "bounded-seed-v1"
+                if retrieval_policy is RetrievalPolicy.BOUNDED_SEED
+                else None,
+                "prompt_version": task_contract.prompt_version,
+                "backend_profile": profile.profile_id,
+                "task_contract_hash": task_contract.identity,
                 "case_id": case.case.case_id,
                 "provider": self.provider.name,
                 "model": self.provider.model,
@@ -292,6 +316,7 @@ class ActiveHarnessRunner:
                         "same_case",
                         "same_budgets",
                         "same_retrieval_policy",
+                        "same_backend_profile",
                         "remaining_model_requests",
                         "existing_revision_root",
                     ],
@@ -303,6 +328,8 @@ class ActiveHarnessRunner:
             }
             if hosted_accounting:
                 payload["provider_accounting"] = provider_accounting
+            if stage1_identity is not None:
+                payload["stage1_identity"] = stage1_identity
             _write_json(
                 run_root / "result.json",
                 payload,
@@ -332,6 +359,7 @@ class ActiveHarnessRunner:
                 checkpoint=checkpoint,
                 resume=resume,
                 retrieval_policy=retrieval_policy,
+                backend=profile.profile_id,
             )
         finally:
             if hosted_accounting:

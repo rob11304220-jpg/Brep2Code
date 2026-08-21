@@ -30,8 +30,7 @@ class GateReport:
             passed=self.passed,
             summary=self.summary,
             signals=tuple(
-                Signal(result.gate_id, result.message, result.passed)
-                for result in self.results
+                Signal(result.gate_id, result.message, result.passed) for result in self.results
             ),
         )
 
@@ -40,7 +39,9 @@ class GateDispatchError(ValueError):
     """Raised when a dossier names an unavailable or invalid gate."""
 
 
-GateHandler = Callable[[GeometryMetrics, dict[str, Any], dict[str, Any], dict[str, Any]], GateResult]
+GateHandler = Callable[
+    [GeometryMetrics, dict[str, Any], dict[str, Any], dict[str, Any]], GateResult
+]
 
 
 def dispatch_gates(
@@ -114,13 +115,21 @@ def _semantic_gate(
     oracle: dict[str, Any],
 ) -> GateResult:
     del metrics, expected
-    faces = [face for face in observations.get("faces", []) if face.get("surface") == oracle.get("surface")]
+    faces = [
+        face
+        for face in observations.get("faces", [])
+        if face.get("surface") == oracle.get("surface")
+    ]
     passed = len(faces) == 1
     if passed:
         face = faces[0]
         passed = isclose(face.get("radius", -1), oracle["radius"], rel_tol=1e-7, abs_tol=1e-6)
-        passed = passed and _vectors_close(face.get("axis_direction", ()), oracle["axis_direction"])
-    return GateResult("semantic", passed, "analytic surface matches" if passed else "analytic surface differs")
+        passed = passed and _axes_equivalent(
+            face.get("axis_direction", ()), oracle["axis_direction"]
+        )
+    return GateResult(
+        "semantic", passed, "analytic surface matches" if passed else "analytic surface differs"
+    )
 
 
 def _adjacency_gate(
@@ -130,20 +139,34 @@ def _adjacency_gate(
     oracle: dict[str, Any],
 ) -> GateResult:
     del metrics, expected
-    faces = [face for face in observations.get("faces", []) if face.get("surface") == oracle.get("surface")]
+    faces = [
+        face
+        for face in observations.get("faces", [])
+        if face.get("surface") == oracle.get("surface")
+    ]
     passed = len(faces) == 1
     if passed:
         extent_axis = int(oracle["axis"])
         bbox = faces[0]["bbox"]
         passed = _close(bbox["min"][extent_axis], oracle["extent_min"])
         passed = passed and _close(bbox["max"][extent_axis], oracle["extent_max"])
-    return GateResult("adjacency", passed, "feature adjacency matches" if passed else "feature adjacency differs")
+    return GateResult(
+        "adjacency", passed, "feature adjacency matches" if passed else "feature adjacency differs"
+    )
 
 
 def _vectors_close(actual: tuple[float, ...], expected: list[float]) -> bool:
     return all(
         isclose(left, right, rel_tol=1e-7, abs_tol=1e-6)
         for left, right in zip(actual, expected, strict=True)
+    )
+
+
+def _axes_equivalent(actual: tuple[float, ...], expected: list[float]) -> bool:
+    if len(actual) != len(expected):
+        return False
+    return _vectors_close(actual, expected) or _vectors_close(
+        tuple(-value for value in actual), expected
     )
 
 

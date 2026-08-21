@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "case_id": "stage1_cylinder",
+  "mechanism_id": "analytic_surface",
+  "capability_level": "L0",
+  "geometry_assets": {
+    "input_step": "input.step",
+    "expected_geometry": "case.json.expected",
+    "topology_oracle": "case.json.expected.counts"
+  },
+  "modeling_assets": {
+    "kernel_operations": ["BRepPrimAPI_MakeCylinder"],
+    "sequence_dependencies": ["independent_solid"],
+    "parameter_dimensions": ["radius", "height", "axis"],
+    "failure_modes": ["wrong_radius", "wrong_height", "wrong_axis"],
+    "parser_notes": ["This is the runtime-visible Stage 1 cylinder diagnostic, independent from eval assets."]
+  },
+  "harness_assets": {
+    "prompt_mode": "observation-only",
+    "repair_policy": {"max_rounds": 2, "initial_script_allowed": true},
+    "required_gates": ["bbox", "volume", "topology", "semantic"],
+    "gate_oracles": {
+      "semantic": {"surface": "cylinder", "radius": 4.0, "axis_direction": [0.0, 0.0, 1.0]}
+    },
+    "development_cohort": ["nominal", "parameter_variation", "failure_sensitive"],
+    "controls": [
+      {"variant": "nominal", "asset": "controls/nominal.py", "sha256": "f504252894e5a3a169685ceca4b6eafd87713c2987db46e75406b399ff635848", "expected_result": "pass", "failure_class": "pass"},
+      {"variant": "parameter_variation", "asset": "controls/parameter_variation.py", "sha256": "3690771e412db6b24d52e781ef1108a09546ee8e8d1582179e5806b0d3c53840", "expected_result": "pass", "failure_class": "pass"},
+      {"variant": "failure_sensitive", "asset": "controls/failure_sensitive.py", "sha256": "777b322c278054b1fb4a7b9d504923d14d6be008e594a25bdc3362732271a627", "expected_result": "fail", "failure_class": "geometry"}
+    ],
+    "held_out_fixture": null,
+    "positive_control": true,
+    "negative_control": true,
+    "reference_policy": "harness_only",
+    "hosted_budget_policy": {"max_requests": 2, "max_total_tokens": 8192, "max_cost_usd": 0.1}
+  }
+}

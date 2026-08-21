@@ -8,6 +8,7 @@ import subprocess
 from time import perf_counter
 from uuid import uuid4
 
+from brep2code.backends import BackendProfileId, backend_profile
 from brep2code.execution.local import ExecutionResult
 
 
@@ -56,9 +57,9 @@ def secure_backend_status(config: SecureBackendConfig | None = None) -> tuple[bo
         config.runtime_root,
     ]
     preflight = (
-        "runtime_root=\"$1\"\n"
+        'runtime_root="$1"\n'
         "command -v bwrap >/dev/null && command -v prlimit >/dev/null && "
-        "command -v timeout >/dev/null && test -x \"$runtime_root/bin/python\"\n"
+        'command -v timeout >/dev/null && test -x "$runtime_root/bin/python"\n'
     )
     try:
         completed = subprocess.run(
@@ -78,6 +79,64 @@ def secure_backend_status(config: SecureBackendConfig | None = None) -> tuple[bo
     if completed.returncode != 0:
         return False, "secure execution backend unavailable: bwrap/runtime prerequisites missing"
     return True, "secure execution backend ready"
+
+
+def secure_backend_profile_status(
+    backend: BackendProfileId | str,
+    config: SecureBackendConfig | None = None,
+) -> tuple[bool, str, str | None]:
+    """Return read-only package readiness for one approved backend profile."""
+    profile = backend_profile(backend)
+    ready, reason = secure_backend_status(config)
+    if not ready:
+        return False, reason, None
+    config = config or secure_backend_config()
+    command = [
+        "wsl.exe",
+        "-d",
+        config.distro,
+        "--",
+        f"{config.runtime_root}/bin/python",
+        "-c",
+        (f"import importlib.metadata as m; print(m.version({profile.package!r}))"),
+    ]
+    try:
+        completed = subprocess.run(
+            command,
+            capture_output=True,
+            timeout=10,
+            check=False,
+            env=_wsl_environment(),
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return False, "secure backend profile probe failed", None
+    stdout = _decode(completed.stdout).strip()
+    stderr = _decode(completed.stderr)
+    if _is_wsl_backend_failure(completed.returncode, stdout, stderr):
+        return (
+            False,
+            "secure execution backend unavailable: WSL2 service or distro access failed",
+            None,
+        )
+    if completed.returncode != 0 or not stdout:
+        return (
+            False,
+            f"secure backend profile {profile.profile_id} package is unavailable",
+            None,
+        )
+    if not _backend_version_supported(profile.profile_id, stdout):
+        return (
+            False,
+            f"secure backend profile {profile.profile_id} version is outside {profile.version_spec}",
+            stdout,
+        )
+    return True, f"secure backend profile {profile.profile_id} ready", stdout
+
+
+def _backend_version_supported(profile_id: BackendProfileId, version: str) -> bool:
+    if profile_id is BackendProfileId.OCP_V1:
+        return version == "7.9.3.1.1"
+    return version == "2.8.0"
 
 
 def run_untrusted_build(

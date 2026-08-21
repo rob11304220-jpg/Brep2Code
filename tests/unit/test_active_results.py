@@ -91,6 +91,64 @@ def test_validate_active_result_cross_checks_trace_revisions_and_budgets(tmp_pat
     validate_active_result(payload, _case(), root)
 
 
+def test_validate_active_result_accepts_provider_action_rejected_by_probe_budget(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "active"
+    root.mkdir()
+    payload = {
+        "schema_version": 3,
+        "mode": "active",
+        "case_id": "box",
+        "provider": "fake",
+        "model": "fake-action-queue-v1",
+        "budgets": {
+            "model_requests": 2,
+            "probes": 0,
+            "retrievals": 0,
+            "script_submissions": 0,
+            "executions": 0,
+            "repairs": 0,
+            "tokens": 0,
+            "cost_usd": 0.0,
+        },
+        "timeout_seconds": 5,
+        "checkpoint_index": 2,
+        "terminal": True,
+        "continuation_policy": {
+            "eligible": False,
+            "implemented": True,
+            "requirements": [
+                "same_case",
+                "same_budgets",
+                "remaining_model_requests",
+                "existing_revision_root",
+            ],
+        },
+        "state": "exhausted",
+        "stop_reason": "probe_budget",
+        "usage": {
+            "model_requests": 1,
+            "probes": 0,
+            "retrievals": 0,
+            "script_submissions": 0,
+            "executions": 0,
+            "repairs": 0,
+            "tokens": 0,
+            "cost_usd": 0.0,
+        },
+        "trace": [
+            {
+                "action": "provider",
+                "requested_action": "probe",
+                "error": "probe_budget",
+            }
+        ],
+    }
+
+    validate_active_result(payload, _case(), root)
+
+
 @pytest.mark.parametrize(
     ("mutation", "message"),
     [

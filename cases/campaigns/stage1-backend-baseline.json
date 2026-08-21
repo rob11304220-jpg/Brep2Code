@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "experiment_id": "stage1-backend-baseline-v1",
+  "provider": "deepseek",
+  "model": "deepseek-v4-pro",
+  "retrieval_policy": "disabled",
+  "cases": ["box", "stage1_cylinder", "block_with_hole", "blind_hole_block", "filleted_box"],
+  "backend_profiles": ["cadquery_v1", "ocp_v1"],
+  "cohorts": {
+    "first_shot": {"model_requests": 1, "probes": 0, "retrievals": 0, "script_submissions": 1, "executions": 1, "repairs": 0, "tokens": 16000, "cost_usd": 0.02},
+    "bounded_repair": {"model_requests": 2, "probes": 0, "retrievals": 0, "script_submissions": 2, "executions": 2, "repairs": 1, "tokens": 16000, "cost_usd": 0.02}
+  },
+  "hosted_limits": {"build_timeout_seconds": 20, "provider_timeout_seconds": 120, "max_retries": 0, "max_output_tokens": 4096, "max_total_tokens": 16000, "max_cost_usd": 0.02, "input_cost_per_million": 0.435, "output_cost_per_million": 0.87},
+  "phases": [
+    {"phase_id": "contract_diagnostic", "cases": ["box", "stage1_cylinder"], "backend_profiles": ["cadquery_v1", "ocp_v1"], "cohorts": ["first_shot", "bounded_repair"], "replicates": 3},
+    {"phase_id": "cadquery_baseline", "cases": ["box", "stage1_cylinder", "block_with_hole", "blind_hole_block", "filleted_box"], "backend_profiles": ["cadquery_v1"], "cohorts": ["first_shot", "bounded_repair"], "replicates": 5},
+    {"phase_id": "ocp_contrast", "cases": ["box", "block_with_hole", "filleted_box"], "backend_profiles": ["ocp_v1"], "cohorts": ["first_shot", "bounded_repair"], "replicates": 5}
+  ],
+  "valid_attempt_threshold": 0.9,
+  "infrastructure_failure_rate_threshold": 0.1
+}

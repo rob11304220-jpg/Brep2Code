@@ -1,413 +1,267 @@
 # Development
 
-A change starts with a problem and observable acceptance condition. Implement
-the smallest slice, add focused tests, run Ruff and relevant tests, then commit
-when requested. Ordinary changes need no governance artifact. Changes to
-sandboxing, secrets, or provider egress require explicit tests and review of
-their boundary. Run artifacts belong under `runs/` and are not documentation.
+Build the smallest tested vertical slice from B-Rep input to executable CAD
+script and validated output. Code, tests, case metadata, and validated run
+artifacts are the project authorities. Run artifacts belong under `runs/` and
+are not permanent documentation.
 
-Use `D:\coderemote\Brep2Code_new` on `codex/v2-lean-rebuild` as the default
-checkout. At task start, inspect the current directory, branch, dirty status,
-worktree ownership, and HEAD relationship once. Continue in place when they
-match; do not create or switch worktrees without a concrete need. An unrelated
-detached worktree can remain in place. Stop before editing if the expected
-branch is owned elsewhere or the current checkout has an unexpected HEAD.
-Preserve all pre-existing changes as user work and keep them out of task commits.
+## Change discipline
 
-The commit boundary is one smallest tested vertical slice: one observable
-behavior change, its focused tests, and only the schema, case metadata, or docs
-required by that behavior. Once Ruff and the relevant tests pass, treat that
-slice as independently committable instead of accumulating it with the next
-stage. Do not mix case expansion with unrelated CLI refactoring, hosted config
-with runner development, or behavior changes with broad formatting. Commit
-only when requested; when a task explicitly requests staged commits, commit
-each verified slice before starting the next one. Commit messages should name
-the behavior delivered rather than the work period or checkpoint.
+Start from an observable problem and acceptance condition. Keep one slice to one
+behavior change, its focused tests, and only the directly required schema, case
+metadata, or documentation. Run Ruff and the relevant tests before treating the
+slice as complete. Commit only when requested; when staged commits are requested,
+commit each verified slice before beginning the next one.
 
-The contract-first L2 entry slice is implemented: one unified action envelope,
-one `edge_candidates` probe, bounded SDK/recipe retrieval plus the legacy
-allowlisted `ocp_symbol` reference tool, and a controller for `probe`,
-`retrieve`, `submit`, and advisory `finish`. Model
-request, probe, retrieval, script submission, execution, repair, token, and cost
-budgets remain independent. The active loop has deterministic fake coverage, a
-validated five-cohort decision gate, unified hosted readiness, and a narrowly
-bounded fresh-root live path for one runtime case.
+Do not mix case expansion with unrelated CLI work, provider transport with
+controller behavior, or a research-condition change with selective reruns of an
+existing cohort. Preserve pre-existing worktree changes and keep them out of the
+slice.
 
-The research refactor separates the generic Harness from the legacy taxonomy.
-An open-ended case may omit mechanism, capability level, and construction
-sequence, and use a case-local `verifier.json` for target references, gates,
-repair policy, and reference projection policy. Existing registry/dossier cases
-remain valid as a compatibility cohort. L0-L6 is now an optional reporting
-taxonomy rather than a required runtime modeling contract.
+Changes to provider egress, credentials, model-visible projection, untrusted
+execution, verifier authority, continuation, or accounting require focused
+boundary tests. An architectural decision record is warranted only for a
+costly-to-reverse cross-module decision.
 
-## Research phase order
+Permanent documentation is limited to README and the three files under `docs/`.
+Do not add workpacks, handoffs, route maps, progress logs, status ledgers, or
+evidence ledgers. CLI syntax belongs to `--help`; individual execution facts
+belong to validated artifacts.
 
-The immediate research objective is a controlled provider baseline, not a broad
-knowledge-base expansion. First run low-difficulty cases with the Active Harness
-and no SDK/recipe retrieval, measuring whether observations, feedback, secure
-execution, and geometry/topology gates are sufficient for a real provider to
-produce a passing B-Rep. Hosted reruns of the existing cases support this
-baseline and validate the hosted Active path; they require secure-backend
-readiness, exact budgets, fresh roots, and fresh authorization.
+## Active Harness development rules
 
-The baseline command must select `retrieval_policy=disabled` with a zero
-retrieval budget. That policy uses a retrieval-free prompt and action surface;
-setting only a zero budget is not a valid no-knowledge condition. Active is the
-primary protocol. Fixed remains optional comparison data and is never an
-automatic fallback or an Active readiness dependency.
+Active is the primary protocol. Fixed is an optional control and never a
+fallback or readiness dependency.
 
-The phase order is fixed for interpretability:
+The controller, provider, submission pipeline, and verifier have separate
+responsibilities. Preserve these invariants:
 
-1. low-difficulty no-knowledge baseline;
-2. hosted Active reruns of existing cases;
-3. local SDK/recipe knowledge-base prototype;
-4. mature modeling-dataset import, indexing, and semantic retrieval.
+- the model selects one currently available action per decision;
+- internal limits are projected as available actions and tools, never as
+  numeric budgets or remaining capacity;
+- provider HTTP attempts and protocol retries are separate from model
+  decisions, submissions, executions, and repairs;
+- compatibility rejection happens before secure execution and does not consume
+  an execution attempt;
+- every submission is a complete script in a new immutable revision;
+- only the verifier can enter `SUCCEEDED`;
+- hosted authorization and secrets never enter model context or saved results;
+- provider-generated code never falls back to the trusted local executor.
 
-Stages 3 and 4 are deferred until stage 1 has a reproducible, interpretable
-result. The local prototype must freeze record schema, provenance, safe runtime
-projection, retrieval metrics, and no-retrieval/seed-retrieval ablations before
-any mature dataset is imported. Mature data additionally requires version and
-unit normalization, near-duplicate and target-solution leakage checks, and an
-explicit policy for multiple valid modeling sequences.
+Extend actions or tools fake-first. Add deterministic action-sequence tests,
+projection tests, saved-result validation, and secure verifier artifacts before
+using a new capability in a hosted cohort. Do not respond to a case-specific
+failure by growing the permanent prompt. Put stable API knowledge in an approved
+SDK projection, geometric uncertainty in a bounded probe, and acceptance logic
+in the verifier.
 
-### Research stages and candidate routes
+Before changing a failure path, classify it as one of:
 
-The four stages below are the durable research order. They describe experiment
-boundaries, not Harness implementation layers. A stage is complete only when
-its exit evidence is represented by code, tests, case metadata, and validated
-run artifacts. A passing fake fixture alone is not research evidence.
+- provider transport, protocol, or accounting;
+- controller action policy;
+- compatibility or CAD generation;
+- secure execution;
+- geometry or topology verification;
+- observation, probe, or approved knowledge projection.
 
-#### Stage 1: Active no-knowledge baseline
+Do not combine model control-policy failures with actual Harness failures in a
+frozen experiment. A changed taxonomy requires a new versioned experiment.
+
+## Research stages and candidate routes
+
+The stages below are experiment boundaries, not implementation layers. A stage
+is complete only when its exit evidence exists in code, tests, case metadata,
+and validated run artifacts. Passing fake fixtures prove implementation behavior,
+not research outcomes.
+
+### Stage 1: Active no-knowledge baseline
 
 Objective: measure whether a real provider can reconstruct low-difficulty
-B-Reps using only bounded observations, optional geometry probes, typed repair
-feedback, compatibility checks, secure execution, and verifier gates.
+B-Reps using path-free observations, optional geometry probes, typed feedback,
+compatibility checking, secure execution, and independent gates, without SDK or
+recipe retrieval.
 
-- Use Active as the primary protocol and Fixed only as an optional ablation.
-- Require `retrieval_policy=disabled`, `max_retrievals=0`, the retrieval-free
+- Use `retrieval_policy=disabled`, zero retrieval capacity, the retrieval-free
   prompt, no retrieval tools, and no retrieval trace.
-- Start with `box`, `block_with_hole`, and `filleted_box`; keep
-  `blind_hole_block` as a secondary diagnostic stress case.
-- Use parameter variation and topology-sensitive variants to separate primitive,
-  boolean, selection, compatibility, geometry, and topology failures.
-- Freeze provider/model, prompt version, case SHA-256, runtime fingerprint,
-  verifier identity, budgets, replicate identity, and failure classification
-  for each cohort.
+- Use the frozen runtime-visible order: `box`, `stage1_cylinder`,
+  `block_with_hole`, `blind_hole_block`, and `filleted_box`.
+- Keep the eval cylinder and every private comparison asset Harness-only.
+- Treat `cadquery_v1` as the end-to-end baseline and `ocp_v1` as the low-level
+  binding contrast; never fall back between them.
+- Report first-shot and one-repair cohorts separately.
+- Freeze provider/model, prompt, case hash, runtime fingerprint, verifier,
+  backend, task-contract hash, limits, cohort and replicate identity, and
+  failure classification.
 
-Exit only when secure execution is stable, the no-knowledge policy is fully
-compliant, at least 90% of runs are valid and interpretable model attempts, and
-infrastructure/provider/Harness failures are below the declared cohort
-threshold. Remaining failures should predominantly be CAD, geometry, topology,
-or budget failures that can be explained from recorded actions and gates.
+Exit only when at least 90% of runs are valid and interpretable and the declared
+infrastructure/provider/Harness failure rate is strictly below its frozen
+threshold. Remaining failures should be explainable from actions, feedback, and
+gates.
 
-#### Stage 2: hosted Active replication
-
-Objective: validate that Stage 1 conclusions survive the real hosted Active
-transport and accounting path without changing the task or knowledge condition.
-
-- Reuse the Stage 1 cases, verifier contracts, prompt version, retrieval policy,
-  and controller budgets wherever possible.
-- Require a fresh run root, secure-backend readiness, explicit provider/model,
-  bounded retries/time/tokens/cost, and fresh itemized authorization per run.
-- Run a small protocol pilot before expanding replicates; do not silently omit
-  provider/network errors or combine runs across changed provider, endpoint,
-  model, runtime, or prompt cohorts.
-- Compare success, gate failures, actions, requests, submissions, repairs,
-  probes, tokens, cost, and stop reasons. Fixed results may be attached as
-  optional control data but never gate Active validity.
-
-Exit only when hosted artifacts validate, accounting is complete, failures are
-classifiable, and repeated runs provide an interpretable baseline. A hosted
-failure must be reproduced or isolated before changing prompts, budgets, tools,
-or cases.
-
-#### Stage 3: local SDK and recipe knowledge prototype
+### Stage 2: local SDK and recipe knowledge prototype
 
 Objective: estimate the causal value of bounded modeling knowledge without
 turning retrieval into target-solution lookup.
 
-- Freeze a versioned record schema, catalog ID, provenance, applicable OCP
-  version, safe projection, query/result bounds, and leakage rules first.
-- Keep SDK symbol knowledge and general modeling recipes as separable sources.
-- Run matched ablations: `active_no_knowledge`, `active_sdk_only`,
-  `active_recipe_only`, and `active_sdk_plus_recipe`.
-- Record retrieval precision, retrieved-but-unused results, post-retrieval first
-  submission success, incorrect SDK guidance, success delta, and token/cost
-  delta in addition to final gates.
-- Records may describe signatures, binding-specific usage, types, common errors,
-  general construction strategies, topology-aware selection, and deterministic
-  export. They must not contain case scripts, target parameters, private oracles,
-  repository paths, or eval references.
+- Treat the former hosted-replication Stage 2 objective as absorbed by the
+  complete Stage 1 v3 cohort; do not repeat v3 under a new stage label.
+- Reuse Stage 1 cases, verifier contracts, provider/model, prompt, controller
+  limits, and hosted execution path wherever required for a matched comparison.
+- Freeze record schema, catalog identity, provenance, backend version, safe
+  projection, result bounds, and leakage rules before the experiment.
+- Keep SDK symbol knowledge and general recipes as separate sources.
+- Run matched `active_no_knowledge`, `active_sdk_only`, `active_recipe_only`,
+  and `active_sdk_plus_recipe` conditions.
+- Record retrieval relevance and use, post-retrieval submission success,
+  incorrect guidance, final success delta, tokens, and cost.
+- Never include case scripts, target parameters, private oracles, repository
+  paths, or eval references.
 
-Exit only when the ablation protocol and metrics are stable and the prototype
-shows an interpretable benefit or an interpretable negative result. Do not grow
-the catalog merely because retrieval is available.
+Before creating a contract, review the knowledge sources, leakage audit,
+matched no-knowledge control, provider/model, cohort, limits, authorization
+scope, and fresh run root. Exit only when the ablation and metrics are stable
+and produce an interpretable positive or negative result. Stage 1 `exit_ready`
+does not itself authorize this work.
 
-#### Stage 4: mature modeling datasets
+### Stage 3: mature modeling datasets
 
 Objective: study scalable indexing, semantic retrieval, and strategy transfer
-from external or internally curated modeling corpora.
+from governed modeling corpora.
 
-- Establish source, license, provenance, kernel/CAD version, units, and format
-  normalization before ingestion.
-- Detect exact and near duplicates across train/eval boundaries and prevent
-  target-solution, parameter, script, and derived-geometry leakage.
-- Represent multiple valid construction sequences without treating one sequence
-  as the unique answer; the verifier remains the acceptance authority.
-- Evaluate retrieval by mechanism family and case difficulty, with matched
-  no-knowledge and Stage 3 controls.
-- Treat dataset retrieval as a research condition, never as an implicit default
-  or a replacement for SDK knowledge.
+- Establish license, provenance, kernel/CAD version, units, and normalization.
+- Detect exact and near duplicates across train/eval boundaries.
+- Prevent target-solution, parameter, script, and derived-geometry leakage.
+- Represent multiple valid construction sequences without treating one as the
+  unique answer; the verifier remains authoritative.
+- Compare against matched Stage 1 and Stage 2 controls by mechanism and
+  difficulty.
 
-Exit criteria must be declared in a campaign or experiment contract before a
-large import. Stage 4 must not begin solely because a dataset is available.
+Declare exit criteria in a campaign or experiment contract before a large
+import. Dataset availability alone never authorizes Stage 3.
 
-The candidate routes are orthogonal experiment choices that map onto those
-stages. Scores are a current prioritization on a ten-point scale, balancing
-scientific value, interpretability, leakage risk, implementation cost, and
-extensibility. They are decision guidance rather than capability claims.
+The current candidate priority is:
 
-| Route | Candidate | Score | Decision and stage mapping |
+| Route | Candidate | Score | Decision |
 |---|---|---:|---|
-| A | Small parameterized case families with Active no-knowledge | 9.2 | Execute first; primary Stage 1 baseline and diagnostic foundation. |
-| B | Small case families with versioned SDK symbol projections | 8.7 | Preferred first Stage 3 knowledge condition after Stages 1--2. |
-| C | Human-curated general modeling recipe catalog | 8.1 | Run independently from B, then combine only in a matched ablation. |
-| D | Automatically extract knowledge from installed SDK documentation/API metadata | 7.5 | Start only after the Stage 3 schema, provenance, version, and projection contracts are frozen. |
-| E | Import mature CAD/modeling datasets with semantic retrieval | 6.3 | Defer to Stage 4 because governance, normalization, duplication, and leakage risks dominate early value. |
+| A | Small parameterized families with Active no-knowledge | 9.2 | Stage 1 foundation |
+| B | Versioned SDK symbol projections | 8.7 | First Stage 2 knowledge condition |
+| C | Human-curated general modeling recipes | 8.1 | Separate Stage 2 ablation before combination |
+| D | Extract installed SDK documentation/API metadata | 7.5 | Scale only after B is stable |
+| E | Import mature CAD/modeling datasets | 6.3 | Defer to Stage 3 |
 
-Default decision: pursue A, then the Stage 2 hosted replication, then B and C as
-separate ablations. Consider D as a scaling mechanism only after B is stable.
-Do not pursue E before Stages 1--3 have produced interpretable results. If new
-evidence changes this ranking, update this table and the relevant entry/exit
-criteria in the same tested slice; do not create a separate roadmap or status
-ledger.
+Default order after Stage 1 is B and C as separate Stage 2 ablations, then D if
+needed, followed by E only after Stage 2 produces interpretable evidence. If new
+evidence changes this priority, update this table and the relevant stage
+criteria in the same tested slice.
 
-The implementation path is in post-pilot diagnostic refinement: a narrowly
-bounded hosted pilot exists, but it does not satisfy the Stage 1 research exit
-criteria above. The evidence program therefore remains in Stage 1 preparation
-and execution until the no-knowledge cohort is reproducible and interpretable.
-Classify stable hosted failures and reproduce them offline before changing
-behavior. Prefer bounded compatibility diagnostics for unambiguous Python/OCP
-binding mistakes, preserve execution budget when rejecting them before the
-sandbox, and attach a `reference_topic` only when the exact topic is already
-allowlisted. Do not make prompt tuning, larger request/repair budgets, or
-broader hosted cohorts the default response to a failed pilot.
+## Current evidence and next condition
 
-L2 edge observations use unique indexed subshapes and bounded, path-free
-geometry keys. Each edge can expose analytic curve parameters, parameter range,
-local tangent, adjacent face IDs, and a sampled dihedral classification. The
-probe also returns bounded face-edge incidence plus parallel and collinear line
-groups. Additional OCP binding guidance belongs in the `ocp_symbol` allowlist,
-not in the active system prompt.
+The original schema-v6 Stage 1 diagnostic, five-case CadQuery phase, and
+representative OCP contrast produced this historical result:
 
-The fake active pilot decision gate consumes validated saved results for the
-nominal, parameter-variation, failure-sensitive, control, and held-out cohorts.
-Its artifact preserves action order, independent budget usage, terminal
-classification, and the comparison with the fixed fake pilot. Passing every
-check permits only a later request for one fresh hosted authorization; it does
-not carry authorization state and does not run a provider.
+| Metric | CadQuery full phase | CadQuery comparable cases | OCP comparable cases |
+|---|---:|---:|---:|
+| Runs | 50 | 30 | 30 |
+| Valid and interpretable | 48 | 29 | 27 |
+| Geometry passed | 17 | 5 | 18 |
+| Model decisions | 70 | 44 | 33 |
+| Repairs | 20 | 14 | 3 |
+| Tokens | 109274 | 70980 | 66735 |
+| Cost (USD) | 0.054679935 | 0.035922735 | 0.037751475 |
+| Provider/Harness failures | 2 | 1 | 3 |
 
-The controller proof required before hosted expansion is a deterministic fake
-provider sequence: probe edge candidates or retrieve an approved SDK/recipe,
-submit a candidate, receive typed geometry feedback, submit one repair, and
-pass. Keep that proof passing as an entry gate for any future hosted expansion;
-do not replace it with an unbounded agent or an additional hosted pilot.
+CadQuery passed its frozen interpretability and infrastructure thresholds. OCP
+improved the comparable geometry result from 5/30 to 18/30, including `box`
+from 4/10 to 10/10 and `block_with_hole` from 1/10 to 8/10, while both profiles
+remained 0/10 on `filleted_box`. OCP also produced 9/15 first-shot passes where
+CadQuery produced 0/15.
 
-Keep active hosted readiness separate from execution. Preflight must remain
-credential-free; config-check may read provider configuration but must remain
-network-free and redact credentials. An execution entry point requires its own
-secure-backend readiness test, exact outbound projection, fresh itemized
-authorization, and controller/provider budget binding. Continuation requires a
-new authorization rather than inheriting permission from the interrupted run.
+OCP nevertheless had three infrastructure classifications in 30 runs: two
+provider responses reached the frozen output ceiling without a valid action,
+and one `finish_without_verifier` artifact was classified as `harness` by the
+frozen classifier. Its 10% rate does not satisfy the strictly-below-10% exit
+condition. Stage 1 therefore did not exit at that checkpoint. The later v3
+replacement did not alter these artifacts or classifications; it established a
+new current exit judgment under its own frozen identity.
 
-Classify a failure before changing behavior: provider protocol and accounting,
-OCP compatibility/runtime diagnostics, observation or probe coverage,
-controller/session policy, or modeling-asset projection. Provider adapters
-normalize transport and usage; compatibility checks diagnose binding mistakes;
-probes reduce geometric uncertainty; the controller allocates actions; approved
-references supply modeling knowledge. Add prompt rules only for stable general
-constraints, not as the default response to a hosted or case-specific failure.
+Preserve all schema-v6 identities, artifacts, and classifications. Do not tune
+their prompt, limits, tools, repair count, retrieval policy, fallback, or
+taxonomy to make the result positive.
 
-Do not add workpacks, handoffs, status ledgers, route maps, or evidence ledgers.
-Preserve durable direction in README.md, the three files under docs/,
-machine-readable schemas, registry/case metadata, tests, and Git history.
-Keep generated campaign trees under runs/; do not add root-level experiment
-snapshots as permanent project documentation.
+The subsequent admissible condition was a separately identified
+protocol-stabilization cohort using schema v7, provider task-contract v2, and
+`active-v4`. It tested the
+orchestration correction that exposes only currently executable capabilities
+and treats bounded provider protocol retry separately from a model decision or
+CAD repair. It is not evidence of improved no-knowledge CAD capability and may
+not replace or selectively rerun Stage 1 identities.
 
-## L0-L6 能力梯子与遗留案例路线
+The frozen stabilization contract is
+`cases/campaigns/stage1-active-v4-stabilization.json`. It declares 12 hosted
+runs: `box` and `block_with_hole`, `first_shot` and `bounded_repair`, three
+replicates each, `ocp_v1`, and retrieval disabled. Validate the contract before
+authorization with `brep2code stage1 stabilization-validate`. Every live run
+validates its saved provider request projection automatically; the standalone
+`stabilization-projection` command supports audit, and `stabilization-report`
+requires the complete identity set. A stable report never changes the frozen
+Stage 1 exit judgment or authorizes Stage 2.
 
-本节是开发者路线说明，不是用户能力承诺，也不是 hosted campaign 授权。
-`capability_level` 是新仓库用于机制、案例和报告聚合的语义等级；旧仓库的
-`P0`--`P3` 是案例/证据层级，不能直接当作能力等级。案例数量、参数数量或
-单次 hosted 通过都不能单独证明某个 L 等级已经实现。
+The hosted confirmation completed all 12 identities with no artifact or
+projection validation failure. Nine runs passed, two were generation failures,
+and one was a geometry failure. The cohort used 13 model requests and HTTP
+attempts, 14,903 tokens, and $0.007858275; no protocol retry occurred. The saved
+aggregate under the run root records `protocol_stable: true`,
+`stage1_exit_changed: false`, and `stage2_authorized: false`.
 
-### 能力等级定义
+For any new hosted cohort:
 
-| 等级 | 开发目标 | 当前/候选机制 | 代表性案例或机制族 | 状态 |
-|---|---|---|---|---|
-| L0 | 独立 primitive 和 analytic-surface 构造 | `primitive`, `analytic_surface` | `box`, `cylinder` | 已实现 |
-| L1 | 单个有序 boolean feature sequence | `boolean_cut` | through cut、blind cut | 已实现 |
-| L2 | 基于边/面的单特征构造 | `fillet`, 后续 `chamfer` | `filleted_box`, `chamfered_block` | fillet 已实现，chamfer 未迁移 |
-| L3 | 多特征有序构造与依赖关系保持 | additive fuse、repeated cut、dependent cut、counterbore | `box_cylinder_union`, `three_hole_plate`, `counterbored_plate`, `stepped_block`, `boss_with_blind_hole`, `additive_boss_dependent_cut` | 规划中 |
-| L4 | 拓扑语义选择与结构化轮廓建模 | face selection、multi-contour、multi-inner-loop、rounded slot | `face_selected_cut_*`, `multi_contour_pocket_*`, `multi_inner_loop_pocket_*`, `oriented_rounded_slot_*` | 规划中 |
-| L5 | 重复特征、参数变化和受控几何泛化 | repeated feature pattern、参数族、held-out split | `repeated_feature_pattern_centered/offset` 及 `low/nominal/high` 变体 | 规划中 |
-| L6 | 非棱柱体和复杂拓扑建模 | revolve、shell、rib；后续可独立评估 sweep、loft | `revolve_centered/offset`, `shell_symmetric/asymmetric` | 规划中 |
+1. keep projection and protocol behavior covered by deterministic fake tests;
+2. define a new experiment identity and complete cohort in advance;
+3. run the read-only readiness gates;
+4. obtain fresh authorization for the exact provider, model, case scope,
+   outbound projection, limits, and new root;
+5. validate and aggregate every planned artifact, including failures.
 
-这个映射是根据遗留案例库和机制路线归纳出的开发目标，不是旧仓库曾经正式
-使用的 L3--L6 编号。旧路线的 hosted 准备顺序是按证据成熟度排列的，不能
-解释成能力等级顺序。
+The attempted replacement baseline
+`cases/campaigns/stage1-no-knowledge-v2.json` aborted after 41 valid terminal
+attempts because identity 42 left a nonterminal provider-exchange checkpoint.
+Its saved aborted report is diagnostic evidence only: it is incomplete, cannot
+be continued or selectively rerun, does not change the Stage 1 exit, and does
+not authorize Stage 2.
 
-### L3-L6 的验收边界
+The replacement frozen baseline is
+`cases/campaigns/stage1-no-knowledge-v3.json`. It contains the same 80 identities: the
+five-case CadQuery baseline and the three-case OCP contrast, both with
+first-shot and bounded-repair cohorts at five replicates. It preserves the 90%
+valid-attempt threshold and the strictly-below-10% infrastructure threshold.
+Execution protocol v3 normalizes bounded transport and response-read failures
+into terminal provider failures while keeping request, response, and accounting
+artifact failures fatal. Its readiness binds the stable protocol prerequisite,
+the SHA-256-bound v2 aborted report, 20 fake baselines, a fresh root, both secure
+backend versions, all 80 identities, the exact outbound projection, and maximum
+authorization scope. Readiness does not read provider configuration, create
+run artifacts, make requests, grant authorization, or authorize Stage 2.
 
-- **L3** 必须验证操作顺序和依赖关系，而不只验证最终 bbox、volume 或 topology。
-  例如 `base -> boss/fuse -> dependent cut` 中，切削必须作用于正确的前置
-  结果，且不能退化成独立 cut。
-- **L4** 必须验证选择对象的拓扑语义。唯一面、外轮廓、内轮廓、岛屿和方向
-  必须有可观察的角色；wrong-face、ambiguous-selector、wrong-frame 等控制
-  必须 fail closed。
-- **L5** 必须验证实例数量、位置、间距和尺寸变化，并保持 development/held-out
-  参数族隔离。它只能支持冻结参数族内的受控泛化结论，不能直接宣称通用参数
-  泛化。
-- **L6** 必须验证 profile、axis、angle、direction、opening、thickness 或
-  attachment 等非棱柱/复杂拓扑语义。`revolve`、`sweep`、`loft` 是独立机制
-  族；`shell` 和 `rib` 也应分开设计，不能合并成一个泛化的 complex-CAD 级别。
+The v3 cohort completed all 80 identities. CadQuery produced 50/50 valid
+attempts and 15 geometry passes; OCP produced 30/30 valid attempts and 17
+geometry passes. Both infrastructure failure rates were 0%, artifact and
+projection validation had no failures, and the aggregate used 110 HTTP
+attempts, 137,335 tokens, and $0.072397485. The frozen phase gates therefore
+set the current Stage 1 judgment to `complete: true` and `exit_ready: true`;
+`stage2_authorized` remains false.
 
-每个新等级必须依次具备：机制 registry 定义、冻结的 sequence grammar、
-development/held-out 案例、正负控制、适用的 geometry/semantic/editability
-gates、停止规则，以及对应的 focused tests。没有这些契约时，只能标记为
-候选机制，不能加入 capability 聚合或 runtime manifest。
+The former hosted-replication Stage 2 objective is satisfied by the complete v3
+path and is now part of Stage 1 history. The next admissible activity is a Stage
+2 knowledge-retrieval scope review, not a provider run. It must define bounded
+SDK and recipe sources as separate ablations, leakage controls, a matched
+no-knowledge control, exit criteria, and the exact provider/model, prompt,
+cohort, limits, authorization scope, and fresh run root. Only an approved
+outcome of that review may introduce a Stage 2 contract or authorize execution.
 
-### 遗留案例库的开发价值
+## Verification workflow
 
-遗留仓库的 `case-library/self-authored` 包含 101 个案例：P0 为 3 个、P1
-为 10 个、P2 为 83 个、P3 为 5 个。它们不是新仓库的 runtime 输入，也不应
-整体迁移。应按机制族逐个审计并重新建立新仓库的 `case.json`、`dossier.json`
-和 manifest。
-
-当前最有价值的候选机制族包括：
-
-- 多特征依赖：`box_cylinder_union`、`three_hole_plate`、`counterbored_plate`、
-  `stepped_block`、`dual_boss_plate`、`boss_with_blind_hole`、
-  `additive_boss_dependent_cut_*`；
-- 拓扑选择与结构化轮廓：`face_selected_cut_*`、
-  `multi_contour_pocket_*`、`multi_inner_loop_pocket_*`、
-  `rounded_slot_*`、`oriented_rounded_slot_*`；
-- 重复特征和受控变体：`repeated_feature_pattern_*`、
-  `reference_guided_through_hole_*` 以及各机制的 centered/offset、
-  low/nominal/high 族；
-- 非棱柱和复杂拓扑：`revolve_*`、`shell_*`，以及后续独立设计的 `rib`、
-  `sweep`、`loft` 候选；
-- 横向鲁棒性：`small_cylinder`、`large_box`、`thin_plate`、side-hole、
-  orientation 和 topology-pair 案例。
-
-横向鲁棒性不是单独的 L 等级。尺度、单位、方向、薄壁、近切和退化条件应
-作为跨等级的 stress family，配合非退化正例、失败分类和停止规则使用。
-
-### 推荐的实现顺序
-
-```text
-L0-L2 当前闭环诊断
-  -> L0-L2 小规模 development/held-out pilot
-  -> L3 多特征依赖
-  -> L4 拓扑选择与结构化轮廓
-  -> L5 重复特征与受控泛化
-  -> L6 revolve / shell / rib 等复杂机制
-```
-
-实际机制族的 hosted 顺序可以不同。例如遗留路线曾把 repeated feature
-pattern、axisymmetric revolve、dependent face selection 和 multi-inner-loop
-pocket 排成一个证据批次；这是因为它们的 dossier 和离线 evidence 已经
-准备好，不表示它们的能力等级顺序高于或低于 L3/L4/L5。
-
-新机制的落地边界仍然是：先完成离线 dossier 和 family freeze，再完成受控
-production/review，最后才考虑单独选择的 hosted campaign。成功的 replay、
-reference script 或 case card 本身不会自动产生 runtime card、manifest admission、
-provider scope 或新的 capability claim。
-
-## Hosted pilot phase gates
-
-| Gate | Prerequisite | Recommended command | Successful output | Reads config | Executes generated code | May cost | Creates artifact |
-|---|---|---|---|---|---|---|---|
-| Case freeze | Case assets, metadata, dossiers, and manifests are final. | `uv run brep2code cases validate` | `status: valid` with the frozen case count | No | No | No | No |
-| Control / held-out freeze | Campaign control and held-out matrices match the frozen cases. | `uv run brep2code campaign validate --contract <contract>` | `status: valid` with the expected control count | No | No | No | No |
-| Fake pilot validated | A completed fake pilot tree exists. | `uv run brep2code campaign pilot-validate --contract <contract> --result <fake-result>` | `status: valid` | No | No | No | No |
-| Hosted contract readiness | Provider, model, limits, cohorts, and a fresh target root are selected. | `uv run brep2code campaign pilot-preflight <hosted arguments>` | `status: ready` with cohort routes and budget | No; it does not read keys | No | No | No |
-| Provider configuration readiness | Hosted contract readiness passes and fresh hosted authorization is present. | `uv run brep2code campaign hosted-pilot-config-check <hosted arguments>` | `status: ready` with only the endpoint host and bounded configuration | Yes, including the key | No; it makes no network requests | No | No |
-| Hosted execution authorization | A person confirms endpoint host, provider, model, limits, cost ceiling, and a new run root for this execution. | Review the exact `hosted-pilot` command; do not run it until confirmed. | Fresh explicit authorization | No | No | No | No |
-| Saved-result validation | The authorized hosted pilot finished and saved all four results. | `uv run brep2code campaign hosted-pilot-validate --contract <contract> --result <hosted-result>` | `status: valid` with mixed-provider routing | No | No | No | No |
-
-`pilot-preflight` never reads secrets or connects to a provider.
-`hosted-pilot-config-check` reads local provider configuration but remains offline.
-Only `hosted-pilot` reads configuration and may send hosted requests, incur cost,
-execute generated code in the secure backend, and create a run artifact tree.
-
-Case changes must update the case metadata and its split manifest together.
-Run `brep2code cases validate` after copying a STEP asset; use the computed
-asset hash rather than trusting legacy metadata. Every admitted case must also
-have a validated dossier.json. Its modeling and Harness fields are not runtime
-inputs. Update the shared mechanism registry when adding a mechanism, and let
-the validator reject drift between the case, registry, dossier, and campaign
-contract.
-
-Use the fake provider for repair-loop development. Its script queue is finite,
-so request accounting and revision budgets remain deterministic. Inspect
-`result.json` plus each revision's request, response, script, and output when a
-loop fails. Do not run untrusted generated scripts with the local executor.
-
-Use `--initial-script` for a controlled repair experiment. The initial script
-occupies revision zero, runs through the same untrusted backend, and consumes
-no provider request. Later revisions receive its complete source plus bounded
-execution or geometry feedback. `max_rounds` counts the initial revision, so
-the number of fake scripts and hosted provider rounds is `max_rounds - 1`.
-
-The local executor is limited to trusted fixtures and developer-authored smoke
-scripts. Provider responses run through `run_untrusted_build`, which requires
-the verified `Ubuntu-24.04` WSL2/bubblewrap backend and fails closed when that
-backend is unavailable. Its focused integration tests cover filesystem and
-environment isolation, network denial, timeout, descendant/process bounds,
-memory, stdout/output size, and an OCP-to-STEP positive control.
-
-## Local Windows and WSL2 setup
-
-The secure integration and end-to-end tests need the same backend as a real
-provider run. The host must have WSL2, an `Ubuntu-24.04` distro, and the
-project runtime installed at `/opt/brep2code/runtime` by default. Override the
-distro and runtime root with `BREP2CODE_WSL_DISTRO` and
-`BREP2CODE_RUNTIME_ROOT`; these host settings are never projected to the model.
-That runtime must contain Python, OCP, `bwrap`, `prlimit`, and `timeout`.
-Generated scripts must never run through the trusted local executor.
-
-Use these read-only checks before debugging a failing test:
-
-```powershell
-wsl.exe --status
-wsl.exe -l -v
-uv run brep2code env doctor
-```
-
-The distro must be running as version 2. If `wsl.exe` reports
-`Wsl/Service/E_ACCESSDENIED`, repair the host service/distro access first;
-the application now records this as `sandbox_unavailable` instead of
-misreporting it as a generated-script error. A practical recovery sequence is
-to close active WSL terminals, run `wsl.exe --shutdown`, start Windows
-Terminal or PowerShell with the account that owns the distro, and repeat the
-three checks. If enumeration is still denied, repair or recreate the distro
-from Windows Settings/WSL administration rather than weakening the sandbox.
-
-Pytest is configured to keep `tmp_path` under a unique project-local directory
-named `.pytest-tmp-<process-id>`, so it does not depend on permissions of the
-user-wide Windows temporary directory and stale WSL-created files do not block
-the next run. If a previous run left an ACL or locked handle, close
-Python/pytest processes and remove only an accessible project-local directory
-before retrying:
-
-```powershell
-Remove-Item -LiteralPath .pytest_cache -Recurse -Force -ErrorAction SilentlyContinue
-uv run pytest -q
-uv run ruff check src tests
-```
-
-The expected validation order is:
+Use the configured project environment and run the smallest relevant checks
+first. The normal full order is:
 
 ```powershell
 uv sync --dev
@@ -418,8 +272,22 @@ uv run pytest --run-secure -q
 uv run ruff check src tests
 ```
 
-If WSL is intentionally unavailable, unit tests and case validation can still
-run; the default pytest command skips tests marked `secure` and reports the
-backend reason. After the WSL checks pass, `--run-secure` is required for the
-full security and end-to-end gate. Never switch those runs to the trusted local
+The secure suite requires WSL2, `Ubuntu-24.04`, and the configured runtime
+containing Python, the selected CAD backend, `bwrap`, `prlimit`, and `timeout`.
+`BREP2CODE_WSL_DISTRO` and `BREP2CODE_RUNTIME_ROOT` select portable host
+settings and are never projected to the model.
+
+Before a secure run, use the read-only checks:
+
+```powershell
+wsl.exe --status
+wsl.exe -l -v
+uv run brep2code env doctor
+```
+
+If the restricted environment reports WSL service or distro access failure,
+request narrowly scoped external execution rather than weakening the sandbox.
+If approval is unavailable, report the blocker and provide the corresponding
+PowerShell command for manual execution. Unit tests and case validation may run
+without WSL, but provider-generated code must never use the trusted local
 executor as a workaround.

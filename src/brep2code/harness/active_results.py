@@ -4,9 +4,11 @@ import json
 from pathlib import Path
 from typing import Any
 
+from brep2code.backends import backend_profile
 from brep2code.cases import ValidatedCase
 from brep2code.harness.active import ActiveBudgets
 from brep2code.providers import ProviderLimits
+from brep2code.providers.task_contract import build_provider_task_contract
 
 
 class ActiveResultValidationError(ValueError):
@@ -52,10 +54,14 @@ def validate_provider_accounting(
     *,
     allow_terminal_overrun: bool = False,
 ) -> dict[str, Any]:
-    if not isinstance(value, dict) or set(value) != _ACCOUNTING_FIELDS:
+    if (
+        not isinstance(value, dict)
+        or set(value) - {"protocol_retries"} != _ACCOUNTING_FIELDS
+    ):
         raise ActiveResultValidationError("provider accounting fields are invalid")
     attempts = value["http_attempts"]
     in_flight = value["in_flight_requests"]
+    protocol_retries = value.get("protocol_retries", 0)
     if (
         not isinstance(attempts, int)
         or isinstance(attempts, bool)
@@ -64,15 +70,22 @@ def validate_provider_accounting(
         or isinstance(in_flight, bool)
         or in_flight not in {0, 1}
         or in_flight > attempts
+        or not isinstance(protocol_retries, int)
+        or isinstance(protocol_retries, bool)
+        or protocol_retries < 0
+        or protocol_retries > attempts
     ):
         raise ActiveResultValidationError("provider request accounting is invalid")
     tokens = value["tokens"]
     if not isinstance(tokens, dict) or set(tokens) != {"prompt", "completion", "total"}:
         raise ActiveResultValidationError("provider token accounting fields are invalid")
-    if any(
-        not isinstance(item, int) or isinstance(item, bool) or item < 0
-        for item in tokens.values()
-    ) or tokens["prompt"] + tokens["completion"] != tokens["total"]:
+    if (
+        any(
+            not isinstance(item, int) or isinstance(item, bool) or item < 0
+            for item in tokens.values()
+        )
+        or tokens["prompt"] + tokens["completion"] != tokens["total"]
+    ):
         raise ActiveResultValidationError("provider token accounting drift")
     cost = value["cost_usd"]
     if not isinstance(cost, (int, float)) or isinstance(cost, bool) or cost < 0:
@@ -108,9 +121,7 @@ def validate_provider_accounting(
     return value
 
 
-def validate_active_result(
-    payload: dict[str, Any], case: ValidatedCase, result_root: Path
-) -> None:
+def validate_active_result(payload: dict[str, Any], case: ValidatedCase, result_root: Path) -> None:
     required = {
         "schema_version",
         "mode",
@@ -130,13 +141,20 @@ def validate_active_result(
     schema_version = payload.get("schema_version") if isinstance(payload, dict) else None
     if schema_version == 4:
         required.add("provider_accounting")
-    if schema_version == 5:
+    if schema_version in {5, 6, 7}:
         required.update({"retrieval_policy", "catalog_id", "prompt_version"})
         if payload.get("provider") != "fake":
             required.add("provider_accounting")
-    if not isinstance(payload, dict) or set(payload) != required:
+    if schema_version in {6, 7}:
+        required.update({"backend_profile", "task_contract_hash"})
+    optional = {"stage1_identity"} if schema_version in {6, 7} else set()
+    if (
+        not isinstance(payload, dict)
+        or not required <= set(payload)
+        or not set(payload) - required <= optional
+    ):
         raise ActiveResultValidationError("active result fields are invalid")
-    if schema_version not in {3, 4, 5} or payload["mode"] != "active":
+    if schema_version not in {3, 4, 5, 6, 7} or payload["mode"] != "active":
         raise ActiveResultValidationError("active result identity is invalid")
     if schema_version == 3 and payload["provider"] != "fake":
         raise ActiveResultValidationError("hosted active result requires provider accounting")
@@ -158,7 +176,7 @@ def validate_active_result(
     )
     budgets = _validated_budgets(payload["budgets"])
     allow_terminal_overrun = (
-        schema_version in {4, 5}
+        schema_version in {4, 5, 6, 7}
         and terminal
         and payload["state"] == "failed"
         and payload["stop_reason"] == "provider_error"
@@ -166,9 +184,20 @@ def validate_active_result(
     usage = _validated_usage(
         payload["usage"], budgets, allow_provider_overrun=allow_terminal_overrun
     )
-    if schema_version == 5:
+    if schema_version in {5, 6, 7}:
         _validate_retrieval_identity(payload)
-    if schema_version in {4, 5} and "provider_accounting" in payload:
+    if schema_version in {6, 7}:
+        backend_profile(payload["backend_profile"])
+        contract = build_provider_task_contract(
+            payload["backend_profile"],
+            payload["retrieval_policy"],
+            contract_version=1 if schema_version == 6 else 2,
+        )
+        if payload["task_contract_hash"] != contract.identity:
+            raise ActiveResultValidationError("provider task contract identity drift")
+        if "stage1_identity" in payload:
+            _validate_stage1_identity(payload["stage1_identity"])
+    if schema_version in {4, 5, 6, 7} and "provider_accounting" in payload:
         accounting = payload["provider_accounting"]
         if not isinstance(accounting, dict):
             raise ActiveResultValidationError("provider accounting fields are invalid")
@@ -196,17 +225,45 @@ def validate_active_result(
     _validate_terminal(payload["state"], payload["stop_reason"], trace, terminal)
 
 
+def _validate_stage1_identity(value: Any) -> None:
+    if not isinstance(value, dict) or set(value) != {
+        "experiment_id", "phase_id", "cohort", "replicate"
+    }:
+        raise ActiveResultValidationError("Stage 1 run identity fields are invalid")
+    if any(
+        not isinstance(value[name], str) or not value[name]
+        for name in ("experiment_id", "phase_id", "cohort")
+    ):
+        raise ActiveResultValidationError("Stage 1 run identity is invalid")
+    if (
+        not isinstance(value["replicate"], int)
+        or isinstance(value["replicate"], bool)
+        or value["replicate"] < 1
+    ):
+        raise ActiveResultValidationError("Stage 1 replicate identity is invalid")
+
+
 def _validate_retrieval_identity(payload: dict[str, Any]) -> None:
     policy = payload["retrieval_policy"]
+    prompt_prefix = {
+        6: "active-v3",
+        7: "active-v4",
+    }.get(payload["schema_version"], "active-v2")
     if policy == "disabled":
-        if payload["catalog_id"] is not None or payload["prompt_version"] != "active-v2-no-retrieval":
+        if (
+            payload["catalog_id"] is not None
+            or payload["prompt_version"] != f"{prompt_prefix}-no-retrieval"
+        ):
             raise ActiveResultValidationError("disabled retrieval identity is invalid")
         if payload["budgets"].get("retrievals") != 0 or payload["usage"].get("retrievals") != 0:
             raise ActiveResultValidationError("disabled retrieval policy requires zero retrievals")
         if any(item.get("action") == "retrieve" for item in payload["trace"]):
             raise ActiveResultValidationError("disabled retrieval result contains retrieval trace")
     elif policy == "bounded_seed":
-        if payload["catalog_id"] != "bounded-seed-v1" or payload["prompt_version"] != "active-v2-retrieval":
+        if (
+            payload["catalog_id"] != "bounded-seed-v1"
+            or payload["prompt_version"] != f"{prompt_prefix}-retrieval"
+        ):
             raise ActiveResultValidationError("bounded retrieval identity is invalid")
     else:
         raise ActiveResultValidationError("active retrieval policy is invalid")
@@ -298,9 +355,7 @@ def _validate_revisions(
     terminal: bool,
 ) -> None:
     expected_count = int(usage["script_submissions"])
-    revision_dirs = sorted(
-        path for path in result_root.glob("revision-*") if path.is_dir()
-    )
+    revision_dirs = sorted(path for path in result_root.glob("revision-*") if path.is_dir())
     expected_names = [f"revision-{index:03d}" for index in range(expected_count)]
     actual_names = [path.name for path in revision_dirs]
     allowed_names = [expected_names]
@@ -318,11 +373,16 @@ def _validate_revisions(
             raise ActiveResultValidationError("active revision script is missing")
         artifact = _read_object(result)
         _reject_private_keys(artifact)
-        if artifact.get("revision_id") != expected_name or artifact.get("workspace") != expected_name:
+        if (
+            artifact.get("revision_id") != expected_name
+            or artifact.get("workspace") != expected_name
+        ):
             raise ActiveResultValidationError("active revision identity drift")
         error = artifact.get("error")
-        if artifact.get("status") == "execution" or "execution" in artifact or (
-            isinstance(error, dict) and error.get("stage") == "sandbox"
+        if (
+            artifact.get("status") == "execution"
+            or "execution" in artifact
+            or (isinstance(error, dict) and error.get("stage") == "sandbox")
         ):
             execution_count += 1
         execution = artifact.get("execution")
@@ -341,7 +401,14 @@ def _validate_terminal(
     state: Any, stop_reason: Any, trace: list[dict[str, Any]], terminal: bool
 ) -> None:
     terminal_states = {"succeeded", "failed", "exhausted"}
-    progress_states = {"observing", "probing", "retrieving", "synthesizing", "executing", "repairing"}
+    progress_states = {
+        "observing",
+        "probing",
+        "retrieving",
+        "synthesizing",
+        "executing",
+        "repairing",
+    }
     if not terminal:
         if state not in progress_states or stop_reason is not None:
             raise ActiveResultValidationError("active result progress state is invalid")
@@ -366,8 +433,10 @@ def _validate_continuation_policy(value: Any, terminal: bool, *, schema_version:
         "same_case",
         "same_budgets",
     ]
-    if schema_version == 5:
+    if schema_version in {5, 6, 7}:
         expected_requirements.append("same_retrieval_policy")
+    if schema_version in {6, 7}:
+        expected_requirements.append("same_backend_profile")
     expected_requirements.extend(["remaining_model_requests", "existing_revision_root"])
     if (
         value["eligible"] is not (not terminal)

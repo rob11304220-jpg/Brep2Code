@@ -5,8 +5,11 @@ from dataclasses import asdict, dataclass
 from enum import StrEnum
 from typing import Any
 
+from brep2code.backends import BackendProfileId, backend_profile
 from brep2code.cases import ValidatedCase
 from brep2code.providers.action_protocol import ActionProvider, ActionRequest
+from brep2code.providers.openai_compatible import ProviderExchangeArtifactError
+from brep2code.providers.task_contract import build_provider_task_contract
 from brep2code.tools import ToolError, dispatch_tool
 
 
@@ -149,9 +152,12 @@ class ActiveHarnessController:
         checkpoint: Callable[[ActiveCheckpoint], None] | None = None,
         resume: ActiveResumeState | None = None,
         retrieval_policy: RetrievalPolicy = RetrievalPolicy.BOUNDED_SEED,
+        backend: BackendProfileId | str = BackendProfileId.OCP_V1,
     ) -> ActiveHarnessResult:
         if retrieval_policy is RetrievalPolicy.DISABLED and budgets.retrievals != 0:
             raise ValueError("disabled retrieval policy requires zero retrieval budget")
+        profile = backend_profile(backend)
+        task_contract = build_provider_task_contract(profile.profile_id, retrieval_policy)
         initial = dispatch_tool("brep_observations", case)
         usage: dict[str, int | float] = (
             dict(resume.usage)
@@ -174,6 +180,9 @@ class ActiveHarnessController:
         notify(resume.state if resume is not None else ActiveState.OBSERVING)
 
         while usage["model_requests"] < budgets.model_requests:
+            allowed_actions, available_tools = _visible_capabilities(
+                budgets, usage, retrieval_policy
+            )
             request = ActionRequest(
                 case_id=case.case.case_id,
                 turn_index=usage["model_requests"],
@@ -181,13 +190,13 @@ class ActiveHarnessController:
                     "case_id": case.case.case_id,
                     "unit": case.metadata["unit"],
                     "initial_observations": initial["brep"],
-                    "available_tools": (
-                        ["edge_candidates"]
-                        if retrieval_policy is RetrievalPolicy.DISABLED
-                        else ["edge_candidates", "knowledge_search", "ocp_symbol"]
-                    ),
+                    "allowed_actions": allowed_actions,
+                    "available_tools": available_tools,
+                    "session_phase": "repair" if feedback is not None else "initial_attempt",
                     "retrieval_policy": retrieval_policy,
-                    "budgets": _budget_snapshot(budgets, usage),
+                    "backend_profile": profile.profile_id,
+                    "task_contract": task_contract.projection(),
+                    "task_contract_hash": task_contract.identity,
                     "current_revision": current_revision,
                     "feedback": feedback,
                     "tool_results": [
@@ -199,6 +208,8 @@ class ActiveHarnessController:
             notify(ActiveState.SYNTHESIZING)
             try:
                 response = self.provider.choose_action(request)
+            except ProviderExchangeArtifactError:
+                raise
             except RuntimeError as exc:
                 trace.append({"action": "provider", "error": str(exc)})
                 return finish(ActiveState.FAILED, "provider_error")
@@ -215,9 +226,19 @@ class ActiveHarnessController:
             except ActionContractError as exc:
                 trace.append({"action": "provider", "error": str(exc)})
                 return finish(ActiveState.FAILED, "provider_error")
+            if action.name not in allowed_actions:
+                trace.append(
+                    {
+                        "action": "provider",
+                        "requested_action": action.name,
+                        "error": "action_not_available",
+                    }
+                )
+                return finish(ActiveState.FAILED, "harness_policy")
 
             if action.name == "probe":
                 if not _consume("probes", budgets, usage):
+                    _record_budget_rejection(trace, action, "probe_budget")
                     return finish(ActiveState.EXHAUSTED, "probe_budget")
                 notify(ActiveState.PROBING)
                 try:
@@ -248,6 +269,7 @@ class ActiveHarnessController:
                     )
                     return finish(ActiveState.FAILED, "harness_policy")
                 if not _consume("retrievals", budgets, usage):
+                    _record_budget_rejection(trace, action, "retrieval_budget")
                     return finish(ActiveState.EXHAUSTED, "retrieval_budget")
                 notify(ActiveState.RETRIEVING)
                 try:
@@ -281,6 +303,7 @@ class ActiveHarnessController:
                 return finish(ActiveState.FAILED, "finish_without_verifier")
 
             if not _consume("script_submissions", budgets, usage):
+                _record_budget_rejection(trace, action, "submission_budget")
                 return finish(ActiveState.EXHAUSTED, "submission_budget")
             current_revision = action.payload["script"]
             notify(ActiveState.EXECUTING)
@@ -348,14 +371,19 @@ def _validate_retrieve(payload: dict[str, Any]) -> None:
     ):
         raise ActionContractError("retrieve scope must be a string array")
     if "limit" in payload and (
-        not isinstance(payload["limit"], int) or isinstance(payload["limit"], bool)
+        not isinstance(payload["limit"], int)
+        or isinstance(payload["limit"], bool)
         or not 1 <= payload["limit"] <= 5
     ):
         raise ActionContractError("retrieve limit must be between 1 and 5")
 
 
 def _validate_submit(payload: dict[str, Any]) -> None:
-    if set(payload) != {"script"} or not isinstance(payload["script"], str) or not payload["script"]:
+    if (
+        set(payload) != {"script"}
+        or not isinstance(payload["script"], str)
+        or not payload["script"]
+    ):
         raise ActionContractError("submit requires one non-empty script")
 
 
@@ -371,13 +399,41 @@ def _consume(name: str, budgets: ActiveBudgets, usage: dict[str, int | float]) -
     return True
 
 
-def _budget_snapshot(
-    budgets: ActiveBudgets, usage: dict[str, int | float]
-) -> dict[str, dict[str, int | float]]:
-    return {
-        name: {"used": usage[name], "limit": limit, "remaining": limit - usage[name]}
-        for name, limit in asdict(budgets).items()
-    }
+def _record_budget_rejection(
+    trace: list[dict[str, Any]], action: HarnessAction, stop_reason: str
+) -> None:
+    trace.append(
+        {
+            "action": "provider",
+            "requested_action": action.name,
+            "error": stop_reason,
+        }
+    )
+
+
+def _visible_capabilities(
+    budgets: ActiveBudgets,
+    usage: dict[str, int | float],
+    retrieval_policy: RetrievalPolicy,
+) -> tuple[list[str], list[str]]:
+    actions: list[str] = []
+    tools: list[str] = []
+    if usage["probes"] < budgets.probes:
+        actions.append("probe")
+        tools.append("edge_candidates")
+    if (
+        retrieval_policy is not RetrievalPolicy.DISABLED
+        and usage["retrievals"] < budgets.retrievals
+    ):
+        actions.append("retrieve")
+        tools.extend(("knowledge_search", "ocp_symbol"))
+    if (
+        usage["script_submissions"] < budgets.script_submissions
+        and usage["executions"] < budgets.executions
+    ):
+        actions.append("submit")
+    actions.append("finish")
+    return actions, tools
 
 
 def _active_result(

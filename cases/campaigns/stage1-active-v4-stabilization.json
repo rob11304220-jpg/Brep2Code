@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "experiment_id": "stage1-active-v4-stabilization-v1",
+  "purpose": "protocol_stabilization",
+  "result_schema_version": 7,
+  "task_contract_version": 2,
+  "prompt_version": "active-v4-no-retrieval",
+  "provider": "deepseek",
+  "model": "deepseek-v4-pro",
+  "retrieval_policy": "disabled",
+  "cases": ["box", "block_with_hole"],
+  "backend_profiles": ["ocp_v1"],
+  "cohorts": {
+    "first_shot": {"model_requests": 1, "probes": 0, "retrievals": 0, "script_submissions": 1, "executions": 1, "repairs": 0, "tokens": 16000, "cost_usd": 0.02},
+    "bounded_repair": {"model_requests": 2, "probes": 0, "retrievals": 0, "script_submissions": 2, "executions": 2, "repairs": 1, "tokens": 16000, "cost_usd": 0.02}
+  },
+  "hosted_limits": {"build_timeout_seconds": 20, "provider_timeout_seconds": 120, "max_retries": 1, "max_output_tokens": 4096, "max_total_tokens": 16000, "max_cost_usd": 0.02, "input_cost_per_million": 0.435, "output_cost_per_million": 0.87},
+  "phases": [
+    {"phase_id": "hosted_protocol_confirmation", "cases": ["box", "block_with_hole"], "backend_profiles": ["ocp_v1"], "cohorts": ["first_shot", "bounded_repair"], "replicates": 3}
+  ]
+}

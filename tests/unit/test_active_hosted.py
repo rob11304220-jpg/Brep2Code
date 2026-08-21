@@ -90,6 +90,18 @@ def test_active_hosted_preflight_declares_projection_and_double_budgets(
     assert plan["remaining_model_requests"] == 4
     assert plan["controller_budget"]["tokens"] == 100
     assert plan["provider_budget"]["max_total_tokens"] == 200
+    assert plan["outbound_projection"]["initial"] == [
+        "case_id",
+        "unit",
+        "initial_observations",
+        "allowed_actions",
+        "available_tools",
+        "session_phase",
+        "retrieval_policy",
+        "backend_profile",
+        "current_revision",
+    ]
+    assert "budgets" not in plan["outbound_projection"]["initial"]
     assert plan["outbound_projection"]["iterative"] == [
         "bounded_tool_results",
         "typed_feedback",
@@ -223,18 +235,14 @@ def test_active_hosted_continuation_requires_same_scope_and_reauthorization(
     [
         (
             lambda payload: (
-                payload["provider_accounting"]["pricing"].update(
-                    input_cost_per_million=1.5
-                ),
+                payload["provider_accounting"]["pricing"].update(input_cost_per_million=1.5),
                 payload["provider_accounting"].update(cost_usd=0.000017),
                 payload["usage"].update(cost_usd=0.000017),
             ),
             "pricing drift",
         ),
         (
-            lambda payload: payload["provider_accounting"]["ceilings"].update(
-                max_requests=3
-            ),
+            lambda payload: payload["provider_accounting"]["ceilings"].update(max_requests=3),
             "ceiling drift",
         ),
         (

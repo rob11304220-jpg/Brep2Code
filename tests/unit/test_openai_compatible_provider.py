@@ -5,6 +5,7 @@ from urllib import error
 
 import pytest
 
+from brep2code.providers.task_contract import build_provider_task_contract
 from brep2code.providers import (
     ActionRequest,
     OpenAICompatibleConfig,
@@ -12,8 +13,10 @@ from brep2code.providers import (
     ProviderBudgetError,
     ProviderConfigurationError,
     ProviderError,
+    ProviderExchangeArtifactError,
     ProviderLimits,
     ProviderRequest,
+    ProviderTransportError,
     deepseek_config_from_env,
 )
 
@@ -106,6 +109,7 @@ def test_openai_compatible_active_action_contract_and_prompt() -> None:
     task = json.loads(messages[1]["content"])
     assert task["turn_index"] == 0
     assert task["initial_observations"]["topology"] == {"edge": 30}
+    assert "budgets" not in task
     assert "host" not in messages[1]["content"].lower()
     assert provider.total_tokens == 30
 
@@ -126,15 +130,83 @@ def test_active_no_retrieval_prompt_removes_retrieval_action() -> None:
     assert "recipe" not in messages[0]["content"]
 
 
+def test_active_prompt_removes_actions_that_are_not_currently_available() -> None:
+    from brep2code.providers.active_prompt import build_action_messages
+
+    messages = build_action_messages(
+        ActionRequest(
+            case_id="box",
+            turn_index=0,
+            session={
+                "retrieval_policy": "disabled",
+                "allowed_actions": ["submit", "finish"],
+                "available_tools": [],
+            },
+        )
+    )
+
+    prompt = messages[0]["content"]
+    assert '"action":"probe"' not in prompt
+    assert '"action":"submit"' in prompt
+    assert '"action":"finish"' in prompt
+
+
+def test_active_prompt_projects_selected_cadquery_contract() -> None:
+    from brep2code.providers.active_prompt import build_action_messages
+
+    messages = build_action_messages(
+        ActionRequest(
+            case_id="box",
+            turn_index=0,
+            session={
+                "retrieval_policy": "disabled",
+                "backend_profile": "cadquery_v1",
+                "available_tools": ["edge_candidates"],
+            },
+        )
+    )
+
+    prompt = messages[0]["content"]
+    assert "backend profile cadquery_v1" in prompt
+    assert "import cadquery as cq" in prompt
+    assert "CadQuery STEP exporter" in prompt
+    assert "installed OCP package" not in prompt
+
+
+def test_active_prompt_keeps_contract_identity_internal() -> None:
+    from brep2code.providers.active_prompt import build_action_messages
+
+    messages = build_action_messages(
+        ActionRequest(
+            case_id="box",
+            turn_index=0,
+            session={
+                "retrieval_policy": "disabled",
+                "backend_profile": "cadquery_v1",
+                "task_contract": build_provider_task_contract(
+                    "cadquery_v1", "disabled"
+                ).projection(),
+                "task_contract_hash": build_provider_task_contract(
+                    "cadquery_v1", "disabled"
+                ).identity,
+                "allowed_actions": ["submit", "finish"],
+                "available_tools": [],
+            },
+        )
+    )
+
+    task = json.loads(messages[1]["content"])
+    assert "task_contract" not in task
+    assert "task_contract_hash" not in task
+
+
 def test_provider_exchange_records_bounded_payloads_without_credentials() -> None:
     events = []
     provider = OpenAICompatibleProvider(
         _config(),
         _limits(),
         opener=lambda *args, **kwargs: FakeHTTPResponse(_response()),
-        exchange_recorder=lambda event, attempt, payload: events.append(
-            (event, attempt, payload)
-        ),
+        exchange_recorder=lambda event, attempt, payload: events.append((event, attempt, payload)),
     )
 
     provider.generate(_request())
@@ -219,6 +291,100 @@ def test_retry_is_bounded_and_each_attempt_consumes_request_budget() -> None:
     assert provider.requests_issued == 2
 
 
+def test_response_read_connection_failure_is_normalized_and_accounted() -> None:
+    class BrokenResponse(FakeHTTPResponse):
+        def read(self, unused_amount=None):
+            raise ConnectionResetError("private transport detail")
+
+    provider = OpenAICompatibleProvider(
+        _config(), _limits(max_retries=0), opener=lambda *args, **kwargs: BrokenResponse({})
+    )
+
+    with pytest.raises(ProviderTransportError, match="failed or timed out") as exc_info:
+        provider.generate(_request())
+
+    assert "private transport detail" not in str(exc_info.value)
+    assert provider.accounting_snapshot()["http_attempts"] == 1
+    assert provider.accounting_snapshot()["in_flight_requests"] == 0
+
+
+@pytest.mark.parametrize("failed_event", ["request", "response"])
+def test_exchange_artifact_failure_is_never_treated_as_transport(failed_event: str) -> None:
+    def recorder(event, attempt, payload):
+        if event == failed_event:
+            raise OSError("private artifact path")
+
+    provider = OpenAICompatibleProvider(
+        _config(), _limits(), exchange_recorder=recorder,
+        opener=lambda *args, **kwargs: FakeHTTPResponse(_response()),
+    )
+
+    with pytest.raises(ProviderExchangeArtifactError, match=f"{failed_event} artifact") as exc_info:
+        provider.generate(_request())
+
+    assert "private artifact path" not in str(exc_info.value)
+    assert provider.accounting_snapshot()["in_flight_requests"] == 0
+
+
+def test_active_action_protocol_retry_is_separate_from_cad_repair() -> None:
+    calls = 0
+    observed_bodies = []
+
+    def opener(http_request, *, timeout):
+        nonlocal calls
+        calls += 1
+        observed_bodies.append(json.loads(http_request.data))
+        response = _response()
+        response["choices"][0]["message"]["content"] = (
+            "not-json" if calls == 1 else json.dumps(
+                {"action": "submit", "submit": {"script": "print('ok')"}}
+            )
+        )
+        return FakeHTTPResponse(response)
+
+    provider = OpenAICompatibleProvider(
+        _config(), _limits(max_retries=1), opener=opener
+    )
+    response = provider.choose_action(
+        ActionRequest(
+            "box",
+            0,
+            {
+                "retrieval_policy": "disabled",
+                "allowed_actions": ["submit", "finish"],
+                "available_tools": [],
+            },
+        )
+    )
+
+    assert response.action["action"] == "submit"
+    assert provider.requests_issued == 2
+    assert provider.total_tokens == 30
+    assert provider.accounting_snapshot()["protocol_retries"] == 1
+    retry_message = observed_bodies[1]["messages"][-1]
+    assert retry_message["role"] == "user"
+    assert "action JSON contract" in retry_message["content"]
+
+
+def test_fixed_generation_does_not_retry_protocol_failure() -> None:
+    calls = 0
+
+    def opener(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        malformed = _response()
+        malformed["choices"][0]["message"]["content"] = "not-json"
+        return FakeHTTPResponse(malformed)
+
+    provider = OpenAICompatibleProvider(
+        _config(), _limits(max_retries=1), opener=opener
+    )
+
+    with pytest.raises(ProviderError, match="content_not_json"):
+        provider.generate(_request())
+    assert calls == 1
+
+
 def test_repair_request_includes_feedback_and_previous_complete_script() -> None:
     observed = {}
 
@@ -250,9 +416,7 @@ def test_token_budget_rejects_response_after_committing_actual_usage() -> None:
         calls += 1
         return FakeHTTPResponse(_response())
 
-    provider = OpenAICompatibleProvider(
-        _config(), _limits(max_total_tokens=10), opener=opener
-    )
+    provider = OpenAICompatibleProvider(_config(), _limits(max_total_tokens=10), opener=opener)
     with pytest.raises(ProviderBudgetError, match="token budget"):
         provider.generate(_request())
     assert provider.total_tokens == 15
@@ -271,9 +435,7 @@ def test_response_at_exact_token_ceiling_succeeds_then_blocks_next_request() -> 
         calls += 1
         return FakeHTTPResponse(_response())
 
-    provider = OpenAICompatibleProvider(
-        _config(), _limits(max_total_tokens=15), opener=opener
-    )
+    provider = OpenAICompatibleProvider(_config(), _limits(max_total_tokens=15), opener=opener)
 
     assert provider.generate(_request()).usage["total_tokens"] == 15
     with pytest.raises(ProviderBudgetError, match="token budget"):
@@ -316,7 +478,8 @@ def test_empty_content_records_safe_reasoning_shape_and_usage() -> None:
         "reasoning_content": "private-reasoning " * 40,
     }
     provider = OpenAICompatibleProvider(
-        _config(), _limits(max_total_tokens=5000),
+        _config(),
+        _limits(max_total_tokens=5000),
         opener=lambda *args, **kwargs: FakeHTTPResponse(malformed),
     )
 
@@ -413,9 +576,7 @@ def test_bounded_explanatory_text_around_single_fenced_json_is_normalized() -> N
         ("```python\nprint('unterminated')", "unterminated_fence"),
     ],
 )
-def test_invalid_content_reports_only_safe_shape_diagnostics(
-    content: str, diagnostic: str
-) -> None:
+def test_invalid_content_reports_only_safe_shape_diagnostics(content: str, diagnostic: str) -> None:
     response = _response()
     response["choices"][0]["message"]["content"] = content
     provider = OpenAICompatibleProvider(
@@ -521,9 +682,7 @@ def test_deepseek_configuration_reads_ignored_file_with_environment_override(
         "DEEPSEEK_BASE_URL=https://api.deepseek.com\n",
         encoding="utf-8",
     )
-    config = deepseek_config_from_env(
-        {"DEEPSEEK_MODEL": "environment-model"}, env_file=env_file
-    )
+    config = deepseek_config_from_env({"DEEPSEEK_MODEL": "environment-model"}, env_file=env_file)
     assert config.model == "environment-model"
     assert config.base_url == "https://api.deepseek.com"
     assert "file-secret" not in repr(config)

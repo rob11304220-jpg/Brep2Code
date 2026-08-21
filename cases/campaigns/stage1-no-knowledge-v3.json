@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "experiment_id": "stage1-no-knowledge-v3",
+  "purpose": "no_knowledge_baseline",
+  "prerequisite_experiment_id": "stage1-active-v4-stabilization-v1",
+  "execution_protocol_version": 3,
+  "supersedes_experiment_id": "stage1-no-knowledge-v2",
+  "aborted_report_sha256": "ABAA99C33579402C54FFEA6CCF22EA868CCD010C1DA2E064F8B41C2309F39133",
+  "result_schema_version": 7,
+  "task_contract_version": 2,
+  "prompt_version": "active-v4-no-retrieval",
+  "provider": "deepseek",
+  "model": "deepseek-v4-pro",
+  "retrieval_policy": "disabled",
+  "cases": ["box", "stage1_cylinder", "block_with_hole", "blind_hole_block", "filleted_box"],
+  "backend_profiles": ["cadquery_v1", "ocp_v1"],
+  "cohorts": {
+    "first_shot": {"model_requests": 1, "probes": 0, "retrievals": 0, "script_submissions": 1, "executions": 1, "repairs": 0, "tokens": 16000, "cost_usd": 0.02},
+    "bounded_repair": {"model_requests": 2, "probes": 0, "retrievals": 0, "script_submissions": 2, "executions": 2, "repairs": 1, "tokens": 16000, "cost_usd": 0.02}
+  },
+  "hosted_limits": {"build_timeout_seconds": 20, "provider_timeout_seconds": 120, "max_retries": 1, "max_output_tokens": 4096, "max_total_tokens": 16000, "max_cost_usd": 0.02, "input_cost_per_million": 0.435, "output_cost_per_million": 0.87},
+  "phases": [
+    {"phase_id": "cadquery_baseline", "cases": ["box", "stage1_cylinder", "block_with_hole", "blind_hole_block", "filleted_box"], "backend_profiles": ["cadquery_v1"], "cohorts": ["first_shot", "bounded_repair"], "replicates": 5},
+    {"phase_id": "ocp_contrast", "cases": ["box", "block_with_hole", "filleted_box"], "backend_profiles": ["ocp_v1"], "cohorts": ["first_shot", "bounded_repair"], "replicates": 5}
+  ],
+  "valid_attempt_threshold": 0.9,
+  "infrastructure_failure_rate_threshold": 0.1
+}

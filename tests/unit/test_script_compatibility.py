@@ -8,13 +8,47 @@ from brep2code.harness.compatibility import validate_script_compatibility
 
 
 def test_compatibility_accepts_installed_ocp_imports() -> None:
-    assert validate_script_compatibility(
-        "from OCP.BRepPrimAPI import BRepPrimAPI_MakeBox\n"
-    ) is None
+    assert (
+        validate_script_compatibility("from OCP.BRepPrimAPI import BRepPrimAPI_MakeBox\n") is None
+    )
+
+
+def test_cadquery_profile_accepts_cadquery_and_skips_ocp_binding_rules() -> None:
+    assert (
+        validate_script_compatibility(
+            "import cadquery as cq\nresult = cq.Workplane('XY').box(1, 2, 3)\n",
+            "cadquery_v1",
+        )
+        is None
+    )
+
+
+def test_backend_profile_rejects_cross_backend_import() -> None:
+    feedback = validate_script_compatibility("import cadquery as cq\n", "ocp_v1")
+
+    assert feedback == {
+        "stage": "generation",
+        "reason": "backend_policy_violation",
+        "backend_profile": "ocp_v1",
+        "module": "cadquery",
+        "message": "Backend profile ocp_v1 permits CAD imports only from OCP.",
+    }
+
+
+def test_cadquery_profile_rejects_ocp_import() -> None:
+    feedback = validate_script_compatibility(
+        "from OCP.BRepPrimAPI import BRepPrimAPI_MakeBox\n", "cadquery_v1"
+    )
+
+    assert feedback is not None
+    assert feedback["reason"] == "backend_policy_violation"
+    assert feedback["backend_profile"] == "cadquery_v1"
 
 
 def test_compatibility_rejects_unsupported_cad_import_without_script_content() -> None:
-    feedback = validate_script_compatibility("from OCC.Core.BRepPrimAPI import BRepPrimAPI_MakeBox\n")
+    feedback = validate_script_compatibility(
+        "from OCC.Core.BRepPrimAPI import BRepPrimAPI_MakeBox\n"
+    )
 
     assert feedback == {
         "stage": "generation",
@@ -45,9 +79,7 @@ def test_compatibility_rejects_invalid_python_as_bounded_feedback() -> None:
 
 def test_compatibility_rejects_function_local_ocp_import() -> None:
     feedback = validate_script_compatibility(
-        "def build():\n"
-        "    from OCP.TopExp import TopExp\n"
-        "    return TopExp\n"
+        "def build():\n    from OCP.TopExp import TopExp\n    return TopExp\n"
     )
 
     assert feedback == {
@@ -76,9 +108,7 @@ def test_compatibility_accepts_suffixed_topexp_static_method() -> None:
 
 
 def test_compatibility_recommends_allowlisted_reference_for_direct_map_shapes() -> None:
-    feedback = validate_script_compatibility(
-        "TopExp.MapShapes(shape, TopAbs_EDGE, edge_map)\n"
-    )
+    feedback = validate_script_compatibility("TopExp.MapShapes(shape, TopAbs_EDGE, edge_map)\n")
 
     assert feedback is not None
     assert feedback["method"] == "TopExp.MapShapes"

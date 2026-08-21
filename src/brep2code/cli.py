@@ -9,6 +9,7 @@ from pathlib import Path
 import re
 from urllib.parse import urlsplit
 
+from brep2code.backends import BackendProfileId, backend_profile_ids
 from brep2code.cases import CaseValidationError, ValidatedCase, validate_catalog
 from brep2code.campaigns import (
     CampaignValidationError,
@@ -28,7 +29,11 @@ from brep2code.harness import (
     preflight_active_hosted,
     validate_active_result,
 )
-from brep2code.execution import secure_backend_config, secure_backend_status
+from brep2code.execution import (
+    secure_backend_config,
+    secure_backend_profile_status,
+    secure_backend_status,
+)
 from brep2code.evaluation import ACTIVE_COHORT_LABELS, build_active_pilot_report
 from brep2code.providers import (
     FakeActionProvider,
@@ -37,6 +42,27 @@ from brep2code.providers import (
     ProviderConfigurationError,
     ProviderLimits,
     deepseek_config_from_env,
+)
+from brep2code.providers.task_contract import build_provider_task_contract
+from brep2code.stage1 import Stage1ContractError, build_stage1_report, load_stage1_contract
+from brep2code.stage1_v2 import (
+    Stage1V2RunOutcome,
+    Stage1V2ValidationError,
+    build_stage1_v2_fake_baselines,
+    build_stage1_v2_preflight,
+    build_stage1_v2_report,
+    build_stage1_v3_readiness,
+    load_stage1_v2_contract,
+    load_stage1_v3_contract,
+    run_stage1_v2_cohort,
+    validate_stage1_v2_result,
+)
+from brep2code.stabilization import (
+    StabilizationValidationError,
+    build_stabilization_report,
+    classify_stabilization_result,
+    load_stabilization_contract,
+    validate_outbound_projection,
 )
 
 
@@ -47,6 +73,32 @@ def main(argv: list[str] | None = None) -> int:
         return _environment_doctor()
     if args.command == "cases" and args.cases_command == "validate":
         return _validate_cases(args.root)
+    if args.command == "stage1" and args.stage1_command == "validate":
+        return _validate_stage1(args.contract, args.cases_root)
+    if args.command == "stage1" and args.stage1_command == "report":
+        return _report_stage1(args)
+    if args.command == "stage1" and args.stage1_command == "stabilization-validate":
+        return _validate_stabilization(args)
+    if args.command == "stage1" and args.stage1_command == "stabilization-projection":
+        return _validate_stabilization_projection(args.run_root)
+    if args.command == "stage1" and args.stage1_command == "stabilization-report":
+        return _report_stabilization(args)
+    if args.command == "stage1" and args.stage1_command == "v2-validate":
+        return _validate_stage1_v2(args)
+    if args.command == "stage1" and args.stage1_command == "v2-preflight":
+        return _preflight_stage1_v2(args)
+    if args.command == "stage1" and args.stage1_command == "v2-report":
+        return _report_stage1_v2(args)
+    if args.command == "stage1" and args.stage1_command == "v3-validate":
+        return _validate_stage1_v3(args)
+    if args.command == "stage1" and args.stage1_command == "v3-fake-baselines":
+        return _fake_baselines_stage1_v3(args)
+    if args.command == "stage1" and args.stage1_command == "v3-readiness":
+        return _readiness_stage1_v3(args)
+    if args.command == "stage1" and args.stage1_command == "v3-live-run":
+        return _live_run_stage1_v3(args)
+    if args.command == "stage1" and args.stage1_command == "v3-report":
+        return _report_stage1_v3(args)
     if args.command == "campaign" and args.campaign_command == "validate":
         return _validate_campaign(args.contract, args.cases_root)
     if args.command == "campaign" and args.campaign_command == "preflight":
@@ -112,6 +164,106 @@ def _build_parser() -> argparse.ArgumentParser:
     cases_commands = cases.add_subparsers(dest="cases_command", required=True)
     validate = cases_commands.add_parser("validate", help="Validate every discovered case.")
     validate.add_argument("--root", type=Path, default=Path("cases"))
+    stage1 = commands.add_parser("stage1", help="Inspect the frozen Stage 1 experiment contract.")
+    stage1_commands = stage1.add_subparsers(dest="stage1_command", required=True)
+    stage1_validate = stage1_commands.add_parser(
+        "validate", help="Validate Stage 1 cases, backend profiles, cohorts, and phases."
+    )
+    stage1_validate.add_argument("--contract", type=Path, required=True)
+    stage1_validate.add_argument("--cases-root", type=Path, default=Path("cases"))
+    stage1_report = stage1_commands.add_parser(
+        "report", help="Read and aggregate schema-v6 Stage 1 result artifacts."
+    )
+    stage1_report.add_argument("--contract", type=Path, required=True)
+    stage1_report.add_argument("--cases-root", type=Path, default=Path("cases"))
+    stage1_report.add_argument("--runs-root", type=Path, required=True)
+    stage1_report.add_argument("--phase", required=True)
+    stabilization_validate = stage1_commands.add_parser(
+        "stabilization-validate",
+        help="Validate the separate schema-v7 Active protocol-stabilization contract.",
+    )
+    stabilization_validate.add_argument("--contract", type=Path, required=True)
+    stabilization_validate.add_argument("--cases-root", type=Path, default=Path("cases"))
+    stabilization_projection = stage1_commands.add_parser(
+        "stabilization-projection",
+        help="Validate model-visible request projections saved by one schema-v7 run.",
+    )
+    stabilization_projection.add_argument("--run-root", type=Path, required=True)
+    stabilization_report = stage1_commands.add_parser(
+        "stabilization-report",
+        help="Aggregate the complete schema-v7 protocol-stabilization cohort.",
+    )
+    stabilization_report.add_argument("--contract", type=Path, required=True)
+    stabilization_report.add_argument("--cases-root", type=Path, default=Path("cases"))
+    stabilization_report.add_argument("--runs-root", type=Path, required=True)
+    stabilization_report.add_argument("--output", type=Path)
+    stage1_v2_validate = stage1_commands.add_parser(
+        "v2-validate", help="Validate the complete schema-v7 no-knowledge v2 contract."
+    )
+    stage1_v2_validate.add_argument("--contract", type=Path, required=True)
+    stage1_v2_validate.add_argument("--cases-root", type=Path, default=Path("cases"))
+    stage1_v2_preflight = stage1_commands.add_parser(
+        "v2-preflight",
+        help="Check the v2 prerequisite, fresh root, backends, and authorization scope.",
+    )
+    stage1_v2_preflight.add_argument("--contract", type=Path, required=True)
+    stage1_v2_preflight.add_argument("--cases-root", type=Path, default=Path("cases"))
+    stage1_v2_preflight.add_argument("--stabilization-report", type=Path, required=True)
+    stage1_v2_preflight.add_argument("--run-root", type=Path, required=True)
+    stage1_v2_report = stage1_commands.add_parser(
+        "v2-report", help="Validate and aggregate all 80 Stage 1 v2 result identities."
+    )
+    stage1_v2_report.add_argument("--contract", type=Path, required=True)
+    stage1_v2_report.add_argument("--cases-root", type=Path, default=Path("cases"))
+    stage1_v2_report.add_argument("--runs-root", type=Path, required=True)
+    stage1_v2_report.add_argument("--output", type=Path)
+    stage1_v3_validate = stage1_commands.add_parser(
+        "v3-validate", help="Validate the replacement Stage 1 execution-protocol-v3 contract."
+    )
+    stage1_v3_validate.add_argument("--contract", type=Path, required=True)
+    stage1_v3_validate.add_argument("--cases-root", type=Path, default=Path("cases"))
+    stage1_v3_baselines = stage1_commands.add_parser(
+        "v3-fake-baselines", help="Build all 20 execution-protocol-v3 fake baselines."
+    )
+    stage1_v3_baselines.add_argument("--contract", type=Path, required=True)
+    stage1_v3_baselines.add_argument("--cases-root", type=Path, default=Path("cases"))
+    stage1_v3_baselines.add_argument("--baseline-root", type=Path, required=True)
+    stage1_v3_readiness = stage1_commands.add_parser(
+        "v3-readiness", help="Validate v3 prerequisites, baselines, and all 80 identities."
+    )
+    stage1_v3_readiness.add_argument("--contract", type=Path, required=True)
+    stage1_v3_readiness.add_argument("--cases-root", type=Path, default=Path("cases"))
+    stage1_v3_readiness.add_argument("--stabilization-report", type=Path, required=True)
+    stage1_v3_readiness.add_argument("--aborted-report", type=Path, required=True)
+    stage1_v3_readiness.add_argument("--baseline-root", type=Path, required=True)
+    stage1_v3_readiness.add_argument("--run-root", type=Path, required=True)
+    stage1_v3_live = stage1_commands.add_parser(
+        "v3-live-run", help="Run the complete execution-protocol-v3 HTTPS cohort once."
+    )
+    stage1_v3_live.add_argument("--contract", type=Path, required=True)
+    stage1_v3_live.add_argument("--cases-root", type=Path, default=Path("cases"))
+    stage1_v3_live.add_argument("--stabilization-report", type=Path, required=True)
+    stage1_v3_live.add_argument("--aborted-report", type=Path, required=True)
+    stage1_v3_live.add_argument("--baseline-root", type=Path, required=True)
+    stage1_v3_live.add_argument("--run-root", type=Path, required=True)
+    stage1_v3_live.add_argument("--authorized-endpoint-host", required=True)
+    for flag in (
+        "authorize-80-runs",
+        "authorize-120-model-decisions",
+        "authorize-240-http-attempts",
+        "authorize-1280000-tokens",
+        "authorize-1-60-usd",
+        "authorize-run-root",
+        "authorize-outbound-projection",
+    ):
+        stage1_v3_live.add_argument(f"--{flag}", action="store_true")
+    stage1_v3_report = stage1_commands.add_parser(
+        "v3-report", help="Validate and aggregate all 80 Stage 1 v3 result identities."
+    )
+    stage1_v3_report.add_argument("--contract", type=Path, required=True)
+    stage1_v3_report.add_argument("--cases-root", type=Path, default=Path("cases"))
+    stage1_v3_report.add_argument("--runs-root", type=Path, required=True)
+    stage1_v3_report.add_argument("--output", type=Path)
     campaign = commands.add_parser("campaign", help="Inspect and validate a campaign contract.")
     campaign_commands = campaign.add_subparsers(dest="campaign_command", required=True)
     campaign_validate = campaign_commands.add_parser(
@@ -317,6 +469,406 @@ def _validate_cases(root: Path) -> int:
     }
     print(json.dumps(payload, indent=2))
     return 0
+
+
+def _validate_stage1(contract_path: Path, cases_root: Path) -> int:
+    try:
+        contract = load_stage1_contract(contract_path, validate_catalog(cases_root))
+    except (CaseValidationError, OSError, Stage1ContractError, ValueError) as exc:
+        print(json.dumps({"status": "invalid", "error": str(exc)}))
+        return 1
+    print(
+        json.dumps(
+            {
+                "status": "valid",
+                "experiment_id": contract["experiment_id"],
+                "cases": contract["cases"],
+                "backend_profiles": contract["backend_profiles"],
+                "phases": [item["phase_id"] for item in contract["phases"]],
+                "network_requests": 0,
+                "artifacts_created": False,
+            },
+            indent=2,
+        )
+    )
+    return 0
+
+
+def _report_stage1(args: argparse.Namespace) -> int:
+    try:
+        catalog = validate_catalog(args.cases_root)
+        contract = load_stage1_contract(args.contract, catalog)
+        report = build_stage1_report(contract, catalog, args.runs_root, args.phase)
+    except (ActiveResultValidationError, CaseValidationError, OSError, Stage1ContractError) as exc:
+        print(json.dumps({"status": "invalid", "error": str(exc)}))
+        return 1
+    print(json.dumps(report, indent=2))
+    return 0 if report["judgment"]["phase_ready"] else 1
+
+
+def _validate_stabilization(args: argparse.Namespace) -> int:
+    try:
+        contract = load_stabilization_contract(args.contract, validate_catalog(args.cases_root))
+    except (CaseValidationError, OSError, StabilizationValidationError, ValueError) as exc:
+        print(json.dumps({"status": "invalid", "error": str(exc)}))
+        return 1
+    phase = contract["phases"][0]
+    expected_runs = (
+        len(phase["cases"])
+        * len(phase["backend_profiles"])
+        * len(phase["cohorts"])
+        * phase["replicates"]
+    )
+    print(
+        json.dumps(
+            {
+                "status": "valid",
+                "experiment_id": contract["experiment_id"],
+                "purpose": contract["purpose"],
+                "expected_runs": expected_runs,
+                "network_requests": 0,
+                "artifacts_created": False,
+                "changes_frozen_stage1": False,
+            },
+            indent=2,
+        )
+    )
+    return 0
+
+
+def _validate_stabilization_projection(run_root: Path) -> int:
+    try:
+        report = validate_outbound_projection(run_root)
+    except StabilizationValidationError as exc:
+        print(json.dumps({"status": "invalid", "error": str(exc)}))
+        return 1
+    print(json.dumps(report, indent=2))
+    return 0
+
+
+def _report_stabilization(args: argparse.Namespace) -> int:
+    try:
+        if args.output is not None and args.output.exists():
+            raise StabilizationValidationError("stabilization report output must be fresh")
+        catalog = validate_catalog(args.cases_root)
+        contract = load_stabilization_contract(args.contract, catalog)
+        report = build_stabilization_report(contract, catalog, args.runs_root)
+        if args.output is not None:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            temporary = args.output.with_suffix(args.output.suffix + ".tmp")
+            temporary.write_text(json.dumps(report, indent=2), encoding="utf-8")
+            temporary.replace(args.output)
+    except (CaseValidationError, OSError, StabilizationValidationError, ValueError) as exc:
+        print(json.dumps({"status": "invalid", "error": str(exc)}))
+        return 1
+    print(json.dumps(report, indent=2))
+    return 0 if report["judgment"]["protocol_stable"] else 1
+
+
+def _validate_stage1_v2(args: argparse.Namespace) -> int:
+    try:
+        contract = load_stage1_v2_contract(args.contract, validate_catalog(args.cases_root))
+    except (CaseValidationError, OSError, Stage1V2ValidationError, ValueError) as exc:
+        print(json.dumps({"status": "invalid", "error": str(exc)}))
+        return 1
+    expected_runs = sum(
+        len(phase["cases"])
+        * len(phase["backend_profiles"])
+        * len(phase["cohorts"])
+        * phase["replicates"]
+        for phase in contract["phases"]
+    )
+    print(
+        json.dumps(
+            {
+                "status": "valid",
+                "experiment_id": contract["experiment_id"],
+                "expected_runs": expected_runs,
+                "network_requests": 0,
+                "artifacts_created": False,
+                "authorization_granted": False,
+            },
+            indent=2,
+        )
+    )
+    return 0
+
+
+def _preflight_stage1_v2(args: argparse.Namespace) -> int:
+    try:
+        contract = load_stage1_v2_contract(args.contract, validate_catalog(args.cases_root))
+        plan = build_stage1_v2_preflight(
+            contract,
+            args.stabilization_report,
+            args.run_root,
+            secure_backend_profile_status,
+        )
+    except (CaseValidationError, OSError, Stage1V2ValidationError, ValueError) as exc:
+        print(json.dumps({"status": "not_ready", "error": str(exc)}))
+        return 1
+    print(json.dumps(plan, indent=2))
+    return 0
+
+
+def _live_run_stage1_v3(args: argparse.Namespace) -> int:
+    return _live_run_stage1(args, load_stage1_v3_contract)
+
+
+def _live_run_stage1(args: argparse.Namespace, contract_loader) -> int:
+    authorization_fields = (
+        "authorize_80_runs",
+        "authorize_120_model_decisions",
+        "authorize_240_http_attempts",
+        "authorize_1280000_tokens",
+        "authorize_1_60_usd",
+        "authorize_run_root",
+        "authorize_outbound_projection",
+    )
+    missing = [name for name in authorization_fields if not getattr(args, name)]
+    if missing:
+        print(
+            json.dumps(
+                {
+                    "status": "not_authorized",
+                    "missing": [name.replace("_", "-") for name in missing],
+                    "network_requests": 0,
+                    "artifacts_created": False,
+                }
+            )
+        )
+        return 1
+    contract = {"experiment_id": "unknown"}
+    try:
+        catalog = validate_catalog(args.cases_root)
+        contract = contract_loader(args.contract, catalog)
+        readiness = build_stage1_v3_readiness(
+            contract,
+            catalog,
+            args.stabilization_report,
+            args.aborted_report,
+            args.baseline_root,
+            args.run_root,
+            secure_backend_profile_status,
+        )
+        config = deepseek_config_from_env(env_file=Path(".env"), thinking_mode="disabled")
+        if config.provider != contract["provider"] or config.model != contract["model"]:
+            raise Stage1V2ValidationError("Stage 1 v2 provider identity drift")
+        endpoint_host = urlsplit(config.base_url).hostname
+        if not endpoint_host or endpoint_host != args.authorized_endpoint_host:
+            raise Stage1V2ValidationError("Stage 1 v2 authorized endpoint host drift")
+        cases = {item.case.case_id: item for manifest in catalog for item in manifest.cases}
+        limits = contract["hosted_limits"]
+
+        def validated_outcome(identity, identity_root):
+            case_id, unused_backend, cohort, unused_replicate, unused_phase = identity
+            payload = _read_json_object(identity_root / "result.json")
+            try:
+                validate_stage1_v2_result(
+                    payload, cases[case_id], identity_root, contract, cohort
+                )
+            except (ActiveResultValidationError, Stage1V2ValidationError):
+                return Stage1V2RunOutcome(
+                    "controller_harness", 0, 0, 0.0, artifact_valid=False
+                )
+            accounting = payload["provider_accounting"]
+            try:
+                validate_outbound_projection(identity_root)
+            except StabilizationValidationError:
+                return Stage1V2RunOutcome(
+                    "projection",
+                    accounting["http_attempts"],
+                    accounting["tokens"]["total"],
+                    accounting["cost_usd"],
+                    projection_valid=False,
+                )
+            return Stage1V2RunOutcome(
+                classify_stabilization_result(payload),
+                accounting["http_attempts"],
+                accounting["tokens"]["total"],
+                accounting["cost_usd"],
+            )
+
+        def execute(identity, identity_root):
+            case_id, backend, cohort, replicate, phase_id = identity
+            budgets = ActiveBudgets(**contract["cohorts"][cohort])
+            provider = OpenAICompatibleProvider(
+                config,
+                ProviderLimits(
+                    max_requests=budgets.model_requests * (1 + limits["max_retries"]),
+                    timeout_seconds=limits["provider_timeout_seconds"],
+                    max_retries=limits["max_retries"],
+                    max_output_tokens=limits["max_output_tokens"],
+                    max_total_tokens=limits["max_total_tokens"],
+                    max_cost_usd=limits["max_cost_usd"],
+                    input_cost_per_million=limits["input_cost_per_million"],
+                    output_cost_per_million=limits["output_cost_per_million"],
+                ),
+                exchange_recorder=_provider_exchange_recorder(identity_root),
+            )
+            ActiveHarnessRunner(provider).run(
+                cases[case_id],
+                identity_root,
+                budgets=budgets,
+                timeout_seconds=limits["build_timeout_seconds"],
+                retrieval_policy=RetrievalPolicy.DISABLED,
+                backend=backend,
+                stage1_identity={
+                    "experiment_id": contract["experiment_id"],
+                    "phase_id": phase_id,
+                    "cohort": cohort,
+                    "replicate": replicate,
+                },
+            )
+            return validated_outcome(identity, identity_root)
+
+        result = run_stage1_v2_cohort(contract, args.run_root, execute)
+    except (
+        ActiveResultValidationError,
+        CaseValidationError,
+        OSError,
+        ProviderConfigurationError,
+        Stage1V2ValidationError,
+        ValueError,
+    ) as exc:
+        _write_stage1_v2_cohort_stop(
+            args.run_root, exc, contract.get("experiment_id", "unknown")
+        )
+        print(json.dumps({"status": "stopped", "error": _safe_readiness_error(exc)}))
+        return 1
+    print(
+        json.dumps(
+            {
+                **result,
+                "endpoint_host": endpoint_host,
+                "readiness": readiness["status"],
+                "fresh_authorization": True,
+            },
+            indent=2,
+        )
+    )
+    return 0
+
+
+def _write_stage1_v2_cohort_stop(
+    run_root: Path, exc: Exception, experiment_id: str
+) -> None:
+    if not run_root.is_dir():
+        return
+    try:
+        observed = 0
+        terminal = 0
+        for result_path in run_root.rglob("result.json"):
+            payload = _read_json_object(result_path)
+            if payload.get("stage1_identity"):
+                observed += 1
+                terminal += payload.get("terminal") is True
+        payload = {
+            "schema_version": 1,
+            "experiment_id": experiment_id,
+            "status": "aborted_infrastructure_failure",
+            "failure_category": getattr(exc, "category", "configuration"),
+            "observed_artifacts": observed,
+            "terminal_artifacts": terminal,
+            "stage2_authorized": False,
+        }
+        target = run_root / "cohort-stop.json"
+        temporary = target.with_suffix(".json.tmp")
+        temporary.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        temporary.replace(target)
+    except (OSError, ValueError):
+        return
+
+
+def _report_stage1_v2(args: argparse.Namespace) -> int:
+    try:
+        if args.output is not None and args.output.exists():
+            raise Stage1V2ValidationError("Stage 1 v2 report output must be fresh")
+        catalog = validate_catalog(args.cases_root)
+        contract = load_stage1_v2_contract(args.contract, catalog)
+        report = build_stage1_v2_report(contract, catalog, args.runs_root)
+        if args.output is not None:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            temporary = args.output.with_suffix(args.output.suffix + ".tmp")
+            temporary.write_text(json.dumps(report, indent=2), encoding="utf-8")
+            temporary.replace(args.output)
+    except (CaseValidationError, OSError, Stage1V2ValidationError, ValueError) as exc:
+        print(json.dumps({"status": "invalid", "error": str(exc)}))
+        return 1
+    print(json.dumps(report, indent=2))
+    return 0 if report["judgment"]["exit_ready"] else 1
+
+
+def _validate_stage1_v3(args: argparse.Namespace) -> int:
+    try:
+        contract = load_stage1_v3_contract(args.contract, validate_catalog(args.cases_root))
+    except (CaseValidationError, OSError, Stage1V2ValidationError, ValueError) as exc:
+        print(json.dumps({"status": "invalid", "error": str(exc)}))
+        return 1
+    print(
+        json.dumps(
+            {
+                "status": "valid",
+                "experiment_id": contract["experiment_id"],
+                "execution_protocol_version": contract["execution_protocol_version"],
+                "expected_runs": 80,
+                "authorization_granted": False,
+                "stage2_authorized": False,
+            },
+            indent=2,
+        )
+    )
+    return 0
+
+
+def _fake_baselines_stage1_v3(args: argparse.Namespace) -> int:
+    try:
+        catalog = validate_catalog(args.cases_root)
+        contract = load_stage1_v3_contract(args.contract, catalog)
+        report = build_stage1_v2_fake_baselines(contract, catalog, args.baseline_root)
+    except (CaseValidationError, OSError, Stage1V2ValidationError, ValueError) as exc:
+        print(json.dumps({"status": "failed", "error": str(exc)}))
+        return 1
+    print(json.dumps(report, indent=2))
+    return 0
+
+
+def _readiness_stage1_v3(args: argparse.Namespace) -> int:
+    try:
+        catalog = validate_catalog(args.cases_root)
+        contract = load_stage1_v3_contract(args.contract, catalog)
+        report = build_stage1_v3_readiness(
+            contract,
+            catalog,
+            args.stabilization_report,
+            args.aborted_report,
+            args.baseline_root,
+            args.run_root,
+            secure_backend_profile_status,
+        )
+    except (CaseValidationError, OSError, Stage1V2ValidationError, ValueError) as exc:
+        print(json.dumps({"status": "not_ready", "error": str(exc)}))
+        return 1
+    print(json.dumps(report, indent=2))
+    return 0
+
+
+def _report_stage1_v3(args: argparse.Namespace) -> int:
+    try:
+        if args.output is not None and args.output.exists():
+            raise Stage1V2ValidationError("Stage 1 v3 report output must be fresh")
+        catalog = validate_catalog(args.cases_root)
+        contract = load_stage1_v3_contract(args.contract, catalog)
+        report = build_stage1_v2_report(contract, catalog, args.runs_root)
+        if args.output is not None:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            temporary = args.output.with_suffix(args.output.suffix + ".tmp")
+            temporary.write_text(json.dumps(report, indent=2), encoding="utf-8")
+            temporary.replace(args.output)
+    except (CaseValidationError, OSError, Stage1V2ValidationError, ValueError) as exc:
+        print(json.dumps({"status": "invalid", "error": str(exc)}))
+        return 1
+    print(json.dumps(report, indent=2))
+    return 0 if report["judgment"]["exit_ready"] else 1
 
 
 def _validate_campaign(contract_path: Path, cases_root: Path) -> int:
@@ -852,6 +1404,8 @@ def _active_run(args: argparse.Namespace) -> int:
             budgets=budgets,
             timeout_seconds=args.timeout,
             retrieval_policy=RetrievalPolicy(args.retrieval_policy),
+            backend=BackendProfileId(args.backend_profile),
+            **_stage1_run_kwargs(args),
         )
     except (CaseValidationError, OSError, ValueError) as exc:
         print(json.dumps({"status": "configuration_error", "error": str(exc)}))
@@ -924,9 +1478,7 @@ def _active_validate(args: argparse.Namespace) -> int:
 
 def _active_continue(args: argparse.Namespace) -> int:
     try:
-        case = _select_case(
-            validate_catalog(args.cases_root), args.case_id, runtime_only=False
-        )
+        case = _select_case(validate_catalog(args.cases_root), args.case_id, runtime_only=False)
         payload = _read_json_object(args.run_root / "result.json")
         validate_active_result(payload, case, args.run_root)
         budgets = _active_budgets(args)
@@ -947,6 +1499,7 @@ def _active_continue(args: argparse.Namespace) -> int:
             budgets=budgets,
             timeout_seconds=args.timeout,
             retrieval_policy=RetrievalPolicy(args.retrieval_policy),
+            backend=BackendProfileId(args.backend_profile),
         )
     except (
         ActiveResultValidationError,
@@ -993,11 +1546,9 @@ def _active_hosted_preflight(args: argparse.Namespace) -> int:
 
 def _active_hosted_config_check(args: argparse.Namespace) -> int:
     try:
-        plan, provider_limits = _active_hosted_plan(args)
+        plan, provider_limits = _active_hosted_plan(args, require_authorization=False)
         provider = OpenAICompatibleProvider(
-            deepseek_config_from_env(
-                env_file=Path(".env"), thinking_mode=args.thinking_mode
-            ),
+            deepseek_config_from_env(env_file=Path(".env"), thinking_mode=args.thinking_mode),
             provider_limits,
         )
         if provider.name != args.provider or provider.model != args.model:
@@ -1035,6 +1586,7 @@ def _active_hosted_config_check(args: argparse.Namespace) -> int:
 def _active_hosted_readiness(args: argparse.Namespace) -> int:
     gate_names = (
         "case_session_scope",
+        "provider_task_contract",
         "fake_active_baseline",
         "saved_result_validation",
         "run_root",
@@ -1047,12 +1599,18 @@ def _active_hosted_readiness(args: argparse.Namespace) -> int:
     current_gate = gate_names[0]
     endpoint_host = None
     try:
-        case = _select_case(
-            validate_catalog(args.cases_root), args.case_id, runtime_only=True
-        )
+        case = _select_case(validate_catalog(args.cases_root), args.case_id, runtime_only=True)
         continuation_payload = None
         if args.continuation_result is not None:
             continuation_payload = _read_json_object(args.continuation_result)
+        gates[current_gate] = "passed"
+
+        current_gate = "provider_task_contract"
+        task_contract = build_provider_task_contract(
+            BackendProfileId(args.backend_profile), args.retrieval_policy
+        )
+        if task_contract.output_file != "output.step":
+            raise ActiveResultValidationError("provider task contract output drift")
         gates[current_gate] = "passed"
 
         current_gate = "fake_active_baseline"
@@ -1063,6 +1621,11 @@ def _active_hosted_readiness(args: argparse.Namespace) -> int:
             )
         if baseline.get("state") != "succeeded":
             raise ActiveResultValidationError("fake active baseline did not succeed")
+        if baseline.get("schema_version") == 6 and (
+            baseline.get("backend_profile") != task_contract.backend_profile
+            or baseline.get("task_contract_hash") != task_contract.identity
+        ):
+            raise ActiveResultValidationError("fake active baseline task contract drift")
         gates[current_gate] = "passed"
 
         current_gate = "saved_result_validation"
@@ -1070,9 +1633,7 @@ def _active_hosted_readiness(args: argparse.Namespace) -> int:
             raise ActiveResultValidationError("fake active baseline case_id drift")
         validate_active_result(baseline, case, args.baseline_result.parent)
         if continuation_payload is not None:
-            validate_active_result(
-                continuation_payload, case, args.continuation_result.parent
-            )
+            validate_active_result(continuation_payload, case, args.continuation_result.parent)
         gates[current_gate] = "passed"
 
         current_gate = "run_root"
@@ -1080,9 +1641,7 @@ def _active_hosted_readiness(args: argparse.Namespace) -> int:
             if args.run_root.exists():
                 raise ActiveResultValidationError("active hosted run root must be fresh")
         elif args.continuation_result != args.run_root / "result.json":
-            raise ActiveResultValidationError(
-                "active hosted continuation must reuse its run root"
-            )
+            raise ActiveResultValidationError("active hosted continuation must reuse its run root")
         gates[current_gate] = "passed"
 
         current_gate = "budget_binding"
@@ -1104,7 +1663,9 @@ def _active_hosted_readiness(args: argparse.Namespace) -> int:
         gates[current_gate] = "passed"
 
         current_gate = "secure_backend"
-        ready, reason = secure_backend_status()
+        ready, reason, backend_version = secure_backend_profile_status(
+            BackendProfileId(args.backend_profile)
+        )
         if not ready:
             raise ActiveResultValidationError(reason)
         gates[current_gate] = "passed"
@@ -1112,9 +1673,7 @@ def _active_hosted_readiness(args: argparse.Namespace) -> int:
         current_gate = "provider_configuration"
         if args.check_provider_config:
             provider = OpenAICompatibleProvider(
-                deepseek_config_from_env(
-                    env_file=Path(".env"), thinking_mode=args.thinking_mode
-                ),
+                deepseek_config_from_env(env_file=Path(".env"), thinking_mode=args.thinking_mode),
                 provider_limits,
             )
             if provider.name != args.provider or provider.model != args.model:
@@ -1127,9 +1686,7 @@ def _active_hosted_readiness(args: argparse.Namespace) -> int:
             gates[current_gate] = "passed"
     except FileNotFoundError:
         gates[current_gate] = "failed"
-        return _print_readiness_failure(
-            gates, current_gate, "required saved result is missing"
-        )
+        return _print_readiness_failure(gates, current_gate, "required saved result is missing")
     except (
         ActiveResultValidationError,
         CaseValidationError,
@@ -1138,9 +1695,7 @@ def _active_hosted_readiness(args: argparse.Namespace) -> int:
         ValueError,
     ) as exc:
         gates[current_gate] = "failed"
-        return _print_readiness_failure(
-            gates, current_gate, _safe_readiness_error(exc)
-        )
+        return _print_readiness_failure(gates, current_gate, _safe_readiness_error(exc))
 
     print(
         json.dumps(
@@ -1149,6 +1704,7 @@ def _active_hosted_readiness(args: argparse.Namespace) -> int:
                 **plan,
                 "gates": gates,
                 "endpoint_host": endpoint_host,
+                "backend_version": backend_version,
                 "network_requests": 0,
                 "provider_configuration_read": args.check_provider_config,
                 "artifacts_created": False,
@@ -1192,21 +1748,15 @@ def _active_hosted_run(args: argparse.Namespace) -> int:
         print(readiness_output.getvalue(), end="")
         return readiness_status
     try:
-        if not args.http_stub_response.resolve().is_relative_to(
-            args.run_root.resolve().parent
-        ):
+        if not args.http_stub_response.resolve().is_relative_to(args.run_root.resolve().parent):
             raise ActiveResultValidationError(
                 "HTTP stub response must be an authorized artifact under the run-root parent"
             )
         stub_payload = _read_json_object(args.http_stub_response)
-        case = _select_case(
-            validate_catalog(args.cases_root), args.case_id, runtime_only=True
-        )
+        case = _select_case(validate_catalog(args.cases_root), args.case_id, runtime_only=True)
         plan, provider_limits = _active_hosted_plan(args)
         provider = OpenAICompatibleProvider(
-            deepseek_config_from_env(
-                env_file=Path(".env"), thinking_mode=args.thinking_mode
-            ),
+            deepseek_config_from_env(env_file=Path(".env"), thinking_mode=args.thinking_mode),
             provider_limits,
             opener=lambda *unused_args, **unused_kwargs: _StubHTTPResponse(stub_payload),
         )
@@ -1220,6 +1770,8 @@ def _active_hosted_run(args: argparse.Namespace) -> int:
             budgets=ActiveBudgets(**plan["controller_budget"]),
             timeout_seconds=args.build_timeout,
             retrieval_policy=RetrievalPolicy(args.retrieval_policy),
+            backend=BackendProfileId(args.backend_profile),
+            **_stage1_run_kwargs(args),
         )
         payload = _read_json_object(args.run_root / "result.json")
         validate_active_result(payload, case, args.run_root)
@@ -1230,11 +1782,7 @@ def _active_hosted_run(args: argparse.Namespace) -> int:
         ProviderConfigurationError,
         ValueError,
     ) as exc:
-        print(
-            json.dumps(
-                {"status": "configuration_error", "error": _safe_readiness_error(exc)}
-            )
-        )
+        print(json.dumps({"status": "configuration_error", "error": _safe_readiness_error(exc)}))
         return 2
     print(
         json.dumps(
@@ -1272,14 +1820,10 @@ def _active_hosted_live_run(args: argparse.Namespace) -> int:
         print(readiness_output.getvalue(), end="")
         return readiness_status
     try:
-        case = _select_case(
-            validate_catalog(args.cases_root), args.case_id, runtime_only=True
-        )
+        case = _select_case(validate_catalog(args.cases_root), args.case_id, runtime_only=True)
         plan, provider_limits = _active_hosted_plan(args)
         provider = OpenAICompatibleProvider(
-            deepseek_config_from_env(
-                env_file=Path(".env"), thinking_mode=args.thinking_mode
-            ),
+            deepseek_config_from_env(env_file=Path(".env"), thinking_mode=args.thinking_mode),
             provider_limits,
             exchange_recorder=_provider_exchange_recorder(args.run_root),
         )
@@ -1293,9 +1837,12 @@ def _active_hosted_live_run(args: argparse.Namespace) -> int:
             budgets=ActiveBudgets(**plan["controller_budget"]),
             timeout_seconds=args.build_timeout,
             retrieval_policy=RetrievalPolicy(args.retrieval_policy),
+            backend=BackendProfileId(args.backend_profile),
+            **_stage1_run_kwargs(args),
         )
         payload = _read_json_object(args.run_root / "result.json")
         validate_active_result(payload, case, args.run_root)
+        projection_validation = validate_outbound_projection(args.run_root)
     except (
         ActiveResultValidationError,
         CaseValidationError,
@@ -1303,11 +1850,7 @@ def _active_hosted_live_run(args: argparse.Namespace) -> int:
         ProviderConfigurationError,
         ValueError,
     ) as exc:
-        print(
-            json.dumps(
-                {"status": "configuration_error", "error": _safe_readiness_error(exc)}
-            )
-        )
+        print(json.dumps({"status": "configuration_error", "error": _safe_readiness_error(exc)}))
         return 2
     print(
         json.dumps(
@@ -1320,6 +1863,7 @@ def _active_hosted_live_run(args: argparse.Namespace) -> int:
                 "network_requests": payload["provider_accounting"]["http_attempts"],
                 "http_stub": False,
                 "fresh_authorization": True,
+                "projection_validation": projection_validation["status"],
             },
             indent=2,
         )
@@ -1360,21 +1904,15 @@ def _active_hosted_continue(args: argparse.Namespace) -> int:
         print(readiness_output.getvalue(), end="")
         return readiness_status
     try:
-        if not args.http_stub_response.resolve().is_relative_to(
-            args.run_root.resolve().parent
-        ):
+        if not args.http_stub_response.resolve().is_relative_to(args.run_root.resolve().parent):
             raise ActiveResultValidationError(
                 "HTTP stub response must be an authorized artifact under the run-root parent"
             )
         stub_payload = _read_json_object(args.http_stub_response)
-        case = _select_case(
-            validate_catalog(args.cases_root), args.case_id, runtime_only=True
-        )
+        case = _select_case(validate_catalog(args.cases_root), args.case_id, runtime_only=True)
         plan, provider_limits = _active_hosted_plan(args)
         provider = OpenAICompatibleProvider(
-            deepseek_config_from_env(
-                env_file=Path(".env"), thinking_mode=args.thinking_mode
-            ),
+            deepseek_config_from_env(env_file=Path(".env"), thinking_mode=args.thinking_mode),
             provider_limits,
             opener=lambda *unused_args, **unused_kwargs: _StubHTTPResponse(stub_payload),
         )
@@ -1388,6 +1926,7 @@ def _active_hosted_continue(args: argparse.Namespace) -> int:
             budgets=ActiveBudgets(**plan["controller_budget"]),
             timeout_seconds=args.build_timeout,
             retrieval_policy=RetrievalPolicy(args.retrieval_policy),
+            backend=BackendProfileId(args.backend_profile),
         )
         payload = _read_json_object(args.run_root / "result.json")
         validate_active_result(payload, case, args.run_root)
@@ -1398,11 +1937,7 @@ def _active_hosted_continue(args: argparse.Namespace) -> int:
         ProviderConfigurationError,
         ValueError,
     ) as exc:
-        print(
-            json.dumps(
-                {"status": "continuation_error", "error": _safe_readiness_error(exc)}
-            )
-        )
+        print(json.dumps({"status": "continuation_error", "error": _safe_readiness_error(exc)}))
         return 2
     print(
         json.dumps(
@@ -1412,8 +1947,7 @@ def _active_hosted_continue(args: argparse.Namespace) -> int:
                 "usage": payload["usage"],
                 "provider_accounting": payload["provider_accounting"],
                 "remaining_model_requests": (
-                    plan["controller_budget"]["model_requests"]
-                    - payload["usage"]["model_requests"]
+                    plan["controller_budget"]["model_requests"] - payload["usage"]["model_requests"]
                 ),
                 "result_path": str(args.run_root / "result.json"),
                 "network_requests": 0,
@@ -1497,7 +2031,10 @@ def _active_pilot_report(args: argparse.Namespace) -> int:
 
 def _active_hosted_plan(
     args: argparse.Namespace,
+    *,
+    require_authorization: bool = True,
 ) -> tuple[dict[str, object], ProviderLimits]:
+    _stage1_identity_from_args(args)
     case = _select_case(validate_catalog(args.cases_root), args.case_id, runtime_only=True)
     budgets = ActiveBudgets(
         model_requests=args.max_model_requests,
@@ -1539,8 +2076,10 @@ def _active_hosted_plan(
             feedback=args.authorize_feedback,
         ),
         retrieval_policy=RetrievalPolicy(args.retrieval_policy),
+        backend=BackendProfileId(args.backend_profile),
         continuation_payload=continuation_payload,
         continuation_result=args.continuation_result,
+        require_authorization=require_authorization,
     )
     return plan, provider_limits
 
@@ -1551,9 +2090,7 @@ def _active_configuration(
     case = _select_case(validate_catalog(args.cases_root), args.case_id, runtime_only=False)
     actions = [_read_json_object(path) for path in args.fake_action]
     if len(actions) != args.max_model_requests:
-        raise CaseValidationError(
-            "number of --fake-action values must equal --max-model-requests"
-        )
+        raise CaseValidationError("number of --fake-action values must equal --max-model-requests")
     for action in actions:
         HarnessAction.parse(action)
     budgets = _active_budgets(args)
@@ -1602,6 +2139,7 @@ def _add_active_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--retrieval-policy", choices=("disabled", "bounded_seed"), default="bounded_seed"
     )
+    parser.add_argument("--backend-profile", choices=backend_profile_ids(), default="ocp_v1")
     parser.add_argument("--max-model-requests", type=int, required=True)
     parser.add_argument("--max-probes", type=int, required=True)
     parser.add_argument("--max-retrievals", type=int, required=True)
@@ -1611,6 +2149,7 @@ def _add_active_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--max-total-tokens", type=int, required=True)
     parser.add_argument("--max-cost-usd", type=float, required=True)
     parser.add_argument("--timeout", type=int, default=30)
+    _add_stage1_identity_arguments(parser)
 
 
 def _add_active_hosted_arguments(parser: argparse.ArgumentParser) -> None:
@@ -1624,6 +2163,7 @@ def _add_active_hosted_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--retrieval-policy", choices=("disabled", "bounded_seed"), default="bounded_seed"
     )
+    parser.add_argument("--backend-profile", choices=backend_profile_ids(), default="ocp_v1")
     parser.add_argument("--authorize-hosted", action="store_true")
     parser.add_argument("--authorize-observations", action="store_true")
     parser.add_argument("--authorize-tool-results", action="store_true")
@@ -1646,6 +2186,34 @@ def _add_active_hosted_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--provider-max-cost-usd", type=float, required=True)
     parser.add_argument("--input-cost-per-million", type=float, required=True)
     parser.add_argument("--output-cost-per-million", type=float, required=True)
+    _add_stage1_identity_arguments(parser)
+
+
+def _add_stage1_identity_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--stage1-experiment-id")
+    parser.add_argument("--stage1-phase")
+    parser.add_argument("--stage1-cohort", choices=("first_shot", "bounded_repair"))
+    parser.add_argument("--stage1-replicate", type=int)
+
+
+def _stage1_identity_from_args(args: argparse.Namespace) -> dict[str, object] | None:
+    names = ("stage1_experiment_id", "stage1_phase", "stage1_cohort", "stage1_replicate")
+    values = [getattr(args, name, None) for name in names]
+    if not any(value is not None for value in values):
+        return None
+    if any(value is None for value in values):
+        raise ActiveResultValidationError("Stage 1 run identity arguments must be supplied together")
+    return {
+        "experiment_id": values[0],
+        "phase_id": values[1],
+        "cohort": values[2],
+        "replicate": values[3],
+    }
+
+
+def _stage1_run_kwargs(args: argparse.Namespace) -> dict[str, object]:
+    identity = _stage1_identity_from_args(args)
+    return {} if identity is None else {"stage1_identity": identity}
 
 
 def _provider_from_args(args: argparse.Namespace):
@@ -1709,9 +2277,7 @@ def _provider_from_args(args: argparse.Namespace):
         output_cost_per_million=args.output_cost_per_million,
     )
     return OpenAICompatibleProvider(
-        deepseek_config_from_env(
-            env_file=Path(".env"), thinking_mode=args.thinking_mode
-        ),
+        deepseek_config_from_env(env_file=Path(".env"), thinking_mode=args.thinking_mode),
         limits,
     )
 
@@ -1788,9 +2354,7 @@ def _validate_hosted_contract_arguments(
 
 def _hosted_pilot_provider_from_args(args: argparse.Namespace, policy: dict):
     provider = OpenAICompatibleProvider(
-        deepseek_config_from_env(
-            env_file=Path(".env"), thinking_mode=args.thinking_mode
-        ),
+        deepseek_config_from_env(env_file=Path(".env"), thinking_mode=args.thinking_mode),
         ProviderLimits(
             max_requests=args.max_requests,
             timeout_seconds=args.provider_timeout,
@@ -1851,9 +2415,7 @@ def _campaign_provider_from_args(args: argparse.Namespace, contract):
                 f"--{argument.replace('_', '-')} must match the campaign contract"
             )
     provider = OpenAICompatibleProvider(
-        deepseek_config_from_env(
-            env_file=Path(".env"), thinking_mode=args.thinking_mode
-        ),
+        deepseek_config_from_env(env_file=Path(".env"), thinking_mode=args.thinking_mode),
         ProviderLimits(
             max_requests=args.max_requests,
             timeout_seconds=args.provider_timeout,
@@ -1892,9 +2454,7 @@ def _validate_hosted_campaign_policy(args: argparse.Namespace, policy: dict, pro
 
 def _validate_disabled_thinking_mode(value: str | None) -> None:
     if value != "disabled":
-        raise CampaignValidationError(
-            "hosted execution requires explicit --thinking-mode disabled"
-        )
+        raise CampaignValidationError("hosted execution requires explicit --thinking-mode disabled")
 
 
 def _campaign_budget_summary(policy: dict) -> dict[str, dict[str, int | float]]:

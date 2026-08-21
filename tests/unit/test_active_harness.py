@@ -124,7 +124,7 @@ def test_active_harness_can_retrieve_a_general_recipe_projection() -> None:
     assert retrieved["result"]["matches"][0]["id"] == "recipe.step_export"
 
 
-def test_active_harness_stops_at_each_independent_budget() -> None:
+def test_active_harness_projects_only_currently_available_actions() -> None:
     case = validate_case(Path("cases/smoke/box"), Path("cases"))
     provider = FakeActionProvider(
         [{"action": "probe", "probe": {"tool": "edge_candidates", "arguments": {}}}]
@@ -134,10 +134,17 @@ def test_active_harness_stops_at_each_independent_budget() -> None:
         case, _budgets(probes=0), lambda _, **__: SubmissionResult(True, executed=True)
     )
 
-    assert result.state is ActiveState.EXHAUSTED
-    assert result.stop_reason == "probe_budget"
+    assert result.state is ActiveState.FAILED
+    assert result.stop_reason == "harness_policy"
     assert result.usage["model_requests"] == 1
     assert result.usage["probes"] == 0
+    assert result.trace == (
+        {
+            "action": "provider",
+            "requested_action": "probe",
+            "error": "action_not_available",
+        },
+    )
 
 
 def test_disabled_retrieval_policy_removes_tools_and_fails_closed() -> None:
@@ -157,7 +164,30 @@ def test_disabled_retrieval_policy_removes_tools_and_fails_closed() -> None:
     assert result.stop_reason == "harness_policy"
     assert result.usage["retrievals"] == 0
     assert provider.requests[0].session["available_tools"] == ["edge_candidates"]
+    assert provider.requests[0].session["allowed_actions"] == ["probe", "submit", "finish"]
+    assert "budgets" not in provider.requests[0].session
     assert provider.requests[0].session["retrieval_policy"] == "disabled"
+
+
+def test_active_harness_hides_internal_limits_and_contract_identity() -> None:
+    case = validate_case(Path("cases/smoke/box"), Path("cases"))
+    provider = FakeActionProvider(
+        [{"action": "submit", "submit": {"script": "candidate"}}]
+    )
+
+    result = ActiveHarnessController(provider).run(
+        case,
+        _budgets(model_requests=1, probes=0, retrievals=0),
+        lambda _, **__: SubmissionResult(True, executed=True),
+        retrieval_policy=RetrievalPolicy.DISABLED,
+    )
+
+    assert result.state is ActiveState.SUCCEEDED
+    session = provider.requests[0].session
+    assert session["allowed_actions"] == ["submit", "finish"]
+    assert session["available_tools"] == []
+    assert session["session_phase"] == "initial_attempt"
+    assert "budgets" not in session
 
 
 def test_finish_cannot_bypass_verifier() -> None:

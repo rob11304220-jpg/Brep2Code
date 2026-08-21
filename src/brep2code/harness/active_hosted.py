@@ -4,6 +4,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
+from brep2code.backends import BackendProfileId, backend_profile
 from brep2code.cases import ValidatedCase
 from brep2code.harness.active import ActiveBudgets, RetrievalPolicy
 from brep2code.harness.active_results import (
@@ -12,6 +13,7 @@ from brep2code.harness.active_results import (
     validate_provider_accounting,
 )
 from brep2code.providers import ProviderLimits
+from brep2code.providers.task_contract import build_provider_task_contract
 
 
 @dataclass(frozen=True)
@@ -43,10 +45,15 @@ def preflight_active_hosted(
     provider_limits: ProviderLimits,
     authorization: ActiveHostedAuthorization,
     retrieval_policy: RetrievalPolicy = RetrievalPolicy.BOUNDED_SEED,
+    backend: BackendProfileId | str = BackendProfileId.OCP_V1,
     continuation_payload: dict[str, Any] | None = None,
     continuation_result: Path | None = None,
+    require_authorization: bool = True,
 ) -> dict[str, Any]:
-    authorization.validate()
+    profile = backend_profile(backend)
+    task_contract = build_provider_task_contract(profile.profile_id, retrieval_policy)
+    if require_authorization:
+        authorization.validate()
     if retrieval_policy is RetrievalPolicy.DISABLED and budgets.retrievals != 0:
         raise ActiveResultValidationError(
             "disabled retrieval policy requires zero retrieval budget"
@@ -58,7 +65,9 @@ def preflight_active_hosted(
     if build_timeout_seconds < 1:
         raise ActiveResultValidationError("active hosted build timeout must be positive")
     if budgets.tokens < 1 or budgets.cost_usd <= 0:
-        raise ActiveResultValidationError("active hosted session token/cost budgets must be positive")
+        raise ActiveResultValidationError(
+            "active hosted session token/cost budgets must be positive"
+        )
     if budgets.tokens > provider_limits.max_total_tokens:
         raise ActiveResultValidationError("session token budget exceeds provider aggregate ceiling")
     if budgets.cost_usd > provider_limits.max_cost_usd:
@@ -79,9 +88,7 @@ def preflight_active_hosted(
         if continuation_result != run_root / "result.json":
             raise ActiveResultValidationError("active hosted continuation must reuse its run root")
         validate_active_result(continuation_payload, case, run_root)
-        validate_provider_accounting(
-            continuation_payload["provider_accounting"], provider_limits
-        )
+        validate_provider_accounting(continuation_payload["provider_accounting"], provider_limits)
         if continuation_payload["terminal"]:
             raise ActiveResultValidationError("active hosted continuation result is terminal")
         if continuation_payload["provider"] != provider or continuation_payload["model"] != model:
@@ -90,10 +97,16 @@ def preflight_active_hosted(
             raise ActiveResultValidationError("active hosted continuation budget drift")
         if continuation_payload["timeout_seconds"] != build_timeout_seconds:
             raise ActiveResultValidationError("active hosted continuation timeout drift")
-        if continuation_payload.get(
-            "retrieval_policy", RetrievalPolicy.BOUNDED_SEED
-        ) != retrieval_policy:
+        if (
+            continuation_payload.get("retrieval_policy", RetrievalPolicy.BOUNDED_SEED)
+            != retrieval_policy
+        ):
             raise ActiveResultValidationError("active hosted continuation retrieval policy drift")
+        if (
+            continuation_payload.get("backend_profile", BackendProfileId.OCP_V1)
+            != profile.profile_id
+        ):
+            raise ActiveResultValidationError("active hosted continuation backend profile drift")
         used_requests = int(continuation_payload["usage"]["model_requests"])
     elif run_root.exists():
         raise ActiveResultValidationError("active hosted run root must be fresh")
@@ -107,6 +120,9 @@ def preflight_active_hosted(
         "model": model,
         "thinking_mode": thinking_mode,
         "retrieval_policy": retrieval_policy,
+        "backend_profile": profile.profile_id,
+        "task_contract_hash": task_contract.identity,
+        "task_contract": task_contract.projection(),
         "continuation": continuation,
         "continuation_requires_fresh_authorization": continuation,
         "remaining_model_requests": remaining_requests,
@@ -117,8 +133,11 @@ def preflight_active_hosted(
                 "case_id",
                 "unit",
                 "initial_observations",
+                "allowed_actions",
                 "available_tools",
-                "budgets",
+                "session_phase",
+                "retrieval_policy",
+                "backend_profile",
                 "current_revision",
             ],
             "iterative": ["bounded_tool_results", "typed_feedback", "current_revision"],
@@ -132,4 +151,5 @@ def preflight_active_hosted(
             ],
         },
         "authorization": asdict(authorization),
+        "authorization_required": require_authorization,
     }

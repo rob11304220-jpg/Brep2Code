@@ -1,0 +1,19 @@
+{
+  "case_id": "stage1_cylinder",
+  "input_step": "input.step",
+  "sha256": "d45162370a6c7c1a08c63317578b64e420a6c267ab6b26ca01666e4c16cbe932",
+  "unit": "mm",
+  "summary": "Vertical cylinder with 8 mm diameter and 15 mm height, centered on the Z axis.",
+  "tags": ["cylinder", "primitive", "stage1"],
+  "mechanism": "analytic_surface",
+  "capability_level": "L0",
+  "compatibility_tier": "T1",
+  "kernel_properties": ["analytic_cylinder", "periodic_surface", "seam_edge"],
+  "sequence": ["make_cylinder"],
+  "difficulty": 1,
+  "expected": {
+    "bbox": {"min": [-4.0, -4.0, 0.0], "max": [4.0, 4.0, 15.0]},
+    "volume": 753.9822368615503,
+    "counts": {"solid": 1, "shell": 1, "face": 3, "edge": 6}
+  }
+}

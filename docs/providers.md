@@ -1,169 +1,143 @@
 # Providers
 
-`fake` is the default provider. Real providers must be selected explicitly.
-Credentials are read only from environment variables and are never persisted.
-Every hosted command must declare model, case scope, maximum rounds, maximum
-requests, request timeout, and a token or cost ceiling. Hosted execution is
-never inferred from an earlier run or from the presence of credentials.
+`fake` is the default provider. A real provider must be selected explicitly;
+credentials alone never activate hosted execution. Credentials are read only
+from environment variables or an ignored local configuration file after the
+hosted path has been selected, and are never persisted or included in errors,
+object representations, or request artifacts.
 
-The shared OpenAI-compatible adapter accepts an HTTPS base URL, explicit model,
-and API key. DeepSeek configuration reads `DEEPSEEK_API_KEY`,
-`DEEPSEEK_MODEL`, and optionally `DEEPSEEK_BASE_URL` from the ignored local
-`.env` file or process environment. Process environment values take precedence.
-The file is read only after explicit hosted selection and authorization. API
-keys are excluded from object representations, request
-artifacts, responses, and sanitized errors.
+The OpenAI-compatible adapter accepts an HTTPS endpoint, explicit model, and API
+key. DeepSeek reads `DEEPSEEK_API_KEY`, `DEEPSEEK_MODEL`, and optionally
+`DEEPSEEK_BASE_URL`; process environment values take precedence. Provider
+pricing is supplied for the authorized run rather than hard-coded because it
+may change.
 
-Callers must construct `ProviderLimits` with maximum HTTP attempts, retries,
-per-request timeout, output tokens, total tokens, total cost, and explicit
-input/output token prices. Retries consume the same request budget. Responses
-that make aggregate token or cost usage exceed a ceiling are rejected after
-their provider-reported usage is committed, because that HTTP cost has already
-occurred. The terminal artifact preserves the actual overrun; reaching or
-crossing a ceiling blocks every later request before HTTP. Provider pricing is
-deliberately not hard-coded because it can change.
+## Provider responsibility
 
-Thinking mode is provider policy, not part of CAD modeling capability or the
-generic Harness action contract. DeepSeek V4 defaults to thinking behavior, so
-hosted CAD generation explicitly requests disabled thinking to preserve bounded
-final-output capacity. Provider-specific request and response fields stay in
-the adapter. Empty, fenced, explanatory, or otherwise malformed responses are
-normalized or rejected there, and any reported usage from a malformed response
-still counts toward request, token, and cost ceilings.
+The adapter transports one provider-neutral Harness action. It owns:
 
-The adapter transports a provider-neutral Harness action envelope; it does not
-supply OCP API knowledge, modeling recipes, probes, or case-specific hints.
-Those belong respectively to the bounded SDK/recipe projection, Harness tools,
-and session controller described in `architecture.md`. A retrieve action may
-use the legacy exact OCP topic or a bounded query over approved SDK/recipe
-records; neither form may return target-specific solutions or private oracles.
+- request construction and bounded response reading;
+- provider-specific fields such as thinking mode;
+- HTTP attempt, timeout, and retry handling;
+- response normalization and action-contract parsing;
+- prompt, completion, and total token accounting;
+- cost calculation and enforcement;
+- redacted request and response artifacts.
 
-Active hosted readiness has two offline gates. `active-hosted-preflight` does
-not read provider configuration; `active-hosted-config-check` reads it but
-makes no network request and emits only the endpoint host and bounded plan.
-Both require fresh itemized authorization for initial observations, bounded
-tool results, complete current revision source, and typed feedback. The
-declared outbound projection excludes eval references, target solutions,
-private oracles, repository files, host paths, and secrets.
+It does not own geometry probes, SDK or recipe content, controller state,
+submission scheduling, secure execution, or success verification.
 
-Active sessions retain two independent budget layers. Controller limits bound
-model turns, probes, retrievals, submissions, executions, repairs, tokens, and
-cost. Provider limits separately bound HTTP attempts, retries, timeout, output
-tokens, aggregate tokens, and aggregate cost. Controller token and cost limits
-may not exceed the provider aggregate ceilings, while provider attempts must
-cover every model turn without exceeding its retry capacity. Continuing an
-interrupted hosted session requires a fresh itemized authorization and the same
-case, provider/model, controller budgets, build timeout, and revision root.
-Neither readiness gate authorizes hosted execution.
+The following events are distinct:
 
-`active-hosted-readiness` composes the full ordered gate set. It requires a
-validated successful fake active baseline and fresh itemized authorization,
-distinguishes fresh initial roots from continuation roots, probes the secure
-backend read-only, and reads provider configuration only with
-`--check-provider-config`. It never sends requests, runs generated code, or
-creates run artifacts.
+| Event | Owner | Meaning |
+|---|---|---|
+| Model decision | Active controller | One requested Harness action |
+| HTTP attempt | Provider adapter | One outbound transport attempt |
+| Protocol retry | Provider adapter | Recovery from malformed action JSON |
+| Submission | Submission pipeline | One complete candidate script |
+| Execution | Secure backend | One untrusted build attempt |
+| Repair | Active controller | One verifier-guided opportunity after failure |
 
-Hosted active checkpoint schema version 5 records the retrieval policy identity
-and a separate `provider_accounting` object. It records HTTP attempts, an
-in-flight request marker, aggregate prompt/completion/total tokens, aggregate
-cost, the selected token prices, and provider ceilings. Malformed responses
-with valid usage are still charged. A terminal provider-budget failure may
-therefore record actual tokens or cost above its declared ceiling, while
-nonterminal continuation state may not. Continuation must restore the saved
-accounting with unchanged prices and ceilings; an in-flight attempt remains
-consumed while its marker is cleared.
-The checkpoint contract alone does not expose a hosted execution command.
+A protocol retry does not consume another model decision, submission, execution,
+or repair. Transport retries and protocol retries still consume provider HTTP
+capacity and any reported token or cost usage.
 
-The initial `active-hosted-run` slice is deliberately HTTP-stub-only. A local
-stub response is mandatory, unified readiness must pass first, and generated
-code still runs through the secure executor. The command validates the final
-schema version 5 artifact and remains network-free.
+Malformed responses are normalized only within the bounded action contract.
+Empty, ambiguous, or invalid content is rejected with a redacted diagnostic.
+When valid provider usage accompanies an invalid action, that usage remains
+charged because the request already occurred.
 
-The separate `active-hosted-live-run` command provides the narrowly scoped real
-HTTPS path for one fresh runtime case and one explicitly selected DeepSeek
-model. It cannot continue a prior session or fall back to another provider. It
-reruns unified readiness with provider configuration enabled, binds controller
-and provider request/round/timeout/token/cost ceilings, requires fresh itemized
-authorization, and executes generated code only through the secure backend.
-Each attempt writes a bounded request artifact without headers or credentials
-and a response artifact without reasoning content. The response body itself is
-read with a fixed ceiling derived from the declared output-token limit.
+## Model projection boundary
 
-`active-hosted-continue` applies the same stub-only boundary. It requires new
-itemized authorization on every invocation, restores controller and provider
-accounting, rejects identity/price/ceiling/timeout/root drift, and consumes only
-remaining limits. Authorization is never stored in or inherited from the
-checkpoint.
+The adapter receives the projection assembled by the Active controller. It may
+send only:
 
-Campaign contracts have two budget scopes. `max_requests`,
-`max_total_tokens`, and `max_cost_usd` are cumulative campaign ceilings passed
-to the shared provider. `case_max_requests`, `case_max_total_tokens`, and
-`case_max_cost_usd` are freshly instantiated for every runtime case. Thus a
-campaign is a serial orchestrator and experiment container: cases have separate
-scripts, feedback, revision roots, and case accounting, while the campaign
-artifact records the cumulative provider accounting. A successful campaign
-therefore means that the selected cases completed under the declared aggregate
-budget; it does not mean that one case's script or repair state was reused by
-another case.
+- task identity and unit;
+- path-free observations;
+- actions and tools available on the current turn;
+- coarse session phase;
+- selected CAD backend and export contract;
+- prior bounded tool results;
+- current revision and typed feedback.
 
-The `run` command exposes DeepSeek only through explicit `--provider deepseek`
-selection. It rejects the command before reading provider configuration unless
-`--authorize-hosted` is present, and then requires explicit HTTP request,
-retry, provider deadline, output/total token, token-price, and total-cost
-limits. Without an initial script, `--max-requests` may not exceed
-`max_rounds * (1 + max_retries)`.
-Every generated script executes through the verified `wsl-bwrap` backend, and
-`result.json` records the declared provider limits plus HTTP-attempt, token,
-and cost accounting. A fresh itemized user authorization must cover the exact
-provider/model, case, outbound context, rounds, limits, and new run path before
-the flag is used. Offline fake-provider runs do not grant hosted authorization.
+It must remove internal compatibility fields such as task-contract hashes and
+must never send controller limits or usage, provider ceilings or accounting,
+retries, timeout, prices, cost, authorization, campaign policy, secure-executor
+configuration, eval material, private oracles, repository files, host paths,
+environment variables, or credentials.
 
-When `--initial-script` is present, it occupies the first revision without a
-provider call. Hosted request bounds apply only to the remaining
-`max_rounds - 1` provider-generated revisions. Fresh authorization must also
-itemize the complete initial script and the bounded feedback that may be sent
-back to the provider; authorization for case observations alone is not enough.
-For hosted runs the seed must be a standalone authorized artifact under the
-new run root's parent, never a source, test, case, or documentation file.
+Internal limits affect the projection only by removing unavailable actions and
+tools. The model is not asked to manage numeric budgets.
 
-Example shape only—this is not authorization and the numeric prices must be
-declared by the caller for the specific run:
+## Provider limits and accounting
 
-```powershell
-brep2code run --provider deepseek --authorize-hosted --case-id box `
-  --run-root runs/<fresh-run> --max-rounds 1 --max-requests 1 `
-  --provider-timeout 120 --max-retries 0 --max-output-tokens 4096 `
-  --max-total-tokens 8192 --max-cost-usd 0.10 `
-  --input-cost-per-million <price> --output-cost-per-million <price>
-```
+Every hosted run declares provider limits for HTTP attempts, bounded retries,
+per-request timeout, response size, output tokens, aggregate tokens, aggregate
+cost, and input/output prices. Reaching a request, token, or cost ceiling blocks
+later requests. If a completed HTTP response moves aggregate usage beyond a
+ceiling, the actual usage is recorded before the run stops.
 
-## Hosted result policy
+Controller limits are separate and bound model decisions, probes, retrievals,
+submissions, executions, and repairs. Provider capacity must be sufficient for
+the declared model decisions and bounded retries, but provider accounting never
+becomes model-visible controller state.
 
-Hosted results are run artifacts, not permanent route documentation. Store a
-fresh run under runs/<run-id> and retain the declared provider/model, case and
-mechanism identity, prompt mode, request and repair counts, execution and
-sandbox status, gate results, failure class, output artifact paths, and
-token/cost accounting in that run's JSON. Summaries used for comparison must
-be generated by the Harness from those artifacts and grouped by mechanism and
-`capability_level`; do not maintain an append-only evidence ledger in docs/ or
-at the repository root.
+Current schema-v7 Active results store provider accounting separately from the
+controller trace and usage. Accounting includes HTTP attempts, in-flight state,
+protocol retries, prompt/completion/total tokens, cost, prices, and provider
+ceilings. Frozen schema-v6 results remain valid under their original contract.
 
-## Archived hosted smoke example
+For schema-v7 live Active runs, the saved request messages are validated after
+execution against the capability-only projection. Unknown or internal task
+fields, nested limit/accounting fields, prompt/action disagreement, tool/action
+disagreement, missing request artifacts, or retry/accounting drift invalidate
+the run for the protocol-stabilization cohort.
 
-The following is a preserved example artifact, not a progress ledger or
-authorization for a retry. New hosted runs must follow the result policy above.
+Continuation restores the saved accounting with unchanged provider/model,
+prices, ceilings, controller limits, timeout, retrieval policy, backend
+contract, and revision root. An interrupted HTTP attempt remains consumed while
+its in-flight marker is cleared. Authorization is never stored in or inherited
+from a checkpoint.
 
-The freshly authorized 2026-08-15 `deepseek-v4-pro` controlled repair used
-path-free probes of `smoke/block_with_hole`, one authorized initial script,
-and exactly one HTTP attempt. It sent no case summary, tags, expected metadata,
-STEP content, repository file, host path, or raw process output. The terminal
-ignored report is
-`runs/hosted-block-with-hole-controlled-repair-20260815-01/result.json`; it
-records 2946 total tokens and $0.00197142 against a $0.01 ceiling. Revision
-zero securely executed a centered through-hole with radius 3 mm; its bounding
-box and topology passed while its volume exceeded the B-Rep observation by
-175.92918860103418 cubic millimetres. The single provider revision received
-the complete authorized script and structured geometry feedback, changed the
-radius to 4 mm, executed securely, and passed bounding-box, volume, and
-topology gates. This validates the bounded model-driven geometry repair path.
-This record authorizes no retry or follow-up hosted call.
+## Hosted readiness and authorization
+
+Readiness and execution are separate operations:
+
+- preflight validates the case, task contract, outbound projection, limits, and
+  root semantics without reading provider configuration or granting permission;
+- config-check may read provider configuration but remains network-free and
+  reports only redacted endpoint and plan information; it does not require or
+  grant execution authorization;
+- secure-backend readiness verifies the selected backend package without
+  executing generated code;
+- a hosted execution command separately validates the complete itemized
+  authorization and performs network requests only after all gates pass.
+
+Readiness never grants permission. Each initial or continuation execution needs
+fresh authorization for the provider, endpoint host, model, case scope, backend,
+knowledge condition, outbound projection, controller and provider limits,
+prices, cost ceiling, and run root. A continuation additionally authorizes the
+current complete revision and bounded feedback that may be sent.
+
+The real Active HTTPS path is deliberately narrow: one explicitly selected
+provider/model, a fresh runtime-case root, no provider fallback, bounded response
+bytes, credential-free exchange artifacts, and generated-code execution only
+through the secure backend. Stub commands remain network-free even when they
+exercise the same controller, accounting, submission, and validation contracts.
+
+Campaigns add an aggregate provider ceiling above fresh per-case limits. Cases
+remain isolated: they never share scripts, feedback, revisions, or controller
+state. The campaign artifact aggregates provider accounting without becoming a
+second runtime context.
+
+## Result policy
+
+Hosted results are run artifacts, not permanent narrative documentation. Store
+each run under its fresh root and retain provider/model identity, task and
+contract identity, actions, requests, protocol retries, submissions, repairs,
+executions, sandbox outcome, gates, failure classification, artifact paths,
+tokens, and cost in validated JSON.
+
+Generate comparisons from those artifacts. Do not copy individual hosted run
+stories into README or `docs/`, and do not maintain an append-only evidence
+ledger. CLI `--help` is the authority for current command flags and arguments.

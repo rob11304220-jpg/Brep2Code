@@ -1,171 +1,209 @@
 # Architecture
 
-The implemented pipeline is task loading, Harness-selected path-free geometry
-observation, model generation, workspace execution, geometry gates, and
-structured repair feedback. The fixed runner uses one observation context; the
-active runner adds model-directed bounded probes and approved SDK/recipe
-retrieval behind a provider-neutral action contract. A run contains sessions;
-a session contains immutable revisions. Each revision keeps the model exchange,
-generated script, execution output, geometry signals, and terminal status.
-Runtime models see only assembled prompts, declared tools, the selected case
-input, and their revision workspace.
+Brep2Code is a Harness-first program-synthesis system. It turns a validated
+STEP/B-Rep task into a complete CAD program, executes that program in a bounded
+environment, and accepts the generated model only through an independent
+verifier. The model proposes actions; the Harness owns the run.
 
-Cases live under `cases/<split>/<case_id>` and are declared exactly once by a
-split manifest. Case metadata contains runtime facts and expected geometry but
-never a reference solution. Runtime case loading accepts `smoke` and `train`;
-the Harness owns evaluation loading and does not expose the `eval` split or its
-private comparison material to the runtime model.
+## System boundaries
 
-The offline Harness requests one complete `build.py` per revision from an
-explicit provider. It checkpoints before and after model, execution, and
-validation stages. Failed execution or geometry signals become bounded
-feedback for the next revision; prior revision files are never modified.
+The system has five distinct responsibilities:
 
-## Fixed and active Harness loops
+1. **Experiment and operator policy** selects the case, provider, model,
+   backend, knowledge condition, limits, cohort identity, and hosted
+   authorization.
+2. **Active controller** owns the state machine, derives the capabilities
+   visible on each turn, dispatches actions, accounts controller usage, and
+   checkpoints the session.
+3. **Provider adapter** projects the bounded task to a model and returns one
+   provider-neutral action. It separately owns transport attempts, protocol
+   retries, token accounting, and cost accounting.
+4. **Submission pipeline** persists a complete script, checks compatibility,
+   executes it in the secure backend, and produces a candidate STEP artifact.
+5. **Verifier** evaluates the candidate independently and is the only component
+   that may declare success.
 
-Active is the primary research protocol. Fixed is an explicit control protocol,
-not a runtime fallback or a prerequisite for Active validity. A Fixed result may
-be attached to an Active pilot report for comparison, but its absence or failure
-does not change the Active decision gate.
+These responsibilities are intentionally not collapsed into a general-purpose
+agent. Fixed generation remains an explicit experimental control and is never a
+fallback from Active.
 
-The fixed runner constructs one model context and permits only a full script
-response. Its revision loop is a small form of counterexample-guided
-inductive synthesis (CEGIS): propose a CAD program, execute and verify it, then
-use a structured failure as a counterexample for the next proposal. It cannot
-represent “information is insufficient,” request another observation, or look
-up an approved binding reference. `max_rounds` currently combines generation
-and repair opportunities.
-
-The implemented active Harness adds a provider-neutral action envelope. The
-initial task payload contains only the case identity, unit, initial path-free
-observations, available tool declarations, typed budgets, and current revision.
-A model turn selects exactly one action with the corresponding payload:
-
-```json
-{
-  "action": "probe | retrieve | submit | finish",
-  "probe": {"tool": "edge_candidates", "arguments": {}},
-  "retrieve": {"query": "topology-aware edge selection", "scope": ["sdk", "recipe"], "limit": 2},
-  "submit": {"script": "complete build.py"},
-  "finish": {"reason": "required gates are expected to pass"}
-}
+```text
+experiment policy
+       |
+       v
+Active controller -- capability projection --> provider/model
+       ^                                          |
+       |                                     one action
+       |                                          |
+       +---- tool result or typed feedback -------+
+       |
+       +---- submission --> compatibility --> secure execution --> verifier
+                                                                  |
+                                                           pass or feedback
 ```
 
-The legacy exact `{"topic": "TopoDS.Edge_s"}` retrieval form remains valid
-for compatibility and deterministic binding diagnostics.
+## Active control loop
 
-The controller owns a bounded state machine: `OBSERVING`, `PROBING`,
-`RETRIEVING`, `SYNTHESIZING`, `EXECUTING`, `VERIFYING`, `REPAIRING`, and a
-terminal `SUCCEEDED` or `EXHAUSTED` state. `probe` performs an allowlisted,
-bounded query over the input B-Rep; `retrieve` returns an approved modeling or
-binding reference; `submit` supplies a complete candidate script for
-compatibility checking, secure execution, and gates. `finish` is advisory: it
-cannot bypass execution or verification, and only the Harness verifier may
-enter `SUCCEEDED`.
+The controller starts from a path-free observation of the input B-Rep. On every
+model turn it exposes only the actions and tools that are executable in the
+current state. The model selects exactly one action envelope:
 
-The submission verifier persists each immutable revision, rejects an unchanged
-failed repair, applies compatibility diagnostics, checks the execution budget,
-and only then enters the secure backend. Stable Python/OCP binding mistakes are
-therefore generation counterexamples rather than sandbox attempts and do not
-consume execution budget. Compatibility feedback may recommend a
-`reference_topic` only when that exact topic exists in the `ocp_symbol`
-allowlist; general SDK/recipe retrieval is also bounded and projected without
-target-specific answers. Binding knowledge stays in retrieval rather than
-growing the system prompt.
+```json
+{"action":"probe","probe":{"tool":"edge_candidates","arguments":{}}}
+```
 
-The active loop is implemented offline with deterministic providers and for one
-fresh hosted runtime case with explicit HTTPS selection and authorization.
-Hosted continuation remains HTTP-stub-only. This is the bounded L2 vertical
-slice, not a general-purpose agent or authorization for broader hosted cohorts.
+```json
+{"action":"retrieve","retrieve":{"query":"topology-aware edge selection","scope":["sdk","recipe"],"limit":2}}
+```
 
-This design combines four bounded methods:
+```json
+{"action":"submit","submit":{"script":"complete build.py"}}
+```
 
-- CEGIS supplies typed execution, compatibility, geometry, and semantic
-  counterexamples for program repair.
-- Active perception treats the target B-Rep as partially observed and lets the
-  model spend a probe only when it reduces relevant uncertainty.
-- Retrieval-augmented program synthesis supplies approved OCP symbols, binding
-  notes, and general modeling recipes instead of growing the system prompt into
-  an API cookbook.
-- A constrained state machine accounts independently for model requests,
-  probes, retrievals, script submissions, executions, repairs, tokens, and
-  cost.
+```json
+{"action":"finish","finish":{"reason":"no further useful action is available"}}
+```
 
-Prompt text defines the stable goal, safety boundary, action schemas, visible
-data, budgets, and completion rule. Session-local probe results, retrieved
-references, candidates, and typed feedback belong to controller state rather
-than the permanent prompt.
+The legacy exact retrieval form
+`{"action":"retrieve","retrieve":{"topic":"TopoDS.Edge_s"}}` remains
+valid for deterministic OCP binding diagnostics.
 
-Evaluation cases occupy the `eval` split and are loaded only by the
-Harness-owned evaluation path. Evaluation emits JSON plus a compact Markdown
-projection and classifies generation, execution, geometry, provider, and
-budget failures. Untrusted execution is a separate secure boundary: if its
-verified backend is unavailable, execution fails closed and never falls back
-to the trusted local adapter.
+The controller owns the states `OBSERVING`, `PROBING`, `RETRIEVING`,
+`SYNTHESIZING`, `EXECUTING`, `VERIFYING`, `REPAIRING`, and the terminal states
+`SUCCEEDED`, `EXHAUSTED`, and `FAILED`. A tool result returns control to the
+next model decision. A failed verified submission produces typed feedback for a
+bounded repair. `finish` is advisory and cannot enter `SUCCEEDED`.
 
-## Task and verifier contract
+## Provider-visible projection
 
-The project separates the task contract from the modeling taxonomy. A task
-always declares its input asset, unit, runtime summary, and expected geometry;
-it may optionally provide a case-local `verifier.json` with required gates,
-gate oracles, repair policy, and reference projection policy. The verifier pack
-does not require a mechanism or construction sequence. It is the preferred
-contract for open-ended tasks where multiple modeling strategies are valid.
+The provider-visible task contains only information needed to choose the next
+CAD action:
 
-The existing mechanism registry and `dossier.json` remain a compatibility
-adapter for the L0-L2 evaluation cohort. They may name expected geometry,
-topology oracles, kernel operations, failure modes, applicable gates, repair
-policy, controls, and hosted budgets, but none of those private fields are
-assembled into runtime observations.
+- case identity and unit;
+- initial path-free geometry observations;
+- actions and tools executable on the current turn;
+- a coarse `initial_attempt` or `repair` phase;
+- selected backend, allowed import root, API summary, and export contract;
+- session-local probe or retrieval results;
+- the current complete revision, when one exists;
+- typed compatibility, execution, or verifier feedback.
 
-`capability_level` is an optional semantic ladder and is valid for L0 through L6.
-The current primitive and analytic-surface cases map to L0, while the ordered
-boolean-cut cases map to L1. T0/T1/T2 remain only as an explicit
-`compatibility_tier` mapping for the first campaign and must not be used for
-capability aggregation or report grouping. This is an initial slice of the
-planned L0-L6 reporting ladder, not a claim that all levels are implemented or
-that runtime scripts must follow it.
+The following invariant is mandatory:
 
-The initial L0/L1 development cohort is declared in each dossier as the
-ordered coverage tuple `nominal`, `parameter_variation`, and
-`failure_sensitive`. The latter requires a negative control; these controls
-are Harness assets and are never runtime observations.
+> Internal limits determine which capabilities are exposed. Numeric limits,
+> usage, transport policy, cost, authorization, experiment governance, and
+> executor configuration are never part of the provider-visible task.
 
-The durable expansion order is:
+In particular, the projection excludes controller budget values and remaining
+capacity, HTTP ceilings and attempts, protocol retries, tokens, prices, cost,
+timeouts, campaign totals, hosted authorization, checkpoint policy, WSL paths,
+sandbox resource limits, and host configuration.
 
-1. Extend the mechanism registry and case dossier schema.
-2. Add observation, topology, semantic, and sequence-sensitive gates only when
-   a case dossier declares them applicable.
-3. Add mechanism-level and capability-level report aggregation.
-4. Run a small L0-L2 hosted pilot with nominal, parameter-variation, and
-   failure-sensitive coverage where applicable.
-5. Add L3-L6 mechanisms and held-out parameter/geometry generalization only
-   after the earlier results are interpretable.
+When a capability is unavailable, the controller removes its action and tool
+from the projection. It does not ask the model to interpret or manage the
+underlying numeric limit. The prompt examples are filtered by the same action
+projection, so the task payload and system instructions cannot advertise
+different capabilities.
 
-This order is a forward design rule, not a progress ledger. The phase boundary
-is enforced by schemas and focused tests rather than by session notes or
-workpacks.
+The model also never receives eval references, target solutions, private
+oracles, repository files, control scripts, host paths, environment variables,
+credentials, or undeclared network access. Runtime values use case-relative or
+path-free identities.
 
-## Asset and visibility boundary
+## Independent limit layers
 
-The geometry asset layer contains input.step, its hash, expected geometry, and
-topology counts. The optional taxonomy layer contains registry and dossier
-fields for mechanism, operations, dependencies, parameter dimensions, parser
-notes, and failure modes. The verifier layer contains gates, repair policy,
-reference projection policy, controls, split membership, and hosted budget
-policy. Runtime providers receive only path-free observations, the declared
-tool contract, bounded SDK/recipe projections, and bounded feedback;
-reference, oracle, dossier, registry, repository, and host-path data remain
-outside the runtime prompt.
+Limits remain required for bounded and reproducible runs, but they belong to
+separate owners:
 
-Those assets have distinct roles in the active Harness. STEP is the private
-geometry source on which the Harness executes bounded probes. Case metadata
-binds runtime facts and expected-geometry validation without containing a
-reference solution. The mechanism registry is durable modeling knowledge, and
-the dossier binds case-specific gates, controls, held-out fixtures, repair
-policy, and hosted budgets. Neither asset is exposed wholesale. An allowlisted
-projection layer may derive answer-free OCP API summaries, general modeling
-recipes, and kernel binding notes for on-demand retrieval; it must exclude eval
-references, target solutions, private oracles, repository content, host paths,
-and secrets. Controls and held-out assets test the Harness, while geometry and
-semantic gates remain the final authority and the source of CEGIS feedback.
+- **Controller limits** bound model decisions, probes, retrievals, script
+  submissions, executions, and verifier-guided repairs.
+- **Provider limits** bound HTTP attempts, protocol retries, response size,
+  tokens, cost, and request timeout.
+- **Executor limits** bound wall time, memory, processes, filesystem exposure,
+  logs, output size, and network access.
+
+A model decision is not an HTTP attempt. A provider protocol retry is not a new
+model decision, CAD submission, execution, or verifier-guided repair. A script
+rejected by compatibility checking is a generation counterexample and does not
+consume an execution attempt. These distinctions must remain visible in saved
+accounting and failure classification.
+
+## Backend and task contract
+
+Each run selects exactly one backend profile. `ocp_v1` freezes
+`cadquery-ocp==7.9.3.1.1`; `cadquery_v1` freezes `cadquery==2.8.0`. A run never
+falls back between profiles.
+
+The provider task contract binds the selected package and version, allowed
+imports, API and export summaries, required `output.step`, retrieval policy,
+action surface, tool surface, and stable safety restrictions. Its canonical
+SHA-256 is stored in Active results and checked on continuation.
+
+Frozen schema-v6 results bind task-contract v1 and the `active-v3` prompt.
+Current schema-v7 results bind task-contract v2 and `active-v4`, which implement
+the capability-only turn projection. The old results remain valid evidence;
+the new contract does not retroactively change their experiment identity.
+
+## Submission and verification
+
+Every `submit` action supplies one complete deterministic script. The submission
+pipeline creates a new immutable revision and:
+
+1. rejects an unchanged repair after a failed revision;
+2. applies backend-specific compatibility checks;
+3. verifies that execution is currently allowed;
+4. runs the script through the configured WSL2/bubblewrap backend;
+5. requires a bounded `output.step`;
+6. inspects the result and dispatches the task's required gates.
+
+Compatibility failures, execution failures, and geometry failures are converted
+to typed feedback. Only a candidate that executed and passed every required gate
+may produce `SUCCEEDED`.
+
+The secure executor clears ambient variables, disables networking, exposes only
+the revision input and bounded output, and enforces time, memory, process, log,
+and output limits. These protections are Harness guarantees; their operational
+details are not model reasoning inputs. If the secure backend is unavailable,
+provider-generated code is not run through the trusted local executor.
+
+## Task, verifier, and asset contracts
+
+Cases live under `cases/<split>/<case_id>` and appear exactly once in a split
+manifest. Runtime loading accepts only `smoke` and `train`; the Harness owns
+evaluation loading.
+
+A task may contain optional mechanism and capability metadata for reporting,
+but the runtime contract is the target geometry plus its verifier pack. The
+verifier defines target references, required gates, repair policy, and reference
+projection policy without prescribing one unique modeling sequence. Multiple
+valid programs may therefore pass the same task.
+
+Assets have distinct visibility:
+
+- input STEP and safe derived observations support model reasoning;
+- verifier references and gate oracles remain Harness-only;
+- controls support tests and evaluation but never enter runtime prompts;
+- dossier and campaign policy configure evaluation and are not projected
+  wholesale;
+- retrieved SDK or recipe records are answer-free projections and must not
+  contain target scripts, target parameters, private oracles, or host paths.
+
+## Artifacts and continuation
+
+A session owns an atomically updated `result.json` and sequential immutable
+revision directories. Artifacts record the selected task and backend contract,
+retrieval condition, controller trace and usage, provider accounting when
+applicable, terminal state, stop reason, and validation results. Secrets and
+authorization are never persisted.
+
+The Harness checkpoints before provider and tool work and at submission,
+repair, and terminal boundaries. A nonterminal checkpoint may continue only
+when its saved result validates and the case, provider/model, total controller
+limits, provider limits, timeout, retrieval policy, backend contract, and
+revision root remain consistent. Interrupted provider or execution attempts are
+charged conservatively. Hosted continuation requires fresh authorization; it
+never inherits permission from the checkpoint.
+
+Code, tests, case metadata, and validated run artifacts are the evidence
+authorities. CLI `--help` owns command syntax; architecture documentation does
+not duplicate every flag or individual run history.

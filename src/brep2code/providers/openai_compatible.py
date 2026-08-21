@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
+from http.client import HTTPException
 import json
 import os
 from pathlib import Path
@@ -14,6 +15,18 @@ from brep2code.providers.prompt import build_messages
 
 
 class ProviderError(RuntimeError):
+    pass
+
+
+class ProviderProtocolError(ProviderError):
+    pass
+
+
+class ProviderTransportError(ProviderError):
+    pass
+
+
+class ProviderExchangeArtifactError(ProviderError):
     pass
 
 
@@ -50,7 +63,9 @@ class ProviderLimits:
         if self.max_requests < 1 or self.max_output_tokens < 1 or self.max_total_tokens < 1:
             raise ProviderConfigurationError("request and token limits must be positive")
         if self.max_retries < 0 or self.timeout_seconds <= 0 or self.max_cost_usd <= 0:
-            raise ProviderConfigurationError("timeout/cost must be positive and retries non-negative")
+            raise ProviderConfigurationError(
+                "timeout/cost must be positive and retries non-negative"
+            )
         if self.input_cost_per_million < 0 or self.output_cost_per_million < 0:
             raise ProviderConfigurationError("token prices must be non-negative")
 
@@ -93,17 +108,17 @@ class OpenAICompatibleProvider:
         self.total_tokens = 0
         self.cost_usd = 0.0
         self.in_flight_requests = 0
+        self.protocol_retries = 0
         self._accounting_checkpoint: Callable[[dict[str, Any]], None] | None = None
 
-    def set_accounting_checkpoint(
-        self, callback: Callable[[dict[str, Any]], None] | None
-    ) -> None:
+    def set_accounting_checkpoint(self, callback: Callable[[dict[str, Any]], None] | None) -> None:
         self._accounting_checkpoint = callback
 
     def accounting_snapshot(self) -> dict[str, Any]:
         return {
             "http_attempts": self.requests_issued,
             "in_flight_requests": self.in_flight_requests,
+            "protocol_retries": self.protocol_retries,
             "tokens": {
                 "prompt": self.prompt_tokens,
                 "completion": self.completion_tokens,
@@ -131,6 +146,7 @@ class OpenAICompatibleProvider:
         self.total_tokens = snapshot["tokens"]["total"]
         self.cost_usd = snapshot["cost_usd"]
         self.in_flight_requests = 0
+        self.protocol_retries = int(snapshot.get("protocol_retries", 0))
         if self.requests_issued > self.limits.max_requests:
             raise ProviderBudgetError("provider request budget exhausted")
         self._raise_if_usage_budget_exhausted(at_ceiling=True)
@@ -138,28 +154,44 @@ class OpenAICompatibleProvider:
 
     def _notify_accounting(self) -> None:
         if self._accounting_checkpoint is not None:
-            self._accounting_checkpoint(self.accounting_snapshot())
+            try:
+                self._accounting_checkpoint(self.accounting_snapshot())
+            except Exception as exc:
+                raise ProviderExchangeArtifactError(
+                    "provider accounting artifact could not be persisted"
+                ) from exc
 
     def generate(self, provider_request: ProviderRequest) -> ProviderResponse:
         return self._request(build_messages(provider_request), self._parse_response)
 
     def choose_action(self, action_request: ActionRequest) -> ActionResponse:
         return self._request(
-            build_action_messages(action_request), self._parse_action_response
+            build_action_messages(action_request),
+            self._parse_action_response,
+            retry_protocol=True,
         )
 
-    def _request(self, messages: list[dict[str, str]], parser: Callable[[dict], Any]):
-        payload = {
-            "model": self.model,
-            "messages": messages,
-            "response_format": {"type": "json_object"},
-            "max_tokens": self.limits.max_output_tokens,
-        }
-        if self.config.thinking_mode is not None:
-            payload["thinking"] = {"type": self.config.thinking_mode}
-        body = json.dumps(payload).encode("utf-8")
+    def _request(
+        self,
+        messages: list[dict[str, str]],
+        parser: Callable[[dict], Any],
+        *,
+        retry_protocol: bool = False,
+    ):
         last_error: Exception | None = None
         for attempt in range(self.limits.max_retries + 1):
+            attempt_messages = (
+                _protocol_retry_messages(messages) if retry_protocol and attempt else messages
+            )
+            payload = {
+                "model": self.model,
+                "messages": attempt_messages,
+                "response_format": {"type": "json_object"},
+                "max_tokens": self.limits.max_output_tokens,
+            }
+            if self.config.thinking_mode is not None:
+                payload["thinking"] = {"type": self.config.thinking_mode}
+            body = json.dumps(payload).encode("utf-8")
             if self.requests_issued >= self.limits.max_requests:
                 raise ProviderBudgetError("provider request budget exhausted")
             self._raise_if_usage_budget_exhausted(at_ceiling=True)
@@ -201,12 +233,22 @@ class OpenAICompatibleProvider:
                 if exc.code < 500 or attempt == self.limits.max_retries:
                     raise ProviderError(f"provider returned HTTP {exc.code}") from exc
                 last_error = exc
-            except (error.URLError, TimeoutError) as exc:
+            except (error.URLError, TimeoutError, ConnectionError, OSError, HTTPException) as exc:
                 if attempt == self.limits.max_retries:
-                    raise ProviderError("provider request failed or timed out") from exc
+                    raise ProviderTransportError(
+                        "provider request failed or timed out"
+                    ) from exc
+                last_error = exc
+            except ProviderProtocolError as exc:
+                if not retry_protocol or attempt == self.limits.max_retries:
+                    raise
+                self.protocol_retries += 1
                 last_error = exc
             except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-                raise ProviderError("provider returned invalid JSON") from exc
+                if not retry_protocol or attempt == self.limits.max_retries:
+                    raise ProviderProtocolError("provider returned invalid JSON") from exc
+                self.protocol_retries += 1
+                last_error = exc
             else:
                 return parsed
             finally:
@@ -214,11 +256,14 @@ class OpenAICompatibleProvider:
                 self._notify_accounting()
         raise ProviderError("provider request failed") from last_error
 
-    def _record_exchange(
-        self, event: str, attempt: int, payload: dict[str, Any]
-    ) -> None:
+    def _record_exchange(self, event: str, attempt: int, payload: dict[str, Any]) -> None:
         if self._exchange_recorder is not None:
-            self._exchange_recorder(event, attempt, payload)
+            try:
+                self._exchange_recorder(event, attempt, payload)
+            except Exception as exc:
+                raise ProviderExchangeArtifactError(
+                    f"provider {event} artifact could not be persisted"
+                ) from exc
 
     def _parse_action_response(self, payload: dict[str, Any]) -> ActionResponse:
         prompt_tokens, completion_tokens, total_tokens, request_cost = self._validated_usage(
@@ -265,9 +310,7 @@ class OpenAICompatibleProvider:
             },
         )
 
-    def _validated_usage(
-        self, payload: dict[str, Any]
-    ) -> tuple[int, int, int, float]:
+    def _validated_usage(self, payload: dict[str, Any]) -> tuple[int, int, int, float]:
         if not isinstance(payload, dict):
             raise _contract_error("top_level_not_object")
         usage = payload.get("usage")
@@ -323,7 +366,20 @@ class OpenAICompatibleProvider:
 
 def _contract_error(reason: str) -> ProviderError:
     """Create a safe diagnostic without including provider response content."""
-    return ProviderError(f"provider response violated the JSON contract: {reason}")
+    return ProviderProtocolError(f"provider response violated the JSON contract: {reason}")
+
+
+def _protocol_retry_messages(messages: list[dict[str, str]]) -> list[dict[str, str]]:
+    return [
+        *messages,
+        {
+            "role": "user",
+            "content": (
+                "The previous provider response did not satisfy the action JSON contract. "
+                "Return exactly one currently allowed action as valid JSON only."
+            ),
+        },
+    ]
 
 
 def _redacted_response_artifact(payload: Any) -> dict[str, Any]:
@@ -359,9 +415,7 @@ def _response_content(payload: dict[str, Any]) -> tuple[str, Any]:
     content = message.get("content")
     reasoning_content = message.get("reasoning_content")
     if not isinstance(content, str):
-        raise _contract_error(
-            f"content_not_string_{_reasoning_diagnostic(reasoning_content)}"
-        )
+        raise _contract_error(f"content_not_string_{_reasoning_diagnostic(reasoning_content)}")
     return content, reasoning_content
 
 
@@ -374,9 +428,7 @@ def _decode_action_object(content: str, reasoning_content: Any = None) -> dict[s
             raise _content_contract_error(normalized, reasoning_content)
         normalized = "\n".join(lines[1:-1]).strip()
     elif "```" in normalized:
-        normalized, fenced_language = _extract_single_fenced_payload(
-            normalized, reasoning_content
-        )
+        normalized, fenced_language = _extract_single_fenced_payload(normalized, reasoning_content)
         if fenced_language not in {"", "json"}:
             raise _content_contract_error(content, reasoning_content)
     try:
@@ -404,9 +456,7 @@ def _decode_content_object(content: str, reasoning_content: Any = None) -> dict[
             raise _content_contract_error(normalized, reasoning_content)
         normalized = "\n".join(lines[1:-1]).strip()
     elif "```" in normalized:
-        normalized, fenced_language = _extract_single_fenced_payload(
-            normalized, reasoning_content
-        )
+        normalized, fenced_language = _extract_single_fenced_payload(normalized, reasoning_content)
         if fenced_language in {"python", "py"}:
             if not normalized:
                 raise _contract_error("script_missing_or_empty")
@@ -424,9 +474,7 @@ def _decode_content_object(content: str, reasoning_content: Any = None) -> dict[
     return decoded
 
 
-def _extract_single_fenced_payload(
-    content: str, reasoning_content: Any = None
-) -> tuple[str, str]:
+def _extract_single_fenced_payload(content: str, reasoning_content: Any = None) -> tuple[str, str]:
     """Extract one complete supported fence with only bounded surrounding prose."""
     if content.count("```") != 2:
         raise _content_contract_error(content, reasoning_content)
